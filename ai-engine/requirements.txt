@@ -3,3 +3,11 @@ uvicorn
 groq
 python-dotenv
 numpy
+sentence-transformers
+faiss-cpu
+langchain-text-splitters
+pypdf
+psycopg2-binary
+requests
+pydantic
+torch --index-url https://download.pytorch.org/whl/cpu

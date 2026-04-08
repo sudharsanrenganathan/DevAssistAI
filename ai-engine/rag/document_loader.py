@@ -1,9 +1,16 @@
-import pytesseract
-from pypdf import PdfReader
-from pdf2image import convert_from_path
+try:
+    import pytesseract
+    from pypdf import PdfReader
+    from pdf2image import convert_from_path
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+    from pypdf import PdfReader
+    print("⚠ OCR libraries not fully installed. Falling back to plain text extraction.")
 
-# Tell Python where Tesseract OCR is installed
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# Tell Python where Tesseract OCR is installed (Only relevant for local dev)
+if OCR_AVAILABLE:
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
 def load_pdf(file_path):
