@@ -1,0 +1,49 @@
+ID: E010
+TITLE: Check Armstrong Number
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a number, check whether it is an Armstrong number.
+
+INPUT FORMAT:
+- One line containing an integer
+
+OUTPUT FORMAT:
+- Print "YES" if it is an Armstrong number
+- Print "NO" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+153
+OUTPUT:
+YES
+EXPLANATION:
+1³ + 5³ + 3³ = 153.
+
+INPUT:
+370
+OUTPUT:
+YES
+EXPLANATION:
+370 is an Armstrong number.
+
+INPUT:
+123
+OUTPUT:
+NO
+EXPLANATION:
+Sum of cubes is not equal to 123.
+
+HIDDEN TEST CASES:
+INPUT:
+0
+OUTPUT:
+YES
+
+INPUT:
+1
+OUTPUT:
+YES
+
+CONSTRAINTS:
+- 0 ≤ number ≤ 10^9

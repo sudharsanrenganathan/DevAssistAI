@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevAssist AI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: #0a0a0a;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: rgba(10, 15, 30, 0.4);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 0; /* Reduced from 12px to push everything to the very top */
+            z-index: 100;
+        }
+        .sidebar-brand {
+            padding: 0px 16px; /* Reduced padding to lift the brand logo/text */
+            display: flex;
+            align-items: center;
+            gap: 0px;
+            cursor: pointer;
+        }
+        .sidebar-brand img { 
+            width: 100px; height: 100px; object-fit: contain; 
+            margin-top: 0px; margin-right: -6px; margin-left: -24px; /* Removed top margin to reach the very top */
+            filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4));
+        }
+        .sidebar-brand span { 
+            font-weight: 800; font-size: 22px; letter-spacing: -0.3px; color: #fff;
+            white-space: nowrap;
+        }
+        .sidebar-brand small { font-size: 11px; color: #94a3b8; margin-top: -1px; }
+
+        .nav-list { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
+        .nav-link {
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #94a3b8;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+        .nav-link.active {
+            color: #fff;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+        }
+        .nav-icon { width: 18px; text-align: center; font-size: 16px; }
+
+        .user-profile {
+            padding: 7px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+            transition: background 0.2s;
+        }
+        .user-profile:hover { background: rgba(255, 255, 255, 0.03); }
+
+        /* USER DROPDOWN MENU */
+        .user-menu {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 200;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .user-menu.active {
+            display: flex;
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .menu-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .menu-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .menu-item.danger {
+            color: #f87171;
+        }
+        .menu-item.danger:hover {
+            background: rgba(248, 113, 113, 0.1);
+        }
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 4px;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #1e293b; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-details h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+        .user-details p { font-size: 12px; color: #64748b; }
+        .user-arrow { color: #64748b; font-size: 12px; transition: transform 0.3s; }
+        .user-profile.active .user-arrow { transform: rotate(180deg); }
+
+        /* WORKFLOW CANVAS */
+        .workspace {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: transparent;
+            height: 100vh;
+        }
+        
+        .canvas-hero {
+            height: 94vh; /* Increased to 97vh to precisely crop the next section's text */
+            padding-bottom: 60px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .workflow-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .wires-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .wire {
+            fill: none;
+            stroke-width: 3;
+            stroke-dasharray: 8 4;
+            animation: dash 8s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+
+        .workflow-node {
+            position: absolute;
+            background: transparent;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            width: 220px;
+            z-index: 20;
+            cursor: grab;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            user-select: none;
+        }
+        .workflow-node:active { cursor: grabbing; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 50; }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+        .node-icon {
+            width: 36px; height: 36px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-size: 18px;
+        }
+        .node-title { font-size: 14px; font-weight: 600; color: #f8fafc; }
+        .node-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; }
+        
+        .btn-run {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #cbd5e1;
+            padding: 6px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: 0.2s;
+        }
+        .btn-run:hover { background: rgba(59, 130, 246, 0.2); color: #fff; }
+
+        /* Specific Node Colors */
+        .node-core .node-icon { background: rgba(6, 245, 205, 0.2); color: #06f5cd; border: 1px solid rgba(6,245,205,0.3); }
+        .node-core { 
+            background: transparent !important;
+            border-color: rgba(6,245,205,0.4); 
+            box-shadow: 0 0 20px rgba(6, 245, 205, 0.1); 
+            z-index: 30;
+            position: relative;
+            overflow: hidden;
+            width: 190px !important; /* Made the card slightly narrower */
+        }
+        #core-3d-container { 
+            position: relative; 
+            width: 100%;
+            height: 100px; /* Reduced slightly from 120px */
+            margin-top: 5px;
+            z-index: 10; 
+            opacity: 1;
+            pointer-events: none;
+        }
+        
+        .node-blue .node-icon { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+        .node-purple .node-icon { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+        .node-orange .node-icon { background: rgba(251, 146, 60, 0.2); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); }
+        .node-yellow .node-icon { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .node-red .node-icon { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+        .node-green .node-icon { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+        .node-gold .node-icon { background: rgba(250, 204, 21, 0.2); color: #facc15; border: 1px solid rgba(250,204,21,0.3); }
+        .node-cyan .node-icon { background: rgba(34, 211, 238, 0.2); color: #22d3ee; border: 1px solid rgba(34,211,238,0.3); }
+
+        /* LOCAL AI MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(10px);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: rgba(15, 23, 42, 0.95); width: 600px; max-width: 90vw;
+            border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
+        .modal-header {
+            padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .btn-close { background: transparent; border: none; color: #64748b; font-size: 24px; cursor: pointer; }
+        .btn-close:hover { color: #fff; }
+        
+        .modal-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0 12px; }
+        .m-tab { padding: 12px 16px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .m-tab:hover { color: #94a3b8; }
+        .m-tab.active { color: #f97316; border-bottom-color: #f97316; }
+        
+        .modal-body { padding: 24px; min-height: 250px; }
+        .m-pane { display: none; }
+        .m-pane.active { display: block; }
+        
+        /* Modal Tabs Specifics */
+        .dl-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; text-align: center; }
+        .btn-brand { background: linear-gradient(135deg, #f97316, #ea580c); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; font-size:14px; }
+        .btn-brand:hover { box-shadow: 0 0 20px rgba(249,115,22,0.3); }
+        .dl-progress { margin-top: 16px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; display: none; }
+        .dl-bar { height: 100%; width: 0%; background: #f97316; transition: width 0.3s; }
+        
+        .inst-step { margin-bottom: 16px; }
+        .inst-step h4 { font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .step-num { width: 20px; height: 20px; background: rgba(249,115,22,0.2); color: #f97316; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+        .code-box { background: rgba(0,0,0,0.5); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); color: #e2e8f0; margin-left: 28px; }
+        .btn-copy { background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; }
+        .btn-copy:hover { background: rgba(255,255,255,0.2); }
+        
+        .conn-box { text-align: center; padding: 20px; }
+        .conn-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px; width: 100%; max-width: 300px; border-radius: 8px; text-align: center; font-family: monospace; margin-bottom: 16px; outline: none; }
+        .conn-status { margin-top: 20px; font-size: 14px; font-weight: 600; padding: 12px; border-radius: 8px; display: none; }
+        .conn-success { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+        .conn-error { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+
+        /* BENTO GRID SECTION (Imported from Landing) */
+        .bento-section {
+            padding: 10px 40px 140px; /* Further reduced to ensure the text crop is perfectly centered on the baseline */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header h2 { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -1px; }
+        .section-header p { color: #94a3b8; font-size: 1.1rem; }
+        
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 250px;
+            gap: 24px;
+        }
+
+        /* CONTACT BUTTONS */
+        .contact-card-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 36px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .contact-card-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .contact-card-btn svg { width: 22px; height: 22px; }
+        .bento-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        .bento-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        .bento-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            opacity: 0.5;
+        }
+        .bento-wide { grid-column: span 2; }
+        .bento-tall { grid-row: span 2; }
+        .bento-icon-lg {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: auto; border: 1px solid #3b82f644;
+        }
+        .bento-card h3 { font-size: 1.3rem; margin-bottom: 8px; font-weight: 600; }
+
+        @keyframes floatUpDown {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand" onclick="window.location.href='dashboard.html'">
+            <img src="img/logo.png" alt="Logo">
+            <div style="display:flex; flex-direction:column; line-height:1.2;">
+                <span>DevAssist AI</span>
+                <small style="color:#94a3b8; font-size:12px; font-weight:400;">Dashboard</small>
+            </div>
+        </div>
+
+        <div class="nav-list">
+            <span style="font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; padding: 0 16px 8px; letter-spacing: 1px;">Menu</span>
+            <a href="global.html" class="nav-link">
+                <span class="nav-icon">💬</span><span>Global AI</span>
+            </a>
+            <a href="secret.html" class="nav-link">
+                <span class="nav-icon">🔐</span><span>Secret AI</span>
+            </a>
+            <a href="code-analyzer.html" class="nav-link">
+                <span class="nav-icon">&lt;/&gt;</span><span>Code Analyzer</span>
+            </a>
+            <a href="online-compiler.html" class="nav-link">
+                <span class="nav-icon">⚡</span><span>Online Compiler</span>
+            </a>
+            <a href="voidmain.html" class="nav-link">
+                <span class="nav-icon">🚀</span><span>VoidMain</span>
+            </a>
+        </div>
+
+        <!-- RECENTS SECTION -->
+        <div class="nav-list" id="recentList" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
+            <span style="font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; padding: 12px 16px 8px; letter-spacing: 1px;">Recent</span>
+            <div id="recentActivityContainer" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 4px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.05) transparent;">
+                <div style="padding: 0 16px; font-size: 12px; color: #475569; font-style: italic;">No recent activity</div>
+            </div>
+        </div>
+
+        <div class="user-profile" id="userProfileBtn">
+            <!-- Account Dropdown Menu -->
+            <div class="user-menu" id="userDropdown">
+                <div class="menu-item">
+                    <span>👤</span> Profile Settings
+                </div>
+                <div class="menu-item">
+                    <span>⚙️</span> Preferences
+                </div>
+                <div class="menu-divider"></div>
+                <div class="menu-item danger" onclick="logout()">
+                    <span>🚪</span> Sign Out
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar" id="avatarImage">
+                    <img src="https://api.dicebear.com/7.x/initials/svg?seed=Guest&backgroundColor=1e293b" id="avatarImgEl" alt="Avatar">
+                </div>
+                <div class="user-details">
+                    <h4 id="sidebarName">Guest</h4>
+                    <p>Get Help</p>
+                </div>
+            </div>
+            <div class="user-arrow">⬍</div>
+        </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="workspace">
+        <div class="canvas-hero" id="canvasHero">
+            <svg class="wires-layer" id="wires-layer"></svg>
+            
+            <div class="workflow-canvas" id="canvas">
+            
+            <!-- CORE NODE (Center) -->
+            <div class="workflow-node node-core" id="node-core">
+                <div class="node-header">
+                    <div class="node-icon">🧠</div>
+                    <div class="node-title">DevAssist Core</div>
+                </div>
+                <div id="core-3d-container"></div>
+            </div>
+
+            <!-- CHAT NODE (Top Left) -->
+            <div class="workflow-node node-blue" id="node-chat">
+                <div class="node-header">
+                    <div class="node-icon">💬</div>
+                    <div class="node-title">Global AI</div>
+                </div>
+                <div class="node-desc">AI-powered discussions without documents.</div>
+                <div class="btn-run" onclick="window.location.href='global.html'">Open Global Chat</div>
+            </div>
+
+            <!-- CODE ANALYZER (Top Left) -->
+            <div class="workflow-node node-orange" id="node-code">
+                <div class="node-header">
+                    <div class="node-icon">&lt;./&gt;</div>
+                    <div class="node-title">Code Analyzer</div>
+                </div>
+                <div class="node-desc">Quickly scan snippets for bug detections.</div>
+                <div class="btn-run" onclick="window.location.href='code-analyzer.html'">Open Analyzer</div>
+            </div>
+
+            <!-- ONLINE COMPILER (Top Center) -->
+            <div class="workflow-node node-cyan" id="node-compiler">
+                <div class="node-header">
+                    <div class="node-icon">💻</div>
+                    <div class="node-title">Online Compiler</div>
+                </div>
+                <div class="node-desc">Execute code in multiple languages.</div>
+                <div class="btn-run" onclick="window.location.href='online-compiler.html'">Open Compiler</div>
+            </div>
+
+            <!-- LEADERBOARD (Top Far Right) -->
+            <div class="workflow-node node-gold" id="node-leaderboard">
+                <div class="node-header">
+                    <div class="node-icon">🏆</div>
+                    <div class="node-title">Leaderboard</div>
+                </div>
+                <div class="node-desc">Compete with top engineers globally.</div>
+                <div class="btn-run" onclick="window.location.href='vm-leaderboard.html'">View Leaderboard</div>
+            </div>
+
+            <!-- HISTORY (Right Center) -->
+            <div class="workflow-node node-green" id="node-history">
+                <div class="node-header">
+                    <div class="node-icon">🕒</div>
+                    <div class="node-title">History</div>
+                </div>
+                <div class="node-desc">Review past solutions and executions.</div>
+                <div class="btn-run" onclick="window.location.href='vm-history.html'">View History</div>
+            </div>
+
+            <!-- SECRET AI NODE (Bottom Left) -->
+            <div class="workflow-node node-purple" id="node-secret">
+                <div class="node-header">
+                    <div class="node-icon">🔐</div>
+                    <div class="node-title">Secret AI</div>
+                </div>
+                <div class="node-desc">Secure document analysis and retrieval.</div>
+                <div class="btn-run" onclick="window.location.href='secret.html'">Open Secret AI</div>
+            </div>
+
+            <!-- LOCAL AI NODE (Bottom Left-Center) -->
+            <div class="workflow-node node-orange" id="node-local-ai">
+                <div class="node-header">
+                    <div class="node-icon">💻</div>
+                    <div class="node-title">Local AI <span style="font-size:9px; padding:2px 6px; margin-left:6px; border-radius:4px; background:rgba(251,146,60,0.15); color:#fdba74; border:1px solid rgba(251,146,60,0.3)">OLLAMA</span></div>
+                </div>
+                <div class="node-desc">Run AI models offline on your machine.</div>
+                <div class="btn-run" onclick="openLocalAIModal()">Setup Provider</div>
+            </div>
+
+            <!-- VOIDMAIN ANALYZER (Bottom Center) -->
+            <div class="workflow-node node-yellow" id="node-voidmain">
+                <div class="node-header">
+                    <div class="node-icon">⚡</div>
+                    <div class="node-title">VoidMain</div>
+                </div>
+                <div class="node-desc">Deep codebase architecture improvements.</div>
+                <div class="btn-run" onclick="window.location.href='voidmain.html'">Open VoidMain</div>
+            </div>
+
+            <!-- PROBLEMS (Bottom Right) -->
+            <div class="workflow-node node-red" id="node-problems">
+                <div class="node-header">
+                    <div class="node-icon">🧩</div>
+                    <div class="node-title">Problems</div>
+                </div>
+                <div class="node-desc">Solve logical challenges and compile code.</div>
+                <div class="btn-run" onclick="window.location.href='vm-problems.html'">View Problems</div>
+            </div>
+
+
+
+        </div>
+        </div>
+
+        <!-- BENTO FEATURES SECTION -->
+        <div class="bento-section">
+            <div class="section-header">
+                <h2>Everything you need. <span style="font-family: 'JetBrains Mono', monospace; color: #f472b6; font-weight: 800;">Unified.</span></h2>
+                <p>Scroll down your dashboard to access powerful tools instantly.</p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Card 1: Global AI (Wide) -->
+                <div class="bento-card bento-wide" style="cursor:pointer;" onclick="window.location.href='global.html'">
+                    <div class="bento-icon-lg" style="background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color:#4ade8044;">💬</div>
+                    <div style="margin-top: auto;">
+                        <h3>Global AI</h3>
+                        <p>Unlock universal answers instantly. Query everything in your workspace—from entire codebases to system architectures—with an advanced retrieval-augmented engine that provides global understanding.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: Secret AI (Standard) -->
+                <div class="bento-card" style="cursor:pointer;" onclick="window.location.href='secret.html'">
+                    <div class="bento-icon-lg" style="background: rgba(168, 85, 247, 0.1); color: #c084fc; border-color:#c084fc44;">🔐</div>
+                    <div style="margin-top: auto;">
+                        <h3>Secret AI</h3>
+                        <p>Your private vault. Upload architecture notes or user documents to get tailored, secure summaries without leaking data outside your session.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Code Analyzer (Standard) -->
+                <div class="bento-card" style="cursor:pointer;" onclick="window.location.href='code-analyzer.html'">
+                    <div class="bento-icon-lg" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color:#38bdf844;">&lt;/&gt;</div>
+                    <div style="margin-top: auto;">
+                        <h3>Code Analyzer</h3>
+                        <p>Automatically analyze complexity, enforce best practices, and get insightful refactoring suggestions and inline comments.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4: Online Compiler (Standard) -->
+                <div class="bento-card" style="cursor:pointer;" onclick="window.location.href='online-compiler.html'">
+                    <div class="bento-icon-lg" style="background: rgba(236, 72, 153, 0.1); color: #f472b6; border-color:#f472b644;">⚡</div>
+                    <div style="margin-top: auto;">
+                        <h3>Online Compiler</h3>
+                        <p>The ultimate compiler for your coding needs. Write, test, and instantly run code across multiple languages within zero-latency sandboxes.</p>
+                    </div>
+                </div>
+
+                <!-- Card 5: Offline AI Mode (Tall) - kept as is -->
+                <div class="bento-card bento-tall" style="cursor:pointer;" onclick="openLocalAIModal()">
+                    <div class="bento-icon-lg" style="background: rgba(249, 115, 22, 0.1); color: #fb923c; border-color:#fb923c44;">💻</div>
+                    
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.12; color: #fb923c; margin: 40px 0;">
+                        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                            <rect x="9" y="9" width="6" height="6"></rect>
+                            <line x1="9" y1="1" x2="9" y2="4"></line>
+                            <line x1="15" y1="1" x2="15" y2="4"></line>
+                            <line x1="9" y1="20" x2="9" y2="23"></line>
+                            <line x1="15" y1="20" x2="15" y2="23"></line>
+                            <line x1="20" y1="9" x2="23" y2="9"></line>
+                            <line x1="20" y1="14" x2="23" y2="14"></line>
+                            <line x1="1" y1="9" x2="4" y2="9"></line>
+                            <line x1="1" y1="14" x2="4" y2="14"></line>
+                        </svg>
+                    </div>
+
+                    <div style="margin-top: auto;">
+                        <h3>Offline AI Mode</h3>
+                        <p>Complete privacy. Download robust, open-source AI models to your local machine and use intelligent tools offline, without the internet. Perfect for uninterrupted coding anywhere, anytime.</p>
+                    </div>
+                </div>
+
+                <!-- Card 6: Void Main (Wide) -->
+                <div class="bento-card bento-wide" style="cursor:pointer;" onclick="window.location.href='voidmain.html'">
+                    <div class="bento-icon-lg" style="background: rgba(234, 179, 8, 0.1); color: #facc15; border-color:#facc1544;">🚀</div>
+                    <div style="margin-top: auto;">
+                        <h3>Void Main</h3>
+                        <p>Your ultimate practice arena. Sharpen your algorithmic skills and prepare for technical challenges in a competitive coding environment designed for mastering data structures and logic puzzles.</p>
+                    </div>
+                </div>
+            </div>
+
+        <!-- ABOUT SECTION -->
+        <div id="about" style="padding: 80px 40px; margin-top: 80px; text-align: center; position: relative; z-index: 10;">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 24px; background: linear-gradient(135deg, #06f5cd, #7c3aed); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">About DevAssist AI</h2>
+                <p style="font-size: 1.15rem; color: #94a3b8; line-height: 1.8;">DevAssist is an advanced agentic AI platform designed for the next generation of engineers. Our ecosystem integrates neural intelligence across key development workflows—from document-based reasoning to standalone performance-oriented compilation and competitive practice modules.</p>
+            </div>
+        </div>
+
+        <!-- CONTACT SECTION -->
+        <div id="contact" style="padding: 60px 40px 100px; text-align: center; background: transparent; position: relative; z-index: 10;">
+            <div style="margin-bottom: 50px;">
+                <h2 style="font-size: 4rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1.5px; color: #fff;">Get in <span style="background: linear-gradient(135deg, #06f5cd, #7c3aed); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Touch</span></h2>
+                <p style="color: #64748b; font-size: 1.2rem;">Connect with me across platforms.</p>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto;">
+                <!-- Gmail -->
+                <a href="mailto:sudharsanrenganathan7@gmail.com" class="contact-card-btn" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    Gmail
+                </a>
+                
+                <!-- LinkedIn -->
+                <a href="https://www.linkedin.com/in/sudharsanrenganathan/" class="contact-card-btn" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    LinkedIn
+                </a>
+                
+                <!-- Instagram -->
+                <a href="https://instagram.com/sudhar__san__05" class="contact-card-btn" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    Instagram
+                </a>
+                
+                <!-- GitHub -->
+                <a href="https://github.com/sudharsanrenganathan" class="contact-card-btn" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    GitHub
+                </a>
+            </div>
+
+            <!-- MINIMAL FOOTER -->
+            <div style="margin-top: 100px; padding: 20px 0; color: #475569; font-size: 14px; letter-spacing: 0.5px; opacity: 0.7; border: none;">
+                &copy; 2026 DevAssist AI. All rights reserved.
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LOCAL AI MODAL -->
+    <div class="modal-overlay" id="localAiModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💻 Local AI Setup Center</h2>
+                <button class="btn-close" onclick="closeLocalAIModal()">×</button>
+            </div>
+            
+            <div class="modal-tabs">
+                <div class="m-tab active" onclick="switchLocModalTab(1)">📥 Download</div>
+                <div class="m-tab" onclick="switchLocModalTab(2)">⚙️ Installation Guide</div>
+                <div class="m-tab" onclick="switchLocModalTab(3)">🔌 Connect & Test</div>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Tab 1: Download -->
+                <div class="m-pane active" id="loc-tab-1">
+                    <div class="dl-card">
+                        <div class="dl-icon">📦</div>
+                        <div class="dl-title">DevAssist Local Model</div>
+                        <div class="dl-size">Meta Llama 3 (8B) • ~4.7 GB</div>
+                        <p style="font-size:13px; color:#94a3b8; margin-bottom:20px;">
+                            Run models entirely offline for maximum privacy and 0 latency limits.
+                        <button class="btn-brand" onclick="realDownload(this)">Download Llama 3</button>
+                        
+                        <div class="dl-progress" id="dlProgress">
+                            <div class="dl-bar" id="dlBar"></div>
+                        </div>
+                        <p id="dlStatus" style="font-size:12px; color:#64748b; margin-top:8px; display:none;">Downloading... 0%</p>
+                    </div>
+                </div>
+                
+                <!-- Tab 2: Installation -->
+                <div class="m-pane" id="loc-tab-2">
+                    <div class="inst-step">
+                        <h4><span class="step-num">1</span> Download Ollama</h4>
+                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Get the engine required to run models locally.</p>
+                        <a href="https://ollama.com/download" target="_blank" class="btn-brand" style="margin-left:28px; font-size:12px; padding:6px 12px;">Go to Ollama.com</a>
+                    </div>
+                    
+                    <div class="inst-step">
+                        <h4><span class="step-num">2</span> Pull a Model</h4>
+                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Open your terminal/command prompt and run:</p>
+                        <div class="code-box">
+                            <span>ollama pull llama3</span>
+                            <button class="btn-copy" onclick="locCopyText('ollama pull llama3', this)">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="inst-step">
+                        <h4><span class="step-num">3</span> Keep Server Running</h4>
+                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Ensure Ollama is running in the background.</p>
+                        <div class="code-box">
+                            <span>ollama serve</span>
+                            <button class="btn-copy" onclick="locCopyText('ollama serve', this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab 3: Connect -->
+                <div class="m-pane" id="loc-tab-3">
+                    <div class="conn-box">
+                        <p style="font-size:13px; color:#94a3b8; margin-bottom:12px;">Endpoint URL (Ollama Default)</p>
+                        <input type="text" class="conn-input" value="http://localhost:11434" readonly>
+                        <br>
+                        <button class="btn-brand" id="btnLocTest" onclick="testLocalConnection()">Test Connection</button>
+                        
+                        <div class="conn-status" id="connStatus"></div>
+                        <div class="model-list" id="connModels" style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Guard & Scripts -->
+    <script src="auth-guard.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const username = localStorage.getItem("username") || "Guest";
+            const seed = encodeURIComponent(username);
+            const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=1e293b`;
+            
+            document.getElementById("sidebarName").textContent = username;
+            document.getElementById("avatarImgEl").src = avatarUrl;
+
+            // Position nodes after layout is known
+            positionNodes();
+            setTimeout(drawWires, 60);
+        });
+
+        function logout() {
+            localStorage.removeItem("username");
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        }
+
+        // Toggle User Dropdown
+        const userProfileBtn = document.getElementById('userProfileBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        userProfileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userProfileBtn.classList.toggle('active');
+            userDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!userProfileBtn.contains(e.target)) {
+                userProfileBtn.classList.remove('active');
+                userDropdown.classList.remove('active');
+            }
+        });
+
+        // --- LAYOUT POSITIONING ---
+        // Positions are expressed as percentages of workspace width/height
+        // so they scale correctly on any screen size.
+        // Based on the screenshot layout proportions.
+        const nodePositions = {
+            'node-chat':        { lp: 0.01,  tp: 0.20 },  // Left Top
+            'node-secret':      { lp: 0.01,  tp: 0.55 },  // Left Bottom
+            'node-code':        { lp: 0.26,  tp: 0.04 },  // Middle Top
+            'node-core':        { lp: 0.27,  tp: 0.38 },  // Middle Center
+            'node-local-ai':    { lp: 0.26,  tp: 0.76 },  // Middle Bottom
+            'node-compiler':    { lp: 0.53,  tp: 0.20 },  // Right-Mid Top
+            'node-voidmain':    { lp: 0.53,  tp: 0.55 },  // Right-Mid Bottom
+            'node-leaderboard': { lp: 0.78,  tp: 0.06 },  // Far Right Top
+            'node-history':     { lp: 0.81,  tp: 0.40 },  // Far Right Mid
+            'node-problems':    { lp: 0.78,  tp: 0.74 },  // Far Right Bottom
+        };
+
+        function positionNodes() {
+            const workspace = document.getElementById('canvasHero');
+            const W = workspace.offsetWidth;
+            const H = workspace.offsetHeight;
+
+            for (const [id, pos] of Object.entries(nodePositions)) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                el.style.left = Math.round(W * pos.lp) + 'px';
+                el.style.top  = Math.round(H * pos.tp) + 'px';
+            }
+            drawWires();
+        }
+
+        // --- WIRES ---
+        const wiresLayer = document.getElementById('wires-layer');
+
+        const connections = [
+            { id: 'w1', from: 'node-core', to: 'node-chat',        color: '#06f5cd' },
+            { id: 'w2', from: 'node-core', to: 'node-secret',      color: '#06f5cd' },
+            { id: 'w3', from: 'node-core', to: 'node-code',        color: '#06f5cd' },
+            { id: 'w4', from: 'node-core', to: 'node-voidmain',    color: '#06f5cd' },
+            { id: 'w8', from: 'node-core', to: 'node-compiler',    color: '#06f5cd' },
+            { id: 'w9', from: 'node-core', to: 'node-local-ai',    color: '#06f5cd' },
+            { id: 'w5', from: 'node-voidmain', to: 'node-problems',    color: '#fbbf24' },
+            { id: 'w6', from: 'node-voidmain', to: 'node-history',     color: '#fbbf24' },
+            { id: 'w7', from: 'node-voidmain', to: 'node-leaderboard', color: '#fbbf24' },
+        ];
+
+        connections.forEach(conn => {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('id', conn.id);
+            path.setAttribute('class', 'wire');
+            path.setAttribute('stroke', conn.color);
+            wiresLayer.appendChild(path);
+        });
+
+        function drawWires() {
+            const hero = document.getElementById('canvasHero');
+            const workspaceRect = hero.getBoundingClientRect();
+            
+            connections.forEach(conn => {
+                const fromNode = document.getElementById(conn.from);
+                const toNode   = document.getElementById(conn.to);
+                if (!fromNode || !toNode) return;
+                
+                const fR = fromNode.getBoundingClientRect();
+                const tR = toNode.getBoundingClientRect();
+
+                // Helper to get edge intersection
+                const getEdge = (rect, target) => {
+                    const cx = rect.left + rect.width / 2;
+                    const cy = rect.top + rect.height / 2;
+                    const tx = target.left + target.width / 2;
+                    const ty = target.top + target.height / 2;
+                    const dx = tx - cx;
+                    const dy = ty - cy;
+                    const absDX = Math.abs(dx);
+                    const absDY = Math.abs(dy);
+                    let scale = 1;
+
+                    if (absDX * (rect.height / 2) > absDY * (rect.width / 2)) {
+                        scale = (rect.width / 2) / absDX;
+                    } else {
+                        scale = (rect.height / 2) / absDY || 1;
+                    }
+                    return { x: cx + dx * scale - workspaceRect.left, y: cy + dy * scale - workspaceRect.top };
+                };
+
+                const start = getEdge(fR, tR);
+                const end   = getEdge(tR, fR);
+
+                const dx = end.x - start.x;
+                const c1x = start.x + dx * 0.4;
+                const c2x = end.x    - dx * 0.4;
+
+                const d = `M ${start.x} ${start.y} C ${c1x} ${start.y}, ${c2x} ${end.y}, ${end.x} ${end.y}`;
+                document.getElementById(conn.id).setAttribute('d', d);
+            });
+        }
+
+        // --- DRAG ---
+        const nodes = document.querySelectorAll('.workflow-node');
+        let activeNode = null, isDragging = false, diffX = 0, diffY = 0;
+
+        nodes.forEach(node => {
+            node.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('btn-run') || e.target.closest('.btn-run')) return;
+                isDragging = true;
+                activeNode = node;
+                diffX = e.clientX - node.getBoundingClientRect().left;
+                diffY = e.clientY - node.getBoundingClientRect().top;
+                nodes.forEach(n => n.style.zIndex = '20');
+                node.style.zIndex = '50';
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || !activeNode) return;
+            e.preventDefault();
+            const workspaceRect = document.getElementById('canvasHero').getBoundingClientRect();
+            activeNode.style.left = (e.clientX - workspaceRect.left - diffX) + 'px';
+            activeNode.style.top  = (e.clientY - workspaceRect.top  - diffY) + 'px';
+            drawWires();
+        });
+
+        document.addEventListener('mouseup', () => { isDragging = false; activeNode = null; });
+        window.addEventListener('resize', () => { positionNodes(); setTimeout(drawWires, 50); });
+
+        // --- LOCAL AI MODAL LOGIC ---
+        function openLocalAIModal() {
+            document.getElementById('localAiModal').classList.add('active');
+        }
+        function closeLocalAIModal() {
+            document.getElementById('localAiModal').classList.remove('active');
+        }
+        function switchLocModalTab(idx) {
+            document.querySelectorAll('.m-tab').forEach((t, i) => t.classList.toggle('active', i === (idx-1)));
+            document.querySelectorAll('.m-pane').forEach((p, i) => p.classList.toggle('active', i === (idx-1)));
+        }
+        function locCopyText(txt, btn) {
+            navigator.clipboard.writeText(txt).then(() => {
+                const old = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = old, 1500);
+            });
+        }
+        async function realDownload(btn) {
+            const bar = document.getElementById('dlBar'), prog = document.getElementById('dlProgress'), stat = document.getElementById('dlStatus');
+            prog.style.display = 'block'; stat.style.display = 'block'; bar.style.width = '0%'; bar.style.background = '#f97316'; stat.style.color = '#64748b'; btn.disabled = true; btn.style.opacity = '0.6';
+            stat.textContent = 'Connecting to local Ollama engine...';
+            try {
+                const ping = await fetch("http://localhost:11434/api/tags").catch(() => null);
+                if (!ping || !ping.ok) throw new Error("Ollama not running");
+                
+                stat.textContent = 'Initiating download...';
+                const res = await fetch("http://localhost:11434/api/pull", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ name: "llama3", stream: true }) });
+                const reader = res.body.getReader(); const decoder = new TextDecoder();
+                while (true) {
+                    const {done, value} = await reader.read(); if (done) break;
+                    const chunk = decoder.decode(value); const lines = chunk.split('\n');
+                    for(let line of lines) {
+                        if(!line.trim()) continue;
+                        try {
+                            const data = JSON.parse(line);
+                            if (data.total && data.completed) {
+                                const percent = (data.completed / data.total) * 100;
+                                bar.style.width = percent + '%'; stat.textContent = (data.status || 'Downloading') + '... ' + Math.round(percent) + '%';
+                            } else if (data.status) { stat.textContent = data.status; }
+                        } catch(e) {}
+                    }
+                }
+                stat.textContent = "Download complete! Model 'llama3' is ready."; stat.style.color = "#22c55e"; bar.style.width = '100%'; bar.style.background = '#22c55e';
+            } catch (err) {
+                stat.innerHTML = "❌ Ollama Engine not detected.<br>Please install Ollama first (Go to Installation Guide)."; stat.style.color = "#ef4444"; bar.style.background = "#ef4444"; bar.style.width = '100%';
+            }
+            btn.disabled = false; btn.style.opacity = '1';
+        }
+        async function testLocalConnection() {
+            const btn = document.getElementById('btnLocTest');
+            const stat = document.getElementById('connStatus');
+            const models = document.getElementById('connModels');
+            btn.textContent = "Testing...";
+            btn.disabled = true;
+            
+            try {
+                // Testing directly from frontend. Note: Ollama needs CORS configured to allow localhost boundaries.
+                const res = await fetch("http://localhost:11434/api/tags");
+                if(!res.ok) throw new Error("Connection Refused");
+                
+                const data = await res.json();
+                stat.className = "conn-status conn-success";
+                stat.innerHTML = "✅ Successfully connected to Ollama Engine!";
+                stat.style.display = "block";
+                
+                let mHtml = "<strong>Available Models:</strong><ul style='margin-top:6px; padding-left:20px;'>";
+                if(data.models && data.models.length > 0) {
+                    data.models.forEach(m => mHtml += `<li>${m.name}</li>`);
+                } else {
+                    mHtml += "<li><em>No models pulled yet (Run 'ollama pull llama3' first)</em></li>";
+                }
+                mHtml += "</ul>";
+                models.innerHTML = mHtml;
+                models.style.display = "block";
+                
+            } catch (err) {
+                stat.className = "conn-status conn-error";
+                stat.innerHTML = "❌ Failed to connect. Is Ollama running?<br><span style='font-size:12px; font-weight:normal'>Troubleshoot: Ensure you ran 'ollama serve' in your terminal and CORS is enabled.</span>";
+                stat.style.display = "block";
+                models.style.display = "none";
+            }
+            
+            btn.textContent = "Test Connection";
+            btn.disabled = false;
+        }
+
+        // --- RECENT ACTIVITY LOGIC ---
+        async function logActivity(toolName, pageUrl, icon) {
+            let userId = localStorage.getItem("userId") || "Guest"; // Fallback for Guests
+            if (userId === "null") userId = "Guest";
+
+            try {
+                await fetch("/api/activity/log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, toolName, pageUrl, icon })
+                });
+            } catch (err) {
+                console.error("Activity log failed:", err);
+            }
+        }
+
+        async function fetchRecents() {
+            let userId = localStorage.getItem("userId") || "Guest";
+            if (userId === "null") userId = "Guest";
+
+            try {
+                const res = await fetch(`/api/activity/recent/${userId}`);
+                const data = await res.json();
+                const container = document.getElementById("recentActivityContainer");
+                const listSection = document.getElementById("recentList");
+
+                if (data && data.length > 0) {
+                    container.innerHTML = data.map(act => `
+                        <a href="${act.pageUrl}" class="nav-link recent-intercept" style="padding: 8px 16px; opacity: 0.8; font-size: 13px;">
+                            <span class="nav-icon" style="font-size: 14px;">${act.icon || '📍'}</span>
+                            <div style="display:flex; flex-direction:column;">
+                                <span>${act.toolName}</span>
+                                <small style="font-size: 10px; color: #64748b;">${formatTimeAgo(act.timestamp)}</small>
+                            </div>
+                        </a>
+                    `).join("");
+                } else {
+                    container.innerHTML = '<div style="padding: 0 16px; font-size: 12px; color: #475569; font-style: italic;">No recent activity</div>';
+                }
+            } catch (err) {
+                console.error("Fetch recents failed:", err);
+            }
+        }
+
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return "";
+            const date = new Date(timestamp);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + "y ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + "mo ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + "d ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + "h ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + "m ago";
+            return "Just now";
+        }
+
+        // Initialize recents
+        fetchRecents();
+
+        // TOOL CONFIGURATION MAP
+        const toolActivityMap = {
+            'global.html': { name: 'Global AI', icon: '💬' },
+            'secret.html': { name: 'Secret AI', icon: '🔐' },
+            'code-analyzer.html': { name: 'Code Analyzer', icon: '🔍' },
+            'online-compiler.html': { name: 'Online Compiler', icon: '💻' },
+            'voidmain.html': { name: 'VoidMain', icon: '⚡' }
+        };
+
+        // Global Dynamic Interceptor
+        document.addEventListener('click', async function(e) {
+            const link = e.target.closest('a, .btn-run, .bento-card, .workflow-node');
+            if (!link) return;
+
+            // Extract the URL from href or onclick
+            let url = link.getAttribute('href') || link.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+            if (!url) return;
+
+            // Extract just the filename (e.g. "global.html")
+            const fileName = url.split('/').pop().split('#')[0].split('?')[0];
+            const tool = toolActivityMap[fileName];
+
+            if (tool) {
+                // If it's a tool we track, log it and then navigate
+                e.preventDefault();
+                await logActivity(tool.name, url, tool.icon);
+                window.location.href = url;
+            }
+        });
+        // --- THREE.JS 3D CORE (High-Fidelity Glass Knot) ---
+        let scene, camera, renderer, globe, innerGlobe;
+        const container = document.getElementById('core-3d-container');
+        function init3DCore() {
+            if (!container) return;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            const width = container.clientWidth || 200;
+            const height = container.clientHeight || 150;
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Complex organic geometry (Organic Glass Swirl) - scaled for small card
+            const geometry = new THREE.TorusKnotGeometry(1.2, 0.45, 150, 24, 2, 3);
+            
+            // Photorealistic Glass Material with Attenuation and Iridescence
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                metalness: 0.1,
+                roughness: 0,
+                transmission: 1.0, 
+                thickness: 4.0,
+                ior: 1.5,
+                iridescence: 1.0,
+                iridescenceIOR: 1.7,
+                transparent: true,
+                opacity: 1,
+                clearcoat: 1,
+                clearcoatRoughness: 0.05,
+                attenuationColor: 0x7c3aed, // Purple internal depth
+                attenuationDistance: 2.0
+            });
+
+            globe = new THREE.Mesh(geometry, material);
+            scene.add(globe);
+
+            // Inner Glowing Core (The "Neural Sun") - scaled smaller
+            const innerGeom = new THREE.SphereGeometry(0.6, 32, 32);
+            const innerMat = new THREE.MeshBasicMaterial({ 
+                color: 0x7c3aed, 
+                transparent: true, 
+                opacity: 0.8 
+            });
+            innerGlobe = new THREE.Mesh(innerGeom, innerMat);
+            scene.add(innerGlobe);
+
+            // Neural Lighting (Rim/Spot effects)
+            const p1 = new THREE.PointLight(0x06f5cd, 50, 15); p1.position.set(5, 5, 8); scene.add(p1);
+            const p2 = new THREE.PointLight(0x7c3aed, 60, 15); p2.position.set(-5, -5, 8); scene.add(p2);
+            const p3 = new THREE.PointLight(0x3b82f6, 40, 15); p3.position.set(0, 0, -8); scene.add(p3);
+            
+            scene.add(new THREE.AmbientLight(0x404040, 0.5));
+
+            camera.position.z = 3.5;
+            animate3D();
+        }
+
+        setTimeout(init3DCore, 300);
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            const time = Date.now() * 0.001;
+
+            if (globe) {
+                globe.rotation.y += 0.006;
+                globe.rotation.x += 0.003;
+                globe.rotation.z += 0.002;
+                const scale = 1 + Math.sin(time * 0.7) * 0.04;
+                globe.scale.set(scale, scale, scale);
+            }
+            
+            if (innerGlobe) {
+                const s2 = 1 + Math.cos(time * 0.7) * 0.1;
+                innerGlobe.scale.set(s2, s2, s2);
+                innerGlobe.material.opacity = 0.5 + Math.sin(time * 1.2) * 0.3;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            if (renderer && container) {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                renderer.setSize(w, h);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            }
+        });
+    </script>
+</body>
+</html>

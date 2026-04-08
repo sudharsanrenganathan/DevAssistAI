@@ -1,0 +1,61 @@
+ID: M014
+TITLE: Binary Search
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a sorted array and a target value, perform binary search.
+
+INPUT FORMAT:
+- First line contains integer N
+- Second line contains N sorted integers
+- Third line contains target integer
+
+OUTPUT FORMAT:
+- Print index of target (0-based)
+- Print -1 if not found
+
+SAMPLE TEST CASES:
+INPUT:
+5
+1 2 3 4 5
+3
+OUTPUT:
+2
+EXPLANATION:
+3 found at index 2.
+
+INPUT:
+4
+10 20 30 40
+25
+OUTPUT:
+-1
+EXPLANATION:
+25 not present.
+
+INPUT:
+1
+7
+7
+OUTPUT:
+0
+EXPLANATION:
+Found at index 0.
+
+HIDDEN TEST CASES:
+INPUT:
+6
+2 4 6 8 10 12
+10
+OUTPUT:
+4
+
+INPUT:
+3
+1 3 5
+2
+OUTPUT:
+-1
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 10^5

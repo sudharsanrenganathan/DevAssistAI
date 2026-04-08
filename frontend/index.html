@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevAssist AI — Landing</title>
+    <meta name="description" content="Welcome to DevAssist AI">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth-guard.js"></script>
+    <style>
+        :root {
+            --bg-base: #05010e;
+            --purple-deep: #1b0742;
+            --purple-neon: #7c3aed;
+            --cyan-neon: #06f5cd;
+            --input-bg: #140b2e;
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* Wrap the existing 100vh content so it scrolls */
+        .hero-section {
+            width: 100%; min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        /* ===== BACKGROUND GLOWS ===== */
+        .ambient-glow {
+            position: absolute;
+            left: 50%; top: 30%;
+            transform: translate(-50%, -50%);
+            width: 800px; height: 300px;
+            background: radial-gradient(ellipse, rgba(124,58,237,0.2) 0%, rgba(124,58,237,0) 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ===== MAIN WRAPPER ===== */
+        .landing-container {
+            width: 100%; max-width: 1300px;
+            height: 100%; min-height: 700px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            padding: 0 40px;
+        }
+
+        /* ===== NAVBAR ===== */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex; align-items: center; gap: 0px; 
+            font-size: 22px; font-weight: 800; letter-spacing: -0.3px;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+        .logo-icon {
+            display:flex; align-items:center; justify-content:center;
+            gap: 4px;
+        }
+        .logo-icon div:first-child {
+            width: 0; height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 16px solid var(--cyan-neon);
+        }
+        .logo-icon div:last-child {
+            width: 16px; height: 20px;
+            border-radius: 50%;
+            border: 4px solid var(--cyan-neon);
+        }
+
+        .nav-links {
+            display: flex; gap: 35px; align-items: center;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        .nav-links a {
+            color: var(--text-main); text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--cyan-neon); }
+
+        .nav-actions {
+            display: flex; align-items: center; gap: 20px;
+        }
+
+        .sign-in-btn {
+            background-color: var(--cyan-neon);
+            color: #000;
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 12px; font-weight: 700; text-transform: uppercase;
+            text-decoration: none; letter-spacing: 0.5px;
+            box-shadow: 0 0 15px rgba(6, 245, 205, 0.4);
+            transition: all 0.3s;
+            cursor: pointer; border: none;
+        }
+        .sign-in-btn:hover {
+            box-shadow: 0 0 25px rgba(6, 245, 205, 0.7);
+            transform: scale(1.02);
+        }
+
+        .hamburger {
+            width: 24px; height: 16px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            cursor: pointer;
+        }
+        .hamburger span {
+            display: block; width: 100%; height: 2px;
+            background: #fff;
+            transition: 0.3s;
+        }
+
+        /* ===== HERO CONTENT ===== */
+        .hero {
+            display: flex; flex: 1;
+            position: relative;
+            align-items: center;
+        }
+
+        /* LEFT SIDE - LOGIN FORM */
+        .login-widget {
+            flex: 0 0 400px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .avatar-ring {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            border: 3px solid rgba(124, 58, 237, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .avatar-ring::before {
+            content: ''; position: absolute; inset: 4px; border-radius: 50%;
+            border: 2px solid rgba(124, 58, 237, 0.8);
+        }
+        /* A subtle person icon using CSS */
+        .avatar-icon {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:3px; opacity:0.8;
+        }
+        .avatar-icon .head {
+            width: 30px; height: 30px; border: 3px solid var(--text-main); border-radius: 50%;
+        }
+        .avatar-icon .body {
+            width: 50px; height: 25px; border: 3px solid var(--text-main);
+            border-top-left-radius: 25px; border-top-right-radius: 25px;
+            border-bottom: 0;
+        }
+
+        .input-group {
+            position: relative; margin-bottom: 20px;
+            width: 100%; max-width: 320px;
+        }
+        .input-group input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 30px;
+            padding: 16px 20px 16px 50px;
+            color: var(--text-main);
+            font-family: inherit; font-size: 14px;
+            outline: none; transition: all 0.3s;
+        }
+        .input-group input::placeholder { color: rgba(255,255,255,0.4); font-weight: 500; font-size: 12px; letter-spacing: 1px;}
+        .input-group input:focus {
+            border-color: var(--purple-neon);
+            box-shadow: 0 0 15px rgba(124,58,237,0.3);
+        }
+        .input-icon {
+            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+            width: 18px; height: 18px; opacity: 0.6; pointer-events: none;
+            display:flex; align-items:center; justify-content:center;
+        }
+
+        .login-btn {
+            background: linear-gradient(90deg, #4b17a6, #6b28eb);
+            color: #fff;
+            width: 100%; max-width: 320px;
+            padding: 16px;
+            border-radius: 30px;
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            letter-spacing: 1.5px;
+            border: none; cursor: pointer;
+            box-shadow: 0 5px 20px rgba(107, 40, 235, 0.4);
+            transition: all 0.3s;
+            margin-bottom: 20px; position: relative;
+        }
+        .login-btn:hover {
+            box-shadow: 0 8px 30px rgba(107, 40, 235, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .google-btn {
+            background: #ffffff;
+            color: #333;
+            width: 100%; max-width: 320px;
+            padding: 14px;
+            border-radius: 30px;
+            font-family: inherit; font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            border: none; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .google-btn:hover {
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .google-logo { width: 18px; height: 18px; }
+        
+        .divider {
+            display: flex; align-items: center; text-align: center;
+            max-width: 320px; margin-bottom: 20px;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .divider span { padding: 0 10px; color: var(--text-muted); font-size: 11px; font-weight: 500; }
+
+        .login-options {
+            display: flex; justify-content: space-between;
+            max-width: 320px; font-size: 11px; color: var(--text-muted);
+            align-items: center;
+        }
+        .custom-checkbox {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .custom-checkbox input { display: none; }
+        .custom-checkbox .mark {
+            width: 14px; height: 14px; border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .custom-checkbox input:checked + .mark {
+            background: var(--purple-neon); border-color: var(--purple-neon);
+        }
+        .custom-checkbox input:checked + .mark::after {
+            content: '✓'; color: #fff; font-size: 10px; font-weight: 700;
+        }
+        .forgot-link { color: var(--text-muted); text-decoration: none; transition: 0.3s;}
+        .forgot-link:hover { color: var(--text-main); }
+
+        /* RIGHT SIDE - THE PLANET HORIZON */
+        .horizon-wrapper {
+            position: absolute;
+            right: -100px; top: 15%;
+            width: 900px; height: 900px;
+            z-index: 1; pointer-events: none;
+        }
+        /* The giant curved line */
+        .horizon-curve {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            border-top: 2px solid;
+            border-image: linear-gradient(90deg, transparent 5%, #e18c5e 25%, #fff 50%, #7c3aed 75%, transparent 95%) 1;
+            /* Create the glowing arc shape */
+            box-shadow: inset 0 200px 150px -100px rgba(124, 58, 237, 0.15),
+                        0 -50px 100px -20px rgba(124, 58, 237, 0.2);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 50%);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 50%);
+            animation: atmosphericSway 10s ease-in-out infinite;
+        }
+        @keyframes atmosphericSway {
+            0%, 100% { transform: rotate(-1deg) scale(1); }
+            50% { transform: rotate(1deg) scale(1.02); }
+        }
+        .satellite {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: #fff; border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px var(--cyan-neon);
+            z-index: 5;
+            top: 50%; left: 50%;
+        }
+        .sat-1 { animation: orbit1 15s linear infinite; }
+        .sat-2 { animation: orbit2 20s linear infinite reverse; opacity: 0.6; }
+        .sat-3 { animation: orbit3 25s linear infinite; opacity: 0.4; }
+
+        @keyframes orbit1 {
+            from { transform: rotate(0deg) translateX(460px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(460px) rotate(-360deg); }
+        }
+        @keyframes orbit2 {
+            from { transform: rotate(45deg) translateX(480px) rotate(-45deg); }
+            to { transform: rotate(405deg) translateX(480px) rotate(-405deg); }
+        }
+        @keyframes orbit3 {
+            from { transform: rotate(-30deg) translateX(500px) rotate(30deg); }
+            to { transform: rotate(330deg) translateX(500px) rotate(-330deg); }
+        }
+        .horizon-glow {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            width: 400px; height: 100px; border-radius: 50%;
+            background: radial-gradient(ellipse, #d698ff 0%, rgba(124,58,237,0.5) 30%, transparent 70%);
+            filter: blur(15px); mix-blend-mode: screen;
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+        .horizon-core-flare {
+            position: absolute; top: -2px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 10px; border-radius: 50%;
+            background: #fff; filter: blur(5px); box-shadow: 0 0 30px #fff;
+            animation: pulseFlare 4s ease-in-out infinite;
+        }
+
+        .welcome-content {
+            position: absolute;
+            top: 120px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center;
+        }
+        .welcome-title {
+            font-size: 85px; font-weight: 700; letter-spacing: -3px;
+            margin-bottom: 25px; line-height: 1;
+            background: linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .welcome-desc {
+            font-size: 11px; font-family: 'Inter', sans-serif; line-height: 1.8;
+            color: var(--text-muted); max-width: 440px; margin-bottom: 30px; letter-spacing: 0.5px;
+            text-transform: uppercase; font-weight: 500;
+        }
+        .signup-prompt {
+            font-size: 11px; font-weight: 500; color: #fff; letter-spacing: 0.5px;
+        }
+        .signup-prompt a {
+            color: #fff; text-decoration: underline; font-weight: 700; margin-left: 5px;
+            cursor: pointer;
+        }
+
+        /* ===== SIGNUP SPECIFIC STYLES ===== */
+        .signup-extras {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .signup-extras.active { display: flex; }
+
+        .pw-strength {
+            display: flex; gap: 4px; margin-top: 6px;
+            padding: 0 4px; max-width: 320px;
+        }
+        .pw-bar {
+            flex: 1; height: 3px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        .pw-bar.active.weak { background: #ef4444; }
+        .pw-bar.active.fair { background: #f59e0b; }
+        .pw-bar.active.good { background: #06b6d4; }
+        .pw-bar.active.strong { background: #22c55e; }
+
+        .pw-label {
+            font-size: 10px; margin-top: 4px; padding: 0 4px;
+            color: rgba(255,255,255,0.4); min-height: 14px;
+            font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .pw-label.weak { color: #ef4444; }
+        .pw-label.fair { color: #f59e0b; }
+        .pw-label.good { color: #06b6d4; }
+        .pw-label.strong { color: #22c55e; }
+
+        .pw-requirements {
+            display: none; flex-direction: column; gap: 4px;
+            margin-top: 10px; padding: 0 10px;
+            max-width: 320px;
+        }
+        .pw-requirements.visible { display: flex; }
+        .pw-req {
+            font-size: 10px; color: rgba(255,255,255,0.35);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .pw-req.met { color: #22c55e; }
+        .pw-req-icon {
+            width: 12px; height: 12px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .pw-req.met .pw-req-icon {
+            background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.3);
+            color: #22c55e;
+        }
+
+        .terms-check {
+            display: flex; align-items: flex-start; gap: 10px;
+            margin-bottom: 20px; cursor: pointer;
+            max-width: 320px;
+        }
+        .terms-check input { display: none; }
+        .terms-check .mark {
+            width: 16px; height: 16px; border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--input-bg); flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .terms-check input:checked + .mark {
+            background: var(--purple-neon); border-color: var(--purple-neon);
+        }
+        .terms-check input:checked + .mark::after {
+            content: '✓'; color: #fff; font-size: 10px; font-weight: 700;
+        }
+        .terms-text {
+            font-size: 10px; color: rgba(255,255,255,0.5); line-height: 1.4;
+        }
+        .terms-text a { color: var(--purple-neon); text-decoration: none; }
+
+        .verify-notice {
+            display: none; flex-direction: column; align-items: center;
+            text-align: center; padding: 40px 20px;
+            background: rgba(124, 58, 237, 0.05);
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            border-radius: 30px; max-width: 320px;
+        }
+        .verify-notice.active { display: flex; }
+        .verify-icon {
+            font-size: 40px; margin-bottom: 20px;
+            animation: verifyPulse 2s ease-in-out infinite;
+        }
+        @keyframes verifyPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        .verify-notice h3 { margin-bottom: 10px; font-size: 18px; }
+        .verify-notice p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+        .verify-email { color: var(--cyan-neon); font-weight: 600; margin: 5px 0; }
+        .resend-link {
+            font-size: 11px; color: var(--purple-neon); text-decoration: underline;
+            margin-top: 20px; cursor: pointer;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .ambient-glow { animation: cosmicMove 20s ease-in-out infinite; }
+        .login-widget { animation: slideInLeft 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .horizon-wrapper { animation: fadeInRight 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .welcome-content { animation: fadeInUp 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+        }
+        @keyframes pulseFlare {
+            0%, 100% { opacity: 0.7; box-shadow: 0 0 20px #fff; }
+            50% { opacity: 1; box-shadow: 0 0 40px #fff; }
+        }
+        @keyframes cosmicMove {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+            50% { transform: translate(-45%, -45%) scale(1.1); opacity: 0.3; }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: scale(0.95) translateX(30px); }
+            to { opacity: 1; transform: scale(1) translateX(0); }
+        }
+
+        /* Simple placeholder SVG icons */
+        .icon { display:inline-block; width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+        /* SCROLL INDICATOR */
+        .scroll-indicator {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            color: rgba(255, 255, 255, 0.4); font-size: 11px; font-weight: 600;
+            letter-spacing: 1px; text-transform: uppercase;
+            animation: floatUpDown 2.5s ease-in-out infinite;
+            cursor: pointer; z-index: 100; transition: color 0.3s;
+        }
+        .scroll-indicator:hover { color: var(--cyan-neon); }
+        @keyframes floatUpDown {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
+        }
+
+        /* BENTO GRID (From landing.html) */
+        .bento-section {
+            padding: 100px 40px 140px;
+            max-width: 1200px; margin: 0 auto;
+            position: relative; z-index: 10;
+        }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header h2 { font-size: 2.8rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -1px; }
+        .section-header p { color: var(--text-muted); font-size: 1.1rem; }
+        
+        .bento-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 250px; gap: 24px;
+        }
+        .bento-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 24px;
+            padding: 32px; display: flex; flex-direction: column;
+            position: relative; overflow: hidden; transition: 0.3s;
+        }
+        .bento-card:hover {
+            background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+        .bento-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); opacity: 0.5;
+        }
+        .bento-wide { grid-column: span 2; }
+        .bento-tall { grid-row: span 2; }
+        .bento-icon-lg {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: rgba(124, 58, 237, 0.15); color: #a78bfa;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: auto; border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+        .bento-card h3 { font-size: 1.4rem; margin-bottom: 8px; font-weight: 600; }
+        .bento-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+        .gradient-text { background: linear-gradient(135deg, var(--cyan-neon), var(--purple-neon)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* SWIPER CAROUSEL (React Bits Clone) */
+        .featuresSwiper {
+            width: 100%;
+            padding-top: 50px;
+            padding-bottom: 80px;
+            overflow: hidden; /* Prevent horizontal scrollbars on body */
+        }
+        .swiper-slide {
+            width: 380px !important; /* Fixed width for uniform cards */
+            height: 420px;
+            display: flex;
+            transition: 0.3s;
+        }
+        /* Make sure cards inside slides take full height */
+        .swiper-slide .bento-card {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            grid-column: auto; grid-row: auto;
+        }
+        /* Custom Swiper Pagination */
+        .swiper-pagination-bullet { background: rgba(255,255,255,0.3); opacity: 1; }
+        .swiper-pagination-bullet-active { background: var(--cyan-neon); box-shadow: 0 0 10px var(--cyan-neon); transform: scale(1.2); }
+
+        .social-btn {
+            display: flex; align-items: center; gap: 12px; 
+            padding: 14px 36px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 50px; 
+            text-decoration: none; 
+            color: #fff; 
+            font-weight: 500; font-size: 16px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .social-btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        .social-btn svg { width: 22px; height: 22px; }
+
+        /* NEW FEATURE ANIMATIONS */
+        .bento-card {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .bento-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .bento-card svg {
+            animation: floatIcon 6s ease-in-out infinite;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .section-header h2 {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1s ease-out;
+        }
+        .section-header h2.revealed {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+        <div class="ambient-glow"></div>
+
+        <div class="landing-container">
+        <nav>
+            <div class="logo" style="cursor: pointer;" onclick="handleLogoClick()">
+                <img src="img/logo.png" alt="Logo" style="width: 100px; height: 100px; object-fit: contain; display: block; filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4)); margin-top: 6px; margin-right: -6px; margin-left: -20px;" />
+                DevAssist AI
+            </div>
+            
+            <div class="nav-links">
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#contact">Contact</a>
+            </div>
+
+            <div class="nav-actions">
+                <!-- Sign In and Hamburger removed as requested -->
+            </div>
+        </nav>
+
+        <main class="hero">
+            
+            <!-- Left Side: Login Form -->
+            <div class="login-widget" id="authFormContainer">
+                <div class="avatar-ring">
+                    <div class="avatar-icon">
+                        <div class="head"></div>
+                        <div class="body"></div>
+                    </div>
+                </div>
+
+                <div class="signup-extras" id="signupExtras">
+                    <div class="input-group">
+                        <div class="input-icon">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <input type="text" placeholder="FULL NAME" id="fullNameInput" />
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-icon">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </div>
+                    <input type="email" placeholder="EMAIL ADDRESS" id="emailInput" />
+                </div>
+
+                <div class="input-group">
+                    <div class="input-icon">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <input type="password" placeholder="••••••••••••" id="passwordInput" oninput="if(authMode==='signup') checkPasswordStrength(this.value)" />
+                </div>
+
+                <!-- Password Strength (Signup only) -->
+                <div id="signupPwInfo" style="display: none; margin-bottom: 20px;">
+                    <div class="pw-strength">
+                        <div class="pw-bar" id="bar1"></div>
+                        <div class="pw-bar" id="bar2"></div>
+                        <div class="pw-bar" id="bar3"></div>
+                        <div class="pw-bar" id="bar4"></div>
+                    </div>
+                    <div class="pw-label" id="pwLabel"></div>
+                    
+                    <div class="pw-requirements" id="pwRequirements">
+                        <div class="pw-req" id="reqLength"><span class="pw-req-icon">✓</span><span>8+ characters</span></div>
+                        <div class="pw-req" id="reqUpper"><span class="pw-req-icon">✓</span><span>Uppercase letter</span></div>
+                        <div class="pw-req" id="reqLower"><span class="pw-req-icon">✓</span><span>Lowercase letter</span></div>
+                        <div class="pw-req" id="reqNumber"><span class="pw-req-icon">✓</span><span>Number</span></div>
+                        <div class="pw-req" id="reqSpecial"><span class="pw-req-icon">✓</span><span>Special character</span></div>
+                    </div>
+                </div>
+
+                <!-- Terms (Signup only) -->
+                <div id="signupTerms" style="display: none;">
+                    <label class="terms-check">
+                        <input type="checkbox" id="termsCheck" />
+                        <span class="mark"></span>
+                        <span class="terms-text">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></span>
+                    </label>
+                </div>
+
+                <button class="login-btn" id="mainAuthBtn" onclick="handleAuth()">LOGIN</button>
+
+                <div class="divider"><span>OR</span></div>
+                
+                <button class="google-btn" onclick="startLogin()">
+                    <svg class="google-logo" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+
+                <div class="login-options" id="loginOptions">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" checked />
+                        <span class="mark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-link">Forgot your password?</a>
+                </div>
+
+                <div class="signup-prompt" style="margin-top: 20px; text-align: center;">
+                    <span id="toggleText">Not a member?</span> 
+                    <a id="toggleLink" onclick="toggleAuthMode()">Create an account</a>
+                </div>
+            </div>
+
+            <!-- Verification Notice Container -->
+            <div class="verify-notice" id="verifyNotice">
+                <div class="verify-icon">📧</div>
+                <h3>Check your email</h3>
+                <p>We've sent a verification link to:</p>
+                <div class="verify-email" id="displayVerifyEmail"></div>
+                <p>Click the link in your email to activate your account.</p>
+                <div class="resend-link" onclick="resendVerification()">Didn't get it? Resend</div>
+                <div class="resend-link" style="margin-top: 10px; color: var(--text-muted);" onclick="toggleAuthMode('login')">← Back to Login</div>
+            </div>
+
+            <!-- Right Side: The Horizon -->
+            <div class="horizon-wrapper">
+                <div class="horizon-curve"></div>
+                <div class="horizon-glow"></div>
+                <div class="horizon-core-flare"></div>
+                <!-- Orbital Particles -->
+                <div class="satellite sat-1"></div>
+                <div class="satellite sat-2"></div>
+                <div class="satellite sat-3"></div>
+
+                <div class="welcome-content">
+                    <div class="welcome-title">Future proof your code.</div>
+                    <div class="welcome-desc">
+                        Bridge the gap between human creativity and artificial intelligence. Join the next generation of developers using neural intelligence to build the future.
+                    </div>
+                    <div class="signup-prompt" id="welcomePrompt">
+                        Not a member? <a onclick="toggleAuthMode('signup')">Sign up with Google</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-indicator" onclick="document.querySelector('#about').scrollIntoView({behavior: 'smooth'})">
+                <span>Explore Platform</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </div>
+
+        </main>
+    </div>
+    </div> <!-- end .hero-section -->
+
+    <!-- ABOUT SECTION -->
+    <div id="about" class="about-section" style="padding: 100px 40px; max-width: 1000px; margin: 0 auto; text-align: center; position: relative; z-index: 10;">
+        <div class="section-header">
+            <h2>About <span class="gradient-text">DevAssist AI</span></h2>
+            <p style="font-size: 1.2rem; line-height: 1.8; color: var(--text-muted); margin-top: 20px;">
+                DevAssist AI is designed to redefine the modern development workflow. By integrating advanced neural networking directly into your workspace, we provide a unified platform that accelerates coding, debugging, and collaboration. Our mission is to bridge the gap between human creativity and artificial intelligence, empowering developers to build the future effortlessly.
+            </p>
+        </div>
+    </div>
+
+    <!-- BENTO FEATURES SECTION -->
+    <div id="features" class="bento-section">
+        <div class="section-header">
+            <h2>Everything you need. <span class="gradient-text">Unified.</span></h2>
+            <p>Ditch the fragmented tools. Experience all your workflows in one powerful hub.</p>
+        </div>
+
+        <div class="swiper featuresSwiper">
+            <div class="swiper-wrapper">
+                <!-- Card 1: Global AI -->
+                <div class="swiper-slide">
+                    <div class="bento-card">
+                        <div class="bento-icon-lg" style="background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color:#4ade8044;">💬</div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.12; color: #4ade80; margin: 40px 0;">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <h3>Global AI</h3>
+                            <p>Unlock universal answers instantly. Query everything in your workspace—from entire codebases to system architectures—with an advanced retrieval-augmented engine that provides global understanding.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Secret AI -->
+                <div class="swiper-slide">
+                    <div class="bento-card">
+                        <div class="bento-icon-lg" style="background: rgba(168, 85, 247, 0.1); color: #c084fc; border-color:#c084fc44;">🔐</div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.15; color: #c084fc; margin: 40px 0;">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <rect x="9" y="11" width="6" height="6" rx="1"></rect>
+                                <path d="M12 11v-2a2 2 0 1 0-4 0v2"></path>
+                            </svg>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <h3>Secret AI</h3>
+                            <p>Your private vault. Upload architecture notes or user documents to get tailored, secure summaries without leaking data outside your session.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Code Analyzer -->
+                <div class="swiper-slide">
+                    <div class="bento-card">
+                        <div class="bento-icon-lg" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color:#38bdf844;">&lt;/&gt;</div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.15; color: #38bdf8; margin: 40px 0;">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <line x1="12" y1="9" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <h3>Code Analyzer</h3>
+                            <p>Automatically analyze complexity, enforce best practices, and get insightful refactoring suggestions and inline comments.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Online Compiler -->
+                <div class="swiper-slide">
+                    <div class="bento-card">
+                        <div class="bento-icon-lg" style="background: rgba(236, 72, 153, 0.1); color: #f472b6; border-color:#f472b644;">⚡</div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.15; color: #f472b6; margin: 40px 0;">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                                <line x1="6" y1="8" x2="6.01" y2="8"></line>
+                                <line x1="10" y1="8" x2="10.01" y2="8"></line>
+                                <line x1="14" y1="8" x2="14.01" y2="8"></line>
+                                <polyline points="6 14 10 18 6 22"></polyline>
+                                <line x1="12" y1="22" x2="18" y2="22"></line>
+                            </svg>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <h3>Online Compiler</h3>
+                            <p>The ultimate compiler for your coding needs. Write, test, and instantly run code across multiple languages within zero-latency sandboxes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Offline AI Mode -->
+                <div class="swiper-slide">
+                    <div class="bento-card">
+                        <div class="bento-icon-lg" style="background: rgba(249, 115, 22, 0.1); color: #fb923c; border-color:#fb923c44;">💻</div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.12; color: #fb923c; margin: 40px 0;">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                <rect x="9" y="9" width="6" height="6"></rect>
+                                <line x1="9" y1="1" x2="9" y2="4"></line>
+                                <line x1="15" y1="1" x2="15" y2="4"></line>
+                                <line x1="9" y1="20" x2="9" y2="23"></line>
+                                <line x1="15" y1="20" x2="15" y2="23"></line>
+                                <line x1="20" y1="9" x2="23" y2="9"></line>
+                                <line x1="20" y1="14" x2="23" y2="14"></line>
+                                <line x1="1" y1="9" x2="4" y2="9"></line>
+                                <line x1="1" y1="14" x2="4" y2="14"></line>
+                            </svg>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <h3>Offline AI Mode</h3>
+                            <p>Complete privacy. Download robust, open-source AI models to your local machine and use intelligent tools offline, without the internet. Perfect for uninterrupted coding anywhere, anytime.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6: Void Main -->
+                <div class="swiper-slide">
+                    <div class="bento-card">
+                        <div class="bento-icon-lg" style="background: rgba(234, 179, 8, 0.1); color: #facc15; border-color:#facc1544;">🚀</div>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.12; color: #facc15; margin: 40px 0;">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="5" r="3"></circle>
+                                <circle cx="5" cy="19" r="3"></circle>
+                                <circle cx="19" cy="19" r="3"></circle>
+                                <line x1="10.5" y1="7.5" x2="6.5" y2="16.5"></line>
+                                <line x1="13.5" y1="7.5" x2="17.5" y2="16.5"></line>
+                                <line x1="7.5" y1="19" x2="16.5" y2="19"></line>
+                            </svg>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <h3>Void Main</h3>
+                            <p>Your ultimate practice arena. Sharpen your algorithmic skills and prepare for technical challenges in a competitive coding environment designed for mastering data structures and logic puzzles.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Pagination Indicator -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+
+    <!-- CONTACT SECTION -->
+    <div id="contact" class="contact-section" style="padding: 100px 40px 60px; max-width: 1000px; margin: 0 auto; text-align: center; position: relative; z-index: 10;">
+        <div class="section-header" style="margin-bottom: 50px;">
+            <h2 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 12px; letter-spacing: -1.5px;">Get in <span style="background: linear-gradient(135deg, var(--cyan-neon), var(--purple-neon)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Touch</span></h2>
+            <p style="color: var(--text-muted); font-size: 1.15rem;">Connect with me across platforms.</p>
+        </div>
+        <div class="contact-buttons" style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;">
+            <!-- Gmail -->
+            <a href="mailto:sudharsanrenganathan7@gmail.com" class="social-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Gmail
+            </a>
+            <!-- LinkedIn -->
+            <a href="https://www.linkedin.com/in/sudharsanrenganathan/" class="social-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                LinkedIn
+            </a>
+            <!-- Instagram -->
+            <a href="https://instagram.com/sudhar__san__05" class="social-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                Instagram
+            </a>
+            <!-- GitHub -->
+            <a href="https://github.com/sudharsanrenganathan" class="social-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                GitHub
+            </a>
+        </div>
+
+        <!-- MINIMAL FOOTER -->
+        <div style="margin-top: 80px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.03); color: var(--text-muted); font-size: 13px; letter-spacing: 0.5px; opacity: 0.6;">
+            &copy; 2026 DevAssist AI. All rights reserved.
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        let authMode = 'login'; // 'login' or 'signup'
+        let signedUpEmail = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if already authenticated
+            const { data: { session } } = await window._supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+
+            // Check for verification param
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('verified') === 'true') {
+                showToast('Email verified successfully! You can now sign in.', 'success');
+            }
+        });
+
+        function toggleAuthMode(mode) {
+            const container = document.getElementById('authFormContainer');
+            const verifyNotice = document.getElementById('verifyNotice');
+            
+            // If we're coming back from verify notice
+            verifyNotice.style.display = 'none';
+            container.style.display = 'flex';
+
+            if (mode) authMode = mode;
+            else authMode = (authMode === 'login') ? 'signup' : 'login';
+
+            const signupExtras = document.getElementById('signupExtras');
+            const signupPwInfo = document.getElementById('signupPwInfo');
+            const signupTerms = document.getElementById('signupTerms');
+            const mainBtn = document.getElementById('mainAuthBtn');
+            const navBtn = document.getElementById('navAuthBtn');
+            const toggleText = document.getElementById('toggleText');
+            const toggleLink = document.getElementById('toggleLink');
+            const loginOptions = document.getElementById('loginOptions');
+            const welcomeTitle = document.querySelector('.welcome-title');
+            const welcomeDesc = document.querySelector('.welcome-desc');
+            const welcomePrompt = document.getElementById('welcomePrompt');
+
+            if (authMode === 'signup') {
+                signupExtras.classList.add('active');
+                signupPwInfo.style.display = 'block';
+                signupTerms.style.display = 'block';
+                loginOptions.style.display = 'none';
+                mainBtn.innerText = 'CREATE ACCOUNT';
+                if (navBtn) navBtn.innerText = 'GO TO LOGIN';
+                toggleText.innerText = 'Already a member?';
+                toggleLink.innerText = 'Sign in instead';
+                welcomeTitle.innerText = 'Join the evolution.';
+                welcomeDesc.innerText = 'Start your journey with DevAssist AI. Experience a unified workspace that evolves with your developmental needs.';
+                welcomePrompt.innerHTML = 'Already a member? <a onclick="toggleAuthMode(\'login\')">Sign in instead</a>';
+            } else {
+                signupExtras.classList.remove('active');
+                signupPwInfo.style.display = 'none';
+                signupTerms.style.display = 'none';
+                loginOptions.style.display = 'flex';
+                mainBtn.innerText = 'LOGIN';
+                if (navBtn) navBtn.innerText = 'SIGN IN';
+                toggleText.innerText = 'Not a member?';
+                toggleLink.innerText = 'Create an account';
+                welcomeTitle.innerText = 'Future-proof your code.';
+                welcomeDesc.innerText = 'Bridge the gap between human creativity and artificial intelligence. Join the next generation of developers using neural intelligence to build the future.';
+                welcomePrompt.innerHTML = 'Not a member? <a onclick="toggleAuthMode(\'signup\')">Sign up with Google</a>';
+            }
+        }
+
+        async function handleLogoClick() {
+            const session = await getSession();
+            if (session) {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('Please sign in to access the dashboard.', 'info');
+            }
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('mainAuthBtn');
+
+            if (!email || !password) {
+                showToast('Please fill in all fields.', 'error');
+                return;
+            }
+
+            const origText = btn.innerText;
+            btn.innerText = 'PROCESSING...';
+            btn.disabled = true;
+
+            try {
+                if (authMode === 'signup') {
+                    const fullName = document.getElementById('fullNameInput').value.trim();
+                    const terms = document.getElementById('termsCheck').checked;
+
+                    if (!fullName) {
+                        showToast('Please enter your full name.', 'error');
+                        resetBtn(); return;
+                    }
+                    if (!terms) {
+                        showToast('Please agree to the Terms and Conditions.', 'error');
+                        resetBtn(); return;
+                    }
+                    
+                    const strength = getPasswordStrength(password);
+                    if (strength.score < 3) {
+                        showToast('Password is too weak.', 'error');
+                        resetBtn(); return;
+                    }
+
+                    const { data, error } = await _supabase.auth.signUp({
+                        email, password,
+                        options: {
+                            data: { full_name: fullName, name: fullName },
+                            emailRedirectTo: window.location.origin + '/index.html?verified=true'
+                        }
+                    });
+
+                    if (error) {
+                        showToast(error.message, 'error');
+                        resetBtn(); return;
+                    }
+
+                    if (data.user && !data.session) {
+                        // Success - show verification notice
+                        signedUpEmail = email;
+                        document.getElementById('displayVerifyEmail').innerText = email;
+                        document.getElementById('authFormContainer').style.display = 'none';
+                        document.getElementById('verifyNotice').style.display = 'flex';
+                    } else if (data.session) {
+                        window.location.href = 'dashboard.html';
+                    }
+                } else {
+                    // Login
+                    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        showToast(error.message, 'error');
+                        resetBtn(); return;
+                    }
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (err) {
+                console.error('Auth error', err);
+                showToast('An unexpected error occurred.', 'error');
+                resetBtn();
+            }
+
+            function resetBtn() {
+                btn.innerText = origText;
+                btn.disabled = false;
+            }
+        }
+
+        async function startLogin() {
+            // This is now purely for Google OAuth
+            try {
+                const { error } = await _supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/dashboard.html',
+                        queryParams: { access_type: 'offline', prompt: 'consent' }
+                    }
+                });
+                if (error) showToast(error.message, 'error');
+            } catch (err) {
+                console.error('Login exception', err);
+            }
+        }
+
+        async function resendVerification() {
+            if (!signedUpEmail) return;
+            try {
+                const { error } = await _supabase.auth.resend({ type: 'signup', email: signedUpEmail });
+                if (error) showToast(error.message, 'error');
+                else showToast('Verification email resent!', 'success');
+            } catch (err) {
+                showToast('Failed to resend email.', 'error');
+            }
+        }
+
+        function getPasswordStrength(pw) {
+            const checks = {
+                length: pw.length >= 8,
+                upper: /[A-Z]/.test(pw),
+                lower: /[a-z]/.test(pw),
+                number: /[0-9]/.test(pw),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw),
+            };
+            const score = Object.values(checks).filter(Boolean).length;
+            let label = '', level = '';
+            if (score <= 1) { label = 'Very weak'; level = 'weak'; }
+            else if (score === 2) { label = 'Weak'; level = 'weak'; }
+            else if (score === 3) { label = 'Fair'; level = 'fair'; }
+            else if (score === 4) { label = 'Good'; level = 'good'; }
+            else { label = 'Strong'; level = 'strong'; }
+            return { checks, score, label, level };
+        }
+
+        function checkPasswordStrength(pw) {
+            const { checks, score, label, level } = getPasswordStrength(pw);
+            const bars = ['bar1', 'bar2', 'bar3', 'bar4'].map(id => document.getElementById(id));
+            bars.forEach((bar, i) => {
+                bar.className = 'pw-bar';
+                if (pw.length > 0 && i < Math.ceil(score * 0.8)) bar.classList.add('active', level);
+            });
+            const pwLabel = document.getElementById('pwLabel');
+            pwLabel.innerText = pw.length > 0 ? label : '';
+            pwLabel.className = 'pw-label' + (pw.length > 0 ? ' ' + level : '');
+
+            // Update requirements visibility
+            const reqs = document.getElementById('pwRequirements');
+            if (pw.length > 0) reqs.classList.add('visible');
+            else reqs.classList.remove('visible');
+
+            // Individual req highlights
+            document.getElementById('reqLength').classList.toggle('met', checks.length);
+            document.getElementById('reqUpper').classList.toggle('met', checks.upper);
+            document.getElementById('reqLower').classList.toggle('met', checks.lower);
+            document.getElementById('reqNumber').classList.toggle('met', checks.number);
+            document.getElementById('reqSpecial').classList.toggle('met', checks.special);
+        }
+
+        // Swiper Initializer
+        document.addEventListener('DOMContentLoaded', () => {
+            const swiper = new Swiper(".featuresSwiper", {
+                effect: "coverflow", grabCursor: true, centeredSlides: true,
+                slidesPerView: "auto", loop: true,
+                coverflowEffect: { rotate: 15, stretch: -50, depth: 250, modifier: 1, slideShadows: false },
+                pagination: { el: ".swiper-pagination", clickable: true },
+                autoplay: { delay: 3500, disableOnInteraction: false }
+            });
+
+            // Intersection Observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        if (entry.target.classList.contains('swiper-wrapper')) {
+                            entry.target.querySelectorAll('.bento-card').forEach((card, i) => {
+                                setTimeout(() => card.classList.add('revealed'), i * 150);
+                            });
+                        }
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            document.querySelectorAll('.section-header h2, .swiper-wrapper').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

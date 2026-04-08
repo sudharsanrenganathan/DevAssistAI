@@ -1,0 +1,54 @@
+ID: H015
+TITLE: Maximum Rectangle in Histogram
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given heights of histogram bars, find the area of the largest rectangle.
+
+INPUT FORMAT:
+- First line contains N
+- Second line contains N integers
+
+OUTPUT FORMAT:
+- Print maximum rectangle area
+
+SAMPLE TEST CASES:
+INPUT:
+6
+2 1 5 6 2 3
+OUTPUT:
+10
+EXPLANATION:
+Largest rectangle area is 10.
+
+INPUT:
+1
+5
+OUTPUT:
+5
+EXPLANATION:
+Single bar.
+
+INPUT:
+4
+2 4 2 1
+OUTPUT:
+6
+EXPLANATION:
+Rectangle covering bars [2,4,2].
+
+HIDDEN TEST CASES:
+INPUT:
+5
+1 2 3 4 5
+OUTPUT:
+9
+
+INPUT:
+5
+5 4 3 2 1
+OUTPUT:
+9
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 10^5

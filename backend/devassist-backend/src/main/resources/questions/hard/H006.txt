@@ -1,0 +1,81 @@
+ID: H006
+TITLE: Word Ladder Length
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given a begin word, end word and a dictionary, find the length of shortest transformation sequence.
+
+INPUT FORMAT:
+- First line contains beginWord
+- Second line contains endWord
+- Third line contains N
+- Next N lines contain dictionary words
+
+OUTPUT FORMAT:
+- Print the length of shortest transformation
+- Print 0 if not possible
+
+SAMPLE TEST CASES:
+INPUT:
+hit
+cog
+6
+hot
+dot
+dog
+lot
+log
+cog
+OUTPUT:
+5
+EXPLANATION:
+hit → hot → dot → dog → cog.
+
+INPUT:
+hit
+cog
+5
+hot
+dot
+dog
+lot
+log
+OUTPUT:
+0
+EXPLANATION:
+End word missing.
+
+INPUT:
+a
+c
+2
+a
+c
+OUTPUT:
+2
+EXPLANATION:
+Direct transformation.
+
+HIDDEN TEST CASES:
+INPUT:
+game
+thee
+5
+gave
+gape
+tame
+take
+thee
+OUTPUT:
+0
+
+INPUT:
+abc
+abd
+1
+abd
+OUTPUT:
+2
+
+CONSTRAINTS:
+- 1 ≤ number of words ≤ 10^5

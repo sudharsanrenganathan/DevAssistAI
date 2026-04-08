@@ -1,0 +1,48 @@
+ID: H001
+TITLE: Longest Substring Without Repeating Characters
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given a string, find the length of the longest substring without repeating characters.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print the length of the longest substring
+
+SAMPLE TEST CASES:
+INPUT:
+abcabcbb
+OUTPUT:
+3
+EXPLANATION:
+"abc" is the longest substring without repeats.
+
+INPUT:
+bbbbb
+OUTPUT:
+1
+EXPLANATION:
+Only one unique character.
+
+INPUT:
+pwwkew
+OUTPUT:
+3
+EXPLANATION:
+"wke" is the longest substring.
+
+HIDDEN TEST CASES:
+INPUT:
+abcdefgh
+OUTPUT:
+8
+
+INPUT:
+abba
+OUTPUT:
+2
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

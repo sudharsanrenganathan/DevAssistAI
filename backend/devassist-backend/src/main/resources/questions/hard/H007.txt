@@ -1,0 +1,63 @@
+ID: H007
+TITLE: Detect Cycle in Directed Graph
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given a directed graph, check if it contains a cycle.
+
+INPUT FORMAT:
+- First line contains V and E
+- Next E lines contain edges u v
+
+OUTPUT FORMAT:
+- Print "YES" if cycle exists
+- Print "NO" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+3 3
+0 1
+1 2
+2 0
+OUTPUT:
+YES
+EXPLANATION:
+Cycle exists.
+
+INPUT:
+3 2
+0 1
+1 2
+OUTPUT:
+NO
+EXPLANATION:
+No cycle.
+
+INPUT:
+1 0
+OUTPUT:
+NO
+EXPLANATION:
+Single node.
+
+HIDDEN TEST CASES:
+INPUT:
+4 4
+0 1
+1 2
+2 3
+3 1
+OUTPUT:
+YES
+
+INPUT:
+5 4
+0 1
+1 2
+2 3
+3 4
+OUTPUT:
+NO
+
+CONSTRAINTS:
+- 1 ≤ V ≤ 10^5

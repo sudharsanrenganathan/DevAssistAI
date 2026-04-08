@@ -1,0 +1,55 @@
+ID: E005
+TITLE: Find Maximum Element
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a list of integers, find the maximum element.
+
+INPUT FORMAT:
+- First line contains an integer N
+- Second line contains N space-separated integers
+
+OUTPUT FORMAT:
+- Print the maximum value
+
+SAMPLE TEST CASES:
+INPUT:
+5
+1 3 2 9 4
+OUTPUT:
+9
+EXPLANATION:
+9 is the largest among the given numbers.
+
+INPUT:
+1
+7
+OUTPUT:
+7
+EXPLANATION:
+Only one element is present.
+
+INPUT:
+3
+-1 -5 -3
+OUTPUT:
+-1
+EXPLANATION:
+-1 is the maximum value.
+
+HIDDEN TEST CASES:
+INPUT:
+4
+10 20 30 40
+OUTPUT:
+40
+
+INPUT:
+2
+0 -1
+OUTPUT:
+0
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 10^5
+- -10^9 ≤ values ≤ 10^9

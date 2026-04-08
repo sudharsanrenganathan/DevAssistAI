@@ -1,0 +1,48 @@
+ID: H005
+TITLE: Longest Palindromic Substring
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given a string, find the longest palindromic substring.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print the longest palindromic substring
+
+SAMPLE TEST CASES:
+INPUT:
+babad
+OUTPUT:
+bab
+EXPLANATION:
+"bab" is a palindrome.
+
+INPUT:
+cbbd
+OUTPUT:
+bb
+EXPLANATION:
+"bb" is longest.
+
+INPUT:
+a
+OUTPUT:
+a
+EXPLANATION:
+Single character.
+
+HIDDEN TEST CASES:
+INPUT:
+forgeeksskeegfor
+OUTPUT:
+geeksskeeg
+
+INPUT:
+abba
+OUTPUT:
+abba
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

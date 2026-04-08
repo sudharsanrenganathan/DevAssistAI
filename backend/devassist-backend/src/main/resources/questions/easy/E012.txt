@@ -1,0 +1,49 @@
+ID: E012
+TITLE: Check Prime Number
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given an integer, check whether it is a prime number.
+
+INPUT FORMAT:
+- One line containing an integer
+
+OUTPUT FORMAT:
+- Print "YES" if the number is prime
+- Print "NO" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+7
+OUTPUT:
+YES
+EXPLANATION:
+7 has no divisors other than 1 and itself.
+
+INPUT:
+4
+OUTPUT:
+NO
+EXPLANATION:
+4 is divisible by 2.
+
+INPUT:
+1
+OUTPUT:
+NO
+EXPLANATION:
+1 is not a prime number.
+
+HIDDEN TEST CASES:
+INPUT:
+2
+OUTPUT:
+YES
+
+INPUT:
+25
+OUTPUT:
+NO
+
+CONSTRAINTS:
+- 0 ≤ number ≤ 10^9

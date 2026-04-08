@@ -1,0 +1,48 @@
+ID: E015
+TITLE: Sum of Natural Numbers
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a number N, find the sum of first N natural numbers.
+
+INPUT FORMAT:
+- One line containing an integer N
+
+OUTPUT FORMAT:
+- Print the sum of first N natural numbers
+
+SAMPLE TEST CASES:
+INPUT:
+5
+OUTPUT:
+15
+EXPLANATION:
+1 + 2 + 3 + 4 + 5 = 15
+
+INPUT:
+1
+OUTPUT:
+1
+EXPLANATION:
+Only one natural number.
+
+INPUT:
+0
+OUTPUT:
+0
+EXPLANATION:
+Sum of first 0 natural numbers is 0.
+
+HIDDEN TEST CASES:
+INPUT:
+10
+OUTPUT:
+55
+
+INPUT:
+100
+OUTPUT:
+5050
+
+CONSTRAINTS:
+- 0 ≤ N ≤ 10^9

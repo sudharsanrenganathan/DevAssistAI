@@ -1,0 +1,55 @@
+ID: M004
+TITLE: Check Anagram
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given two strings, check whether they are anagrams of each other.
+
+INPUT FORMAT:
+- First line contains string A
+- Second line contains string B
+
+OUTPUT FORMAT:
+- Print "YES" if they are anagrams
+- Print "NO" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+listen
+silent
+OUTPUT:
+YES
+EXPLANATION:
+Both strings contain the same characters.
+
+INPUT:
+hello
+world
+OUTPUT:
+NO
+EXPLANATION:
+Characters do not match.
+
+INPUT:
+a
+a
+OUTPUT:
+YES
+EXPLANATION:
+Same single character.
+
+HIDDEN TEST CASES:
+INPUT:
+triangle
+integral
+OUTPUT:
+YES
+
+INPUT:
+apple
+papel
+OUTPUT:
+YES
+
+CONSTRAINTS:
+- 1 ≤ length of strings ≤ 10^5

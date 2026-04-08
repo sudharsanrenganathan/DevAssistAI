@@ -1,0 +1,12 @@
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\code-analyzer.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\dashboard.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\global.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\index.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\login.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\secret.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\signup.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\vm-compiler.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\vm-history.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\vm-leaderboard.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\vm-problems.html
+C:\Users\sudha\Desktop\DevAssistAI\backend\devassist-backend\src\main\resources\static\voidmain.html

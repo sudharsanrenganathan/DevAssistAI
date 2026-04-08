@@ -1,0 +1,54 @@
+ID: H012
+TITLE: Minimum Window Substring
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given two strings S and T, find the minimum window in S containing all characters of T.
+
+INPUT FORMAT:
+- First line contains string S
+- Second line contains string T
+
+OUTPUT FORMAT:
+- Print the minimum window substring
+- Print empty string if not possible
+
+SAMPLE TEST CASES:
+INPUT:
+ADOBECODEBANC
+ABC
+OUTPUT:
+BANC
+EXPLANATION:
+Smallest window containing A, B, C.
+
+INPUT:
+a
+a
+OUTPUT:
+a
+EXPLANATION:
+Exact match.
+
+INPUT:
+a
+b
+OUTPUT:
+
+EXPLANATION:
+No window possible.
+
+HIDDEN TEST CASES:
+INPUT:
+aaabdabcefaecbef
+abc
+OUTPUT:
+abc
+
+INPUT:
+abc
+abcd
+OUTPUT:
+
+CONSTRAINTS:
+- 1 ≤ length of S ≤ 10^5

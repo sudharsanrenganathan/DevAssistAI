@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VoidMain — Problems</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: radial-gradient(circle at top left, #0b1020, #020617); color: #e5e7eb; min-height: 100vh; }
+body::before { content: ""; position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.15), transparent); top: -200px; left: -200px; filter: blur(150px); z-index: 0; pointer-events: none; }
+
+/* TOPBAR */
+.topbar { position: sticky; top: 0; z-index: 100; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: rgba(2,6,23,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.topbar-brand { display: flex; align-items: center; gap: 0px; cursor: pointer; text-decoration: none; color: inherit; }
+.topbar-brand img { 
+    width: 100px; height: 100px; object-fit: contain; 
+    margin-top: 6px; margin-right: -6px; margin-left: -24px;
+    filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4));
+}
+.topbar-brand span.vm-text { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 800; font-size: 22px; color: #fff; letter-spacing: -0.3px; white-space: nowrap; }
+.topbar-brand span.vm { background: linear-gradient(135deg, #6366f1, #22c55e); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.topbar-nav { display: flex; gap: 6px; }
+.topbar-nav a { text-decoration: none; color: #94a3b8; font-size: 13px; padding: 7px 14px; border-radius: 8px; transition: all 0.2s; }
+.topbar-nav a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.topbar-nav a.active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+.user-badge { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #a5b4fc; }
+
+/* MAIN */
+.main { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 1; }
+
+/* HEADER */
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-header h1 { font-size: 28px; font-weight: 700; }
+
+/* SEARCH */
+.search-bar { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: white; font-size: 14px; outline: none; margin-bottom: 20px; transition: border-color 0.2s; }
+.search-bar:focus { border-color: rgba(99,102,241,0.4); }
+.search-bar::placeholder { color: #475569; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 4px; }
+.tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; color: #94a3b8; transition: all 0.25s; }
+.tab:hover { color: #e2e8f0; }
+.tab.active { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+.tab.active.easy-active { background: rgba(34,197,94,0.2); color: #22c55e; }
+.tab.active.medium-active { background: rgba(250,204,21,0.2); color: #facc15; }
+.tab.active.hard-active { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+/* COUNT */
+.count-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 13px; color: #64748b; }
+
+/* PROBLEM LIST */
+.problem-list { display: flex; flex-direction: column; gap: 10px; }
+.problem-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.25s; }
+.problem-item:hover { transform: translateY(-2px); border-color: rgba(99,102,241,0.3); box-shadow: 0 6px 25px rgba(0,0,0,0.3); background: rgba(255,255,255,0.06); }
+.problem-left { display: flex; flex-direction: column; gap: 6px; }
+.problem-title { font-size: 15px; font-weight: 500; }
+.problem-meta { display: flex; align-items: center; gap: 8px; }
+.badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.badge-easy { background: rgba(34,197,94,0.15); color: #22c55e; }
+.badge-medium { background: rgba(250,204,21,0.15); color: #facc15; }
+.badge-hard { background: rgba(239,68,68,0.15); color: #ef4444; }
+.badge-solved { background: rgba(34,197,94,0.2); color: #22c55e; }
+.badge-unsolved { background: rgba(148,163,184,0.15); color: #94a3b8; }
+.problem-arrow { color: #475569; font-size: 18px; transition: 0.2s; }
+.problem-item:hover .problem-arrow { color: #6366f1; transform: translateX(4px); }
+.empty-msg { text-align: center; padding: 40px; color: #475569; }
+.loading { text-align: center; padding: 40px; color: #64748b; }
+
+@media (max-width: 640px) { .tabs { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="dashboard.html" class="topbar-brand">
+        <img src="img/logo.png" alt="Logo" />
+        <div style="display:flex; flex-direction:column; line-height:1.2;">
+            <span class="vm-text">DevAssist AI</span>
+            <small style="color:#94a3b8; font-size:12px; margin-top: -2px;">Problems</small>
+        </div>
+    </a>
+    <div class="topbar-nav">
+        <a href="voidmain.html">Dashboard</a>
+        <a href="vm-problems.html" class="active">Problems</a>
+        <a href="vm-history.html">History</a>
+        <a href="vm-leaderboard.html">Leaderboard</a>
+    </div>
+    <div class="user-badge" id="userBadge">guest</div>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1 id="pageTitle">Problems</h1>
+    </div>
+
+    <input class="search-bar" id="searchBar" placeholder="🔍 Search problems..." oninput="filterProblems()">
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('ALL', this)">All</div>
+        <div class="tab" onclick="switchTab('EASY', this)">Easy</div>
+        <div class="tab" onclick="switchTab('MEDIUM', this)">Medium</div>
+        <div class="tab" onclick="switchTab('HARD', this)">Hard</div>
+    </div>
+
+    <div class="count-bar">
+        <span id="countText">Loading...</span>
+    </div>
+
+    <div class="problem-list" id="problemList">
+        <div class="loading">Loading problems...</div>
+    </div>
+</div>
+
+<script>
+const API = "http://localhost:8080/vm";
+const username = localStorage.getItem("username") || "guest";
+document.getElementById("userBadge").textContent = username;
+
+let allProblems = [];
+let currentDifficulty = "ALL";
+
+async function loadProblems() {
+    try {
+        const res = await fetch(`${API}/problems?username=${username}`);
+        allProblems = await res.json();
+        renderProblems();
+    } catch(e) {
+        document.getElementById("problemList").innerHTML = '<div class="empty-msg">Failed to load problems</div>';
+    }
+}
+
+function filterProblems() { renderProblems(); }
+
+function renderProblems() {
+    const search = document.getElementById("searchBar").value.toLowerCase();
+    let filtered = allProblems;
+
+    if (currentDifficulty !== "ALL") {
+        filtered = filtered.filter(p => p.difficulty === currentDifficulty);
+    }
+    if (search) {
+        filtered = filtered.filter(p =>
+            p.id.toLowerCase().includes(search) ||
+            p.title.toLowerCase().includes(search)
+        );
+    }
+
+    document.getElementById("countText").textContent = `${filtered.length} problems`;
+
+    const list = document.getElementById("problemList");
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="empty-msg">No problems found</div>';
+        return;
+    }
+
+    list.innerHTML = filtered.map(p => {
+        const bc = p.difficulty === "EASY" ? "badge-easy" : p.difficulty === "MEDIUM" ? "badge-medium" : "badge-hard";
+        const sc = p.solved ? "badge-solved" : "badge-unsolved";
+        const st = p.solved ? "✔ Solved" : "Unsolved";
+        return `
+        <div class="problem-item" onclick="location.href='vm-compiler.html?questionId=${p.id}'">
+            <div class="problem-left">
+                <div class="problem-title">${p.id} · ${p.title}</div>
+                <div class="problem-meta">
+                    <span class="badge ${bc}">${p.difficulty}</span>
+                    <span class="badge ${sc}">${st}</span>
+                </div>
+            </div>
+            <div class="problem-arrow">→</div>
+        </div>`;
+    }).join("");
+}
+
+function switchTab(diff, el) {
+    currentDifficulty = diff;
+    document.querySelectorAll(".tab").forEach(t => {
+        t.classList.remove("active", "easy-active", "medium-active", "hard-active");
+    });
+    el.classList.add("active");
+    if (diff === "EASY") el.classList.add("easy-active");
+    else if (diff === "MEDIUM") el.classList.add("medium-active");
+    else if (diff === "HARD") el.classList.add("hard-active");
+    renderProblems();
+}
+
+// Auto-select tab from URL
+const params = new URLSearchParams(location.search);
+const diffParam = params.get("difficulty");
+if (diffParam) {
+    const tabs = document.querySelectorAll(".tab");
+    tabs.forEach(t => {
+        if (t.textContent.toUpperCase() === diffParam.toUpperCase()) t.click();
+    });
+}
+
+loadProblems();
+</script>
+</body>
+</html>

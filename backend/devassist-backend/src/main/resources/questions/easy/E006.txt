@@ -1,0 +1,49 @@
+ID: E006
+TITLE: Check Even or Odd
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given an integer, determine whether it is even or odd.
+
+INPUT FORMAT:
+- One line containing an integer
+
+OUTPUT FORMAT:
+- Print "EVEN" if the number is even
+- Print "ODD" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+4
+OUTPUT:
+EVEN
+EXPLANATION:
+4 is divisible by 2.
+
+INPUT:
+7
+OUTPUT:
+ODD
+EXPLANATION:
+7 is not divisible by 2.
+
+INPUT:
+0
+OUTPUT:
+EVEN
+EXPLANATION:
+0 is divisible by 2.
+
+HIDDEN TEST CASES:
+INPUT:
+-3
+OUTPUT:
+ODD
+
+INPUT:
+-10
+OUTPUT:
+EVEN
+
+CONSTRAINTS:
+- -10^18 ≤ number ≤ 10^18

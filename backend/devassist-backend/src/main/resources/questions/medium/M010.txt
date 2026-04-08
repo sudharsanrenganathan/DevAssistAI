@@ -1,0 +1,49 @@
+ID: M010
+TITLE: Valid Parentheses
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a string containing parentheses, check whether it is valid.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print "YES" if valid
+- Print "NO" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+()
+OUTPUT:
+YES
+EXPLANATION:
+Properly matched.
+
+INPUT:
+(]
+OUTPUT:
+NO
+EXPLANATION:
+Mismatched brackets.
+
+INPUT:
+({[]})
+OUTPUT:
+YES
+EXPLANATION:
+All brackets are balanced.
+
+HIDDEN TEST CASES:
+INPUT:
+((()))
+OUTPUT:
+YES
+
+INPUT:
+(()))
+OUTPUT:
+NO
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

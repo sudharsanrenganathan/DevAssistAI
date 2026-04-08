@@ -1,0 +1,60 @@
+ID: M009
+TITLE: Two Sum
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given an array of integers and a target value, find indices of two numbers that add up to the target.
+
+INPUT FORMAT:
+- First line contains integer N
+- Second line contains N space-separated integers
+- Third line contains integer target
+
+OUTPUT FORMAT:
+- Print two indices (0-based) separated by space
+
+SAMPLE TEST CASES:
+INPUT:
+4
+2 7 11 15
+9
+OUTPUT:
+0 1
+EXPLANATION:
+2 + 7 = 9.
+
+INPUT:
+3
+3 2 4
+6
+OUTPUT:
+1 2
+EXPLANATION:
+2 + 4 = 6.
+
+INPUT:
+2
+1 3
+4
+OUTPUT:
+0 1
+EXPLANATION:
+1 + 3 = 4.
+
+HIDDEN TEST CASES:
+INPUT:
+5
+1 5 7 3 9
+10
+OUTPUT:
+1 3
+
+INPUT:
+4
+0 4 3 0
+0
+OUTPUT:
+0 3
+
+CONSTRAINTS:
+- 2 ≤ N ≤ 10^5

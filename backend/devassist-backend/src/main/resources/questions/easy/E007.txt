@@ -1,0 +1,48 @@
+ID: E007
+TITLE: Count Words in a String
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a sentence, count the number of words in it.
+
+INPUT FORMAT:
+- One line containing a sentence
+
+OUTPUT FORMAT:
+- Print the number of words
+
+SAMPLE TEST CASES:
+INPUT:
+hello world
+OUTPUT:
+2
+EXPLANATION:
+There are two words: "hello" and "world".
+
+INPUT:
+one
+OUTPUT:
+1
+EXPLANATION:
+Single word.
+
+INPUT:
+this is test
+OUTPUT:
+3
+EXPLANATION:
+Three space-separated words.
+
+HIDDEN TEST CASES:
+INPUT:
+welcome to voidmain platform
+OUTPUT:
+4
+
+INPUT:
+a b c d e
+OUTPUT:
+5
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

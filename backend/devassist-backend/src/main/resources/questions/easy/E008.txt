@@ -1,0 +1,48 @@
+ID: E008
+TITLE: Find Length of String
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a string, find its length.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print the length of the string
+
+SAMPLE TEST CASES:
+INPUT:
+hello
+OUTPUT:
+5
+EXPLANATION:
+The string "hello" has 5 characters.
+
+INPUT:
+a
+OUTPUT:
+1
+EXPLANATION:
+Single character length is 1.
+
+INPUT:
+voidmain
+OUTPUT:
+8
+EXPLANATION:
+"voidmain" has 8 characters.
+
+HIDDEN TEST CASES:
+INPUT:
+programming
+OUTPUT:
+11
+
+INPUT:
+abcdefghijklmnopqrstuvwxyz
+OUTPUT:
+26
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

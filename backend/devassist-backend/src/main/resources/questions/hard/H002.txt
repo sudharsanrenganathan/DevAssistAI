@@ -1,0 +1,64 @@
+ID: H002
+TITLE: Merge Intervals
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given a list of intervals, merge all overlapping intervals.
+
+INPUT FORMAT:
+- First line contains integer N
+- Next N lines contain two integers start and end
+
+OUTPUT FORMAT:
+- Print merged intervals in increasing order
+
+SAMPLE TEST CASES:
+INPUT:
+4
+1 3
+2 6
+8 10
+15 18
+OUTPUT:
+1 6
+8 10
+15 18
+EXPLANATION:
+Overlapping intervals are merged.
+
+INPUT:
+1
+1 4
+OUTPUT:
+1 4
+EXPLANATION:
+Single interval.
+
+INPUT:
+2
+1 4
+4 5
+OUTPUT:
+1 5
+EXPLANATION:
+Touching intervals are merged.
+
+HIDDEN TEST CASES:
+INPUT:
+3
+1 5
+2 3
+4 6
+OUTPUT:
+1 6
+
+INPUT:
+2
+5 7
+1 3
+OUTPUT:
+1 3
+5 7
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 10^5

@@ -1,0 +1,61 @@
+ID: H011
+TITLE: Topological Sort
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given a DAG, print its topological ordering.
+
+INPUT FORMAT:
+- First line contains V and E
+- Next E lines contain u v
+
+OUTPUT FORMAT:
+- Print one valid topological order
+
+SAMPLE TEST CASES:
+INPUT:
+6 6
+5 2
+5 0
+4 0
+4 1
+2 3
+3 1
+OUTPUT:
+5 4 2 3 1 0
+EXPLANATION:
+Valid topological order.
+
+INPUT:
+1 0
+OUTPUT:
+0
+EXPLANATION:
+Single node.
+
+INPUT:
+2 1
+0 1
+OUTPUT:
+0 1
+EXPLANATION:
+0 before 1.
+
+HIDDEN TEST CASES:
+INPUT:
+3 2
+1 0
+2 0
+OUTPUT:
+1 2 0
+
+INPUT:
+4 3
+0 1
+1 2
+2 3
+OUTPUT:
+0 1 2 3
+
+CONSTRAINTS:
+- 1 ≤ V ≤ 10^5

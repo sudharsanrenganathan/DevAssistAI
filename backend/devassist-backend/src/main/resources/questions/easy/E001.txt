@@ -1,0 +1,46 @@
+ID: E001
+TITLE: Reverse a String
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a string, reverse the string and print the result.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Reversed string
+
+SAMPLE TEST CASES:
+INPUT:
+hello
+OUTPUT:
+olleh
+
+
+INPUT:
+abc
+OUTPUT:
+cba
+
+
+INPUT:
+a
+OUTPUT:
+a
+
+
+HIDDEN TEST CASES:
+INPUT:
+programming
+OUTPUT:
+gnimmargorp
+
+INPUT:
+racecar
+OUTPUT:
+racecar
+
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

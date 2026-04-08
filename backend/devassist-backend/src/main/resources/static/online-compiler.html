@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DevAssist — Online Compiler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #020617; color: #e5e7eb; height: 100vh; overflow: hidden; margin: 0; }
+        body::before { content: ""; position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.12), transparent); top: -200px; left: -200px; filter: blur(150px); z-index: 0; pointer-events: none; }
+
+        /* TOPBAR */
+        .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(2,6,23,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .topbar-left { display: flex; align-items: center; gap: 16px; }
+        .topbar-brand { display: flex; align-items: center; gap: 0px; font-weight: 800; text-decoration: none; color: inherit; font-family: 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.5px; }
+        .topbar-brand img { 
+            width: 100px; height: 100px; object-fit: contain; 
+            margin-top: 6px; margin-right: -6px; margin-left: -20px;
+            filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4));
+        }
+        
+        .badge-ide { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); padding: 4px 12px; border-radius: 8px; font-size: 12px; color: #4ade80; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        
+        .btn-back { background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); text-decoration: none; }
+        .btn-back:hover { background: rgba(255,255,255,0.1); color: white; }
+        
+        .btn-run { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 0 2px 10px rgba(34,197,94,0.2); }
+        .btn-run:hover { box-shadow: 0 4px 15px rgba(34,197,94,0.4); transform: translateY(-1px); }
+        .btn-run:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* MULTI-PANE WORKSPACE */
+        .workspace { position: fixed; top: 54px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: row; padding: 12px; gap: 16px; box-sizing: border-box; }
+        
+        .section-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; backdrop-filter: blur(12px); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        
+        .editor-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+        /* EDITOR TOOLBAR */
+        .editor-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); }
+        .lang-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; }
+        .lang-select option { background: #0f172a; }
+        
+        .editor-actions { display: flex; align-items: center; gap: 8px; }
+        .icon-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #94a3b8; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.2s; font-weight: 500; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+        /* EDITOR CONTAINER */
+        .editor-wrapper { flex: 1; position: relative; }
+
+        /* TERMINAL PANEL */
+        .terminal-panel { width: 35%; min-width: 300px; }
+        
+        /* Terminal Tabs */
+        .term-tabs { display: flex; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .term-tab { padding: 12px 18px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .term-tab:hover { color: #94a3b8; background: rgba(255,255,255,0.02); }
+        .term-tab.active { color: #818cf8; background: rgba(99,102,241,0.05); border-bottom-color: #6366f1; }
+        
+        .term-content { flex: 1; position: relative; display: flex; background: rgba(0,0,0,0.2); }
+        .term-pane { flex: 1; padding: 16px; display: none; overflow: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; }
+        .term-pane.active { display: block; }
+        
+        /* Custom Input */
+        .custom-input { width: 100%; height: 100%; resize: none; background: rgba(0,0,0,0.2); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; }
+        .custom-input:focus { border-color: rgba(99,102,241,0.4); box-shadow: 0 0 0 1px rgba(99,102,241,0.2); }
+        
+        /* Output area */
+        .output-stdout { color: #e2e8f0; white-space: pre-wrap; }
+        .output-stderr { color: #ef4444; white-space: pre-wrap; padding: 10px; background: rgba(239,68,68,0.05); border-left: 3px solid #ef4444; margin-top: 10px; border-radius: 0 4px 4px 0; }
+        .output-empty { color: #475569; font-style: italic; }
+        .output-success { color: #22c55e; margin-bottom: 5px; font-weight: 600; }
+        
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Scrollbar styles */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <a href="dashboard.html" class="topbar-brand">
+            <img src="img/logo.png" alt="Logo">
+            <div style="display:flex; flex-direction:column; line-height:1.2;">
+                <span style="font-size:22px; white-space: nowrap;">DevAssist AI</span>
+                <small style="color:#94a3b8; font-size:11px; font-weight:500; margin-top: -1px;">Online IDE</small>
+            </div>
+        </a>
+    </div>
+    <div class="topbar-right">
+        <button class="topbar-btn btn-back" style="padding: 6px 10px;" onclick="downloadPDF(event)" title="Download as PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+        <a href="dashboard.html" class="topbar-btn btn-back">← Dashboard</a>
+        <button class="topbar-btn btn-run" id="btnRun" onclick="runDryCode()">
+            <span>▶</span> Run Code
+        </button>
+    </div>
+</div>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+    <div class="editor-panel section-box">
+        <!-- EDITOR HEADER -->
+        <div class="editor-header">
+            <div style="display:flex;align-items:center;gap:12px">
+                <select class="lang-select" id="langSelect" onchange="switchLanguage()">
+                    <option value="java" selected>Java 22</option>
+                    <option value="python">Python 3.12</option>
+                    <option value="c">GNU C</option>
+                    <option value="cpp">GNU C++</option>
+                    <option value="javascript">Node.js</option>
+                </select>
+            </div>
+            <div class="editor-actions">
+                <button class="icon-btn" onclick="resetCode()" title="Load boilerpate">↺ Reset</button>
+                <button class="icon-btn" onclick="copyCode()" title="Copy code snippet">📋 Copy</button>
+                <button class="icon-btn" onclick="clearOutput()" title="Clear console">🗑 Clear</button>
+            </div>
+        </div>
+
+        <!-- CODE EDITOR -->
+        <div class="editor-wrapper">
+            <div id="monaco-container" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- TERMINAL PANEL -->
+    <div class="terminal-panel section-box">
+        <div class="term-tabs">
+            <div class="term-tab active" onclick="switchTab('output', this)">💻 Console</div>
+            <div class="term-tab" onclick="switchTab('input', this)">⌨️ Input (stdin)</div>
+        </div>
+        <div class="term-content">
+            <!-- Output Pane -->
+            <div class="term-pane active" id="pane-output">
+                <div class="output-empty" id="out-placeholder">Code execution results will appear here...</div>
+                <div id="out-target"></div>
+            </div>
+            <!-- Input Pane -->
+            <div class="term-pane" id="pane-input">
+                <textarea class="custom-input" id="customInput" placeholder="Enter standard input (stdin) values here..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<script>
+    const API = "http://localhost:8080/vm";
+    let currentLang = 'java';
+    
+    const defaultTemplates = {
+        java: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, DevAssist AI!");\n    }\n}`,
+        python: `def main():\n    print("Hello, DevAssist AI!")\n\nif __name__ == "__main__":\n    main()`,
+        c: `#include <stdio.h>\n\nint main() {\n    printf("Hello, DevAssist AI!\\n");\n    return 0;\n}`,
+        cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, DevAssist AI!" << endl;\n    return 0;\n}`,
+        javascript: `console.log("Hello, DevAssist AI!");`
+    };
+
+    // Monaco Setup
+    let monacoEditor;
+    const myEditor = {
+        getValue: () => monacoEditor ? monacoEditor.getValue() : getSavedCode(),
+        setValue: (val) => { if(monacoEditor) monacoEditor.setValue(val); }
+    };
+
+    function getSavedCode() {
+        return localStorage.getItem(`ide_code_${currentLang}`) || defaultTemplates[currentLang];
+    }
+
+    if (window.require) {
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: getSavedCode(),
+                language: currentLang,
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', monospace",
+                scrollBeyondLastLine: false,
+                padding: { top: 16 }
+            });
+
+            monacoEditor.onDidChangeModelContent(() => {
+                localStorage.setItem(`ide_code_${currentLang}`, monacoEditor.getValue());
+            });
+        });
+    }
+
+    // Language Handling
+    function switchLanguage() {
+        if(monacoEditor) {
+            localStorage.setItem(`ide_code_${currentLang}`, monacoEditor.getValue());
+        }
+        currentLang = document.getElementById('langSelect').value;
+        const newCode = getSavedCode();
+        if (monacoEditor) {
+            let monacoLangMap = { c: 'c', cpp: 'cpp', java: 'java', python: 'python', javascript: 'javascript' };
+            monaco.editor.setModelLanguage(monacoEditor.getModel(), monacoLangMap[currentLang]);
+            myEditor.setValue(newCode);
+        }
+    }
+
+    function resetCode() {
+        if(confirm("Restore default starting template for " + currentLang + "?")) {
+            myEditor.setValue(defaultTemplates[currentLang]);
+            localStorage.removeItem(`ide_code_${currentLang}`);
+        }
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(myEditor.getValue()).then(() => {
+            const btn = event.target;
+            const original = btn.textContent;
+            btn.textContent = "✓ Copied";
+            setTimeout(() => btn.textContent = original, 1500);
+        });
+    }
+
+    // Tab Interface
+    function switchTab(tabName, el) {
+        document.querySelectorAll('.term-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.term-pane').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(`pane-${tabName}`).classList.add('active');
+    }
+
+    function clearOutput() {
+        document.getElementById('out-target').innerHTML = '';
+        document.getElementById('out-placeholder').style.display = 'block';
+    }
+
+    // Execution
+    async function runDryCode() {
+        const btn = document.getElementById('btnRun');
+        const outTarget = document.getElementById('out-target');
+        const placeholder = document.getElementById('out-placeholder');
+        const customInput = document.getElementById('customInput').value;
+        
+        // Force output tab active
+        switchTab('output', document.querySelector('.term-tabs').children[0]);
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Running...';
+        
+        placeholder.style.display = 'none';
+        outTarget.innerHTML = `<span style="color:#64748b;">Executing code payload in secure container...</span>`;
+
+        try {
+            const res = await fetch(`${API}/execute`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: myEditor.getValue(), language: currentLang, input: customInput })
+            });
+            
+            const data = await res.json();
+            
+            let resultHtml = "";
+            
+            if (data.compile_error) {
+                resultHtml += `<div class="output-stderr"><strong>Compilation Error:</strong>\n${escapeHtml(data.compile_error)}</div>`;
+            } else if (data.timeout) {
+                resultHtml += `<div class="output-stderr"><strong>Time Limit Exceeded:</strong>\nExecution was killed due to timeout.</div>`;
+            } else if (data.runtime_error) {
+                if(data.output && data.output.trim()) {
+                    resultHtml += `<div class="output-stdout">${escapeHtml(data.output)}</div>`;
+                }
+                resultHtml += `<div class="output-stderr"><strong>Runtime Error:</strong>\n${escapeHtml(data.runtime_error)}</div>`;
+            } else {
+                resultHtml += `<div class="output-success">✓ Executed Successfully</div>`;
+                if (data.output && data.output.trim()) {
+                    resultHtml += `<div class="output-stdout">${escapeHtml(data.output)}</div>`;
+                } else {
+                    resultHtml += `<div style="color:#64748b; font-style:italic">Program successfully executed and exited with no output.</div>`;
+                }
+            }
+            
+            outTarget.innerHTML = resultHtml;
+            
+        } catch(e) {
+            outTarget.innerHTML = `<div class="output-stderr"><strong>Network Error:</strong>\nCould not reach compiler service. ${escapeHtml(e.message)}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>▶</span> Run Code';
+        }
+    }
+
+    function escapeHtml(text) {
+        if(!text) return "";
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // PDF Download
+    function downloadPDF(event) {
+        if (!window.jspdf) {
+            alert("PDF library is still loading, please try again.");
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const code = myEditor.getValue();
+        const lang = document.getElementById('langSelect').value;
+        const btn = event.currentTarget || event.target;
+        
+        btn.style.opacity = '0.5';
+        
+        // Add PDF Title
+        doc.setFont("courier", "bold");
+        doc.setFontSize(14);
+        doc.text(`DevAssist Code Snippet (${lang.toUpperCase()})`, 10, 15);
+        
+        // Setup code font
+        doc.setFont("courier", "normal");
+        doc.setFontSize(10);
+        
+        const lines = code.split('\\n');
+        let y = 25;
+        const pageHeight = doc.internal.pageSize.height;
+        
+        for(let i=0; i<lines.length; i++) {
+            // Convert tabs to 4 spaces to preserve precise indentation in PDF
+            const line = lines[i].replace(/\\t/g, '    ');
+            
+            // Wrap text if line is too long
+            const splitLines = doc.splitTextToSize(line, 190);
+            
+            for(let j=0; j<splitLines.length; j++) {
+                if (y > pageHeight - 15) {
+                    doc.addPage();
+                    y = 15;
+                }
+                doc.text(splitLines[j], 10, y);
+                y += 5;
+            }
+        }
+        
+        doc.save(`devassist_code_${lang}.pdf`);
+        btn.style.opacity = '1';
+    }
+</script>
+</body>
+</html>

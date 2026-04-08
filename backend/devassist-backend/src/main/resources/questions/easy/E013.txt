@@ -1,0 +1,48 @@
+ID: E013
+TITLE: Factorial of a Number
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a number, find its factorial.
+
+INPUT FORMAT:
+- One line containing an integer
+
+OUTPUT FORMAT:
+- Print the factorial of the number
+
+SAMPLE TEST CASES:
+INPUT:
+5
+OUTPUT:
+120
+EXPLANATION:
+5! = 5 × 4 × 3 × 2 × 1 = 120
+
+INPUT:
+0
+OUTPUT:
+1
+EXPLANATION:
+Factorial of 0 is 1.
+
+INPUT:
+1
+OUTPUT:
+1
+EXPLANATION:
+1! = 1
+
+HIDDEN TEST CASES:
+INPUT:
+7
+OUTPUT:
+5040
+
+INPUT:
+3
+OUTPUT:
+6
+
+CONSTRAINTS:
+- 0 ≤ number ≤ 12

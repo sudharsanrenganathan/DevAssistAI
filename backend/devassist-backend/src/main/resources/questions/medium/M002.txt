@@ -1,0 +1,49 @@
+ID: M002
+TITLE: Longest Word in a Sentence
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a sentence, find the longest word in it.
+If multiple words have the same maximum length, print the first one.
+
+INPUT FORMAT:
+- One line containing a sentence
+
+OUTPUT FORMAT:
+- Print the longest word
+
+SAMPLE TEST CASES:
+INPUT:
+hello world
+OUTPUT:
+hello
+EXPLANATION:
+Both words have length 5, first is chosen.
+
+INPUT:
+find longest word here
+OUTPUT:
+longest
+EXPLANATION:
+"longest" has maximum length.
+
+INPUT:
+a bb ccc
+OUTPUT:
+ccc
+EXPLANATION:
+"ccc" is the longest.
+
+HIDDEN TEST CASES:
+INPUT:
+welcome to voidmain platform
+OUTPUT:
+voidmain
+
+INPUT:
+java programming language
+OUTPUT:
+programming
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

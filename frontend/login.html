@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — DevAssist AI</title>
+<meta name="description" content="Sign in to DevAssist AI — Your AI-powered development assistant with Global AI, Document Intelligence, and Code Analysis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow-x: hidden; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #050510;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ===== ANIMATED BACKGROUND ===== */
+.bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, #0c0826 0%, #030712 40%, #020510 100%);
+    overflow: hidden;
+}
+.bg-canvas::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse at 10% 40%, rgba(90,40,180,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 20%, rgba(20,100,140,0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 90%, rgba(10,80,60,0.1) 0%, transparent 40%);
+}
+
+/* Stars */
+.star {
+    position: absolute; border-radius: 50%; background: #fff;
+    animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+    0% { opacity: 0.05; transform: scale(0.7); }
+    100% { opacity: var(--o, 0.6); transform: scale(1.2); }
+}
+
+/* Nebula clouds */
+.nebula {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: nebulaDrift var(--nd, 30s) ease-in-out infinite alternate;
+}
+.neb-purple {
+    width: 800px; height: 600px; top: -15%; left: -10%;
+    background: radial-gradient(ellipse at 40% 50%, rgba(100,40,200,0.15) 0%, transparent 70%);
+    filter: blur(100px); --nd: 35s;
+}
+.neb-teal {
+    width: 600px; height: 500px; bottom: -10%; right: -5%;
+    background: radial-gradient(ellipse at 50% 40%, rgba(10,160,140,0.12) 0%, transparent 70%);
+    filter: blur(90px); --nd: 28s; animation-delay: -15s;
+}
+.neb-pink {
+    width: 400px; height: 400px; top: 10%; right: 15%;
+    background: radial-gradient(circle, rgba(200,60,150,0.06) 0%, transparent 60%);
+    filter: blur(70px); --nd: 25s; animation-delay: -20s;
+}
+@keyframes nebulaDrift {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { transform: translate(var(--dx, 40px), var(--dy, 25px)) scale(1.1); opacity: 0.85; }
+}
+
+/* Scan line */
+.scan-line {
+    position: fixed; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124,58,237,0.12), rgba(6,182,212,0.15), transparent);
+    pointer-events: none; z-index: 1;
+    animation: scanMove 12s linear infinite;
+}
+@keyframes scanMove { 0% { top: -1px; } 100% { top: 100vh; } }
+
+/* Circuit grid at bottom */
+.circuit-ground {
+    position: fixed; left: -10%; right: -10%; bottom: 0; height: 40%;
+    z-index: 0; overflow: hidden; pointer-events: none;
+}
+.circuit-plane {
+    position: absolute; inset: 0;
+    transform: rotateX(65deg); transform-origin: center bottom;
+    background:
+        linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: circuitScroll 20s linear infinite;
+    mask-image: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 80%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 80%);
+}
+@keyframes circuitScroll { 0% { background-position: 0 0; } 100% { background-position: 0 60px; } }
+
+/* ===== AUTH CONTAINER ===== */
+.auth-container {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 460px;
+    padding: 20px;
+}
+
+/* ===== AUTH CARD ===== */
+.auth-card {
+    background: rgba(12, 16, 36, 0.65);
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 48px 40px 40px;
+    box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(124, 58, 237, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    animation: cardEntrance 0.8s cubic-bezier(0.19, 1, 0.22, 1) 0.15s both;
+}
+@keyframes cardEntrance {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ===== LOGO ===== */
+.auth-logo {
+    display: flex; flex-direction: row; align-items: center; justify-content: center;
+    margin-bottom: 24px; gap: 0px;
+}
+.auth-logo img {
+    width: 100px; height: 100px; object-fit: contain;
+    margin-top: 6px; margin-right: -12px; margin-left: -12px;
+    filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4));
+}
+.logo-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    background: linear-gradient(90deg, #c4b5fd, #67e8f9);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* ===== HEADING ===== */
+.auth-heading {
+    text-align: center; margin-bottom: 32px;
+}
+.auth-heading h1 {
+    font-family: 'Inter', sans-serif;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+}
+.auth-heading p {
+    font-size: 14px; color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+}
+
+/* ===== GOOGLE BUTTON ===== */
+.google-btn {
+    width: 100%;
+    padding: 14px 24px;
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 500;
+    color: #1f2937;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+.google-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(66,133,244,0.05), rgba(52,168,83,0.05));
+    opacity: 0; transition: opacity 0.25s;
+}
+.google-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1);
+}
+.google-btn:hover::before { opacity: 1; }
+.google-btn:active { transform: translateY(0); }
+.google-btn svg { flex-shrink: 0; }
+
+/* ===== DIVIDER ===== */
+.divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 28px 0;
+}
+.divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.divider span {
+    font-size: 12px; color: rgba(255,255,255,0.35);
+    letter-spacing: 2px; font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* ===== FORM ===== */
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+.input-group {
+    position: relative;
+}
+.input-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    font-size: 16px; color: rgba(255,255,255,0.3);
+    pointer-events: none; transition: color 0.3s;
+    z-index: 2;
+}
+.form-input {
+    width: 100%;
+    padding: 15px 16px 15px 48px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; color: #f1f5f9;
+    outline: none;
+    transition: all 0.3s ease;
+}
+.form-input::placeholder { color: rgba(255,255,255,0.3); }
+.form-input:focus {
+    border-color: rgba(124, 58, 237, 0.5);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+}
+.form-input:focus + .input-icon,
+.input-group:focus-within .input-icon {
+    color: rgba(124, 58, 237, 0.7);
+}
+
+/* Password toggle */
+.pw-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none;
+    color: rgba(255,255,255,0.3); cursor: pointer;
+    font-size: 16px; padding: 4px;
+    transition: color 0.2s; z-index: 2;
+}
+.pw-toggle:hover { color: rgba(255,255,255,0.6); }
+
+/* Forgot password */
+.forgot-link {
+    text-align: right;
+    font-size: 13px; color: rgba(196,181,253,0.7);
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+    margin-top: -4px;
+    display: block;
+}
+.forgot-link:hover { color: #c4b5fd; }
+
+/* ===== SUBMIT BUTTON ===== */
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 4px;
+    background: linear-gradient(135deg, #7c3aed, #6366f1, #0891b2);
+    background-size: 200% 200%;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: gradientShift 4s ease infinite;
+}
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.submit-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0; transition: opacity 0.3s;
+}
+.submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4), 0 0 60px rgba(124, 58, 237, 0.15);
+}
+.submit-btn:hover::before { opacity: 1; }
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled {
+    opacity: 0.6; cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.btn-content { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-loader {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== FOOTER ===== */
+.auth-footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.45);
+}
+.auth-footer a {
+    color: #a78bfa;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.auth-footer a:hover { color: #c4b5fd; }
+
+/* ===== FORGOT PASSWORD MODAL ===== */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.25s ease;
+}
+.modal-overlay.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-card {
+    width: 100%; max-width: 420px;
+    background: rgba(12, 16, 36, 0.9);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 36px 32px 32px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    animation: modalIn 0.4s cubic-bezier(0.19,1,0.22,1);
+}
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+}
+.modal-header h2 {
+    font-size: 18px; font-weight: 600; color: #f1f5f9;
+}
+.modal-close {
+    background: none; border: none;
+    color: rgba(255,255,255,0.4); font-size: 20px;
+    cursor: pointer; padding: 4px;
+    transition: color 0.2s;
+}
+.modal-close:hover { color: #fff; }
+.modal-desc {
+    font-size: 13px; color: rgba(255,255,255,0.45);
+    line-height: 1.6; margin-bottom: 24px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 36px 24px 32px;
+        border-radius: 20px;
+    }
+    .auth-heading h1 { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== ANIMATED BACKGROUND ===== -->
+<div class="bg-canvas">
+    <div id="starField"></div>
+    <div class="nebula neb-purple"></div>
+    <div class="nebula neb-teal"></div>
+    <div class="nebula neb-pink"></div>
+</div>
+<div class="circuit-ground"><div class="circuit-plane"></div></div>
+<div class="scan-line"></div>
+
+<!-- ===== AUTH CARD ===== -->
+<div class="auth-container">
+    <div class="auth-card">
+
+        <!-- Logo -->
+        <div class="auth-logo" style="cursor: pointer;" onclick="window.location.href='dashboard.html'">
+            <img src="img/logo.png" alt="DevAssist AI Logo">
+            <span class="logo-name">DevAssist AI</span>
+        </div>
+
+        <!-- Heading -->
+        <div class="auth-heading">
+            <h1>Welcome back</h1>
+            <p>Sign in to continue to your AI workspace</p>
+        </div>
+
+        <!-- Email/Password Form -->
+        <form class="auth-form" id="loginForm" onsubmit="signInWithEmail(event)">
+            <div class="input-group">
+                <input type="email" class="form-input" id="email" placeholder="Email address" required autocomplete="email">
+                <span class="input-icon">✉</span>
+            </div>
+            <div class="input-group">
+                <input type="password" class="form-input" id="password" placeholder="Password" required autocomplete="current-password" style="padding-right:48px;">
+                <span class="input-icon">🔒</span>
+                <button type="button" class="pw-toggle" onclick="togglePassword()" id="pwToggle" aria-label="Toggle password visibility">👁</button>
+            </div>
+            <a class="forgot-link" onclick="openForgotModal(event)">Forgot password?</a>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-content" id="btnContent">Sign in</span>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <p class="auth-footer">
+            Don't have an account? <a href="signup.html">Create one</a>
+        </p>
+    </div>
+</div>
+
+<!-- ===== FORGOT PASSWORD MODAL ===== -->
+<div class="modal-overlay" id="forgotModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>Reset password</h2>
+            <button class="modal-close" onclick="closeForgotModal()">✕</button>
+        </div>
+        <p class="modal-desc">Enter your email address and we'll send you a link to reset your password.</p>
+        <form class="auth-form" onsubmit="sendPasswordReset(event)">
+            <div class="input-group">
+                <input type="email" class="form-input" id="resetEmail" placeholder="Email address" required autocomplete="email">
+                <span class="input-icon">✉</span>
+            </div>
+            <button type="submit" class="submit-btn" id="resetBtn">
+                <span class="btn-content" id="resetBtnContent">Send reset link</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="auth-guard.js"></script>
+<script>
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', async () => {
+    generateStars();
+
+    // Check URL params for messages
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === 'true') {
+        showToast('Email verified successfully! You can now sign in.', 'success');
+    }
+    if (params.get('reset') === 'true') {
+        showToast('Password reset email sent. Check your inbox.', 'info');
+    }
+
+    // Redirect if already logged in
+    await redirectIfAuthenticated('/dashboard.html');
+});
+
+// ==================== EMAIL SIGN-IN ====================
+async function signInWithEmail(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('submitBtn');
+    const btnContent = document.getElementById('btnContent');
+
+    if (!email || !password) {
+        showToast('Please fill in all fields.', 'error');
+        return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btnContent.innerHTML = '<div class="btn-loader"></div> Signing in...';
+
+    try {
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            if (error.message.includes('Invalid login credentials')) {
+                showToast('Invalid email or password. Please try again.', 'error');
+            } else if (error.message.includes('Email not confirmed')) {
+                showToast('Please verify your email before signing in. Check your inbox.', 'error');
+            } else {
+                showToast(error.message, 'error');
+            }
+            btn.disabled = false;
+            btnContent.textContent = 'Sign in';
+            return;
+        }
+
+        if (data.session) {
+            showToast('Welcome back!', 'success');
+            // Small delay for toast visibility
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 500);
+        }
+    } catch (err) {
+        showToast('Network error. Please check your connection.', 'error');
+        btn.disabled = false;
+        btnContent.textContent = 'Sign in';
+    }
+}
+
+// ==================== PASSWORD TOGGLE ====================
+function togglePassword() {
+    const input = document.getElementById('password');
+    const toggle = document.getElementById('pwToggle');
+    if (input.type === 'password') {
+        input.type = 'text';
+        toggle.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        toggle.textContent = '👁';
+    }
+}
+
+// ==================== FORGOT PASSWORD ====================
+function openForgotModal(e) {
+    if (e) e.preventDefault();
+    document.getElementById('forgotModal').classList.add('active');
+    document.getElementById('resetEmail').value = document.getElementById('email').value;
+    document.getElementById('resetEmail').focus();
+}
+
+function closeForgotModal() {
+    document.getElementById('forgotModal').classList.remove('active');
+}
+
+// Close modal on overlay click
+document.getElementById('forgotModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeForgotModal();
+});
+
+async function sendPasswordReset(e) {
+    e.preventDefault();
+    const email = document.getElementById('resetEmail').value.trim();
+    const btn = document.getElementById('resetBtn');
+    const btnContent = document.getElementById('resetBtnContent');
+
+    if (!email) {
+        showToast('Please enter your email address.', 'error');
+        return;
+    }
+
+    btn.disabled = true;
+    btnContent.innerHTML = '<div class="btn-loader"></div> Sending...';
+
+    try {
+        const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/login.html?reset=true',
+        });
+
+        if (error) {
+            showToast(error.message, 'error');
+        } else {
+            showToast('Password reset link sent! Check your email.', 'success');
+            closeForgotModal();
+        }
+    } catch (err) {
+        showToast('Failed to send reset email. Please try again.', 'error');
+    }
+
+    btn.disabled = false;
+    btnContent.textContent = 'Send reset link';
+}
+
+// ==================== STAR FIELD GENERATOR ====================
+function generateStars() {
+    const container = document.getElementById('starField');
+    if (!container) return;
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2 + 0.5;
+        star.style.cssText = `
+            width: ${size}px; height: ${size}px;
+            left: ${Math.random() * 100}%; top: ${Math.random() * 100}%;
+            --d: ${2 + Math.random() * 5}s;
+            --o: ${0.2 + Math.random() * 0.6};
+            animation-delay: ${Math.random() * 5}s;
+        `;
+        if (Math.random() > 0.85) {
+            star.style.boxShadow = '0 0 3px rgba(180,200,255,0.6)';
+        }
+        container.appendChild(star);
+    }
+}
+
+// ==================== KEYBOARD SHORTCUT ====================
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeForgotModal();
+});
+</script>
+</body>
+</html>

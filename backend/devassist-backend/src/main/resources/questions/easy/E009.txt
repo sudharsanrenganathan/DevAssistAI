@@ -1,0 +1,48 @@
+ID: E009
+TITLE: Reverse an Integer
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given an integer, reverse its digits.
+
+INPUT FORMAT:
+- One line containing an integer
+
+OUTPUT FORMAT:
+- Print the reversed integer
+
+SAMPLE TEST CASES:
+INPUT:
+123
+OUTPUT:
+321
+EXPLANATION:
+Digits reversed give 321.
+
+INPUT:
+10
+OUTPUT:
+1
+EXPLANATION:
+Leading zero is removed.
+
+INPUT:
+5
+OUTPUT:
+5
+EXPLANATION:
+Single digit remains same.
+
+HIDDEN TEST CASES:
+INPUT:
+1000
+OUTPUT:
+1
+
+INPUT:
+987654
+OUTPUT:
+456789
+
+CONSTRAINTS:
+- 0 ≤ number ≤ 10^18

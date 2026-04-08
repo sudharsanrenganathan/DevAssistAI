@@ -1,0 +1,49 @@
+ID: E002
+TITLE: Check Palindrome
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a string, check whether it is a palindrome or not.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print "YES" if the string is a palindrome
+- Print "NO" otherwise
+
+SAMPLE TEST CASES:
+INPUT:
+racecar
+OUTPUT:
+YES
+EXPLANATION:
+The string reads the same forwards and backwards.
+
+INPUT:
+hello
+OUTPUT:
+NO
+EXPLANATION:
+"hello" reversed is not the same as the original.
+
+INPUT:
+a
+OUTPUT:
+YES
+EXPLANATION:
+A single character is always a palindrome.
+
+HIDDEN TEST CASES:
+INPUT:
+level
+OUTPUT:
+YES
+
+INPUT:
+program
+OUTPUT:
+NO
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

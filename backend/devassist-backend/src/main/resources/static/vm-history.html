@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VoidMain — Submission History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: radial-gradient(circle at top left, #0b1020, #020617); color: #e5e7eb; min-height: 100vh; overflow-x: hidden; }
+body::before { content: ""; position: fixed; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.15), transparent); top: -200px; left: -200px; filter: blur(150px); z-index: 0; pointer-events: none; }
+body::after { content: ""; position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(34,197,94,0.12), transparent); bottom: -150px; right: -150px; filter: blur(120px); z-index: 0; pointer-events: none; }
+
+/* TOPBAR */
+.topbar { position: sticky; top: 0; z-index: 100; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: rgba(2,6,23,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.topbar-brand { display: flex; align-items: center; gap: 0px; cursor: pointer; text-decoration: none; color: inherit; }
+.topbar-brand img { 
+    width: 100px; height: 100px; object-fit: contain; 
+    margin-top: 6px; margin-right: -6px; margin-left: -24px;
+    filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4));
+}
+.topbar-brand span.vm-text { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 800; font-size: 22px; color: #fff; letter-spacing: -0.3px; white-space: nowrap; }
+.topbar-brand span.vm { background: linear-gradient(135deg, #6366f1, #22c55e); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.topbar-nav { display: flex; gap: 6px; }
+.topbar-nav a { text-decoration: none; color: #94a3b8; font-size: 13px; padding: 7px 14px; border-radius: 8px; transition: all 0.2s; }
+.topbar-nav a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.topbar-nav a.active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+.user-badge { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #a5b4fc; }
+
+/* MAIN */
+.main { max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 1; }
+
+/* HEADER */
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+.page-header h1 { font-size: 28px; font-weight: 700; }
+.page-header h1 span { background: linear-gradient(135deg, #6366f1, #22c55e); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* STATS BAR */
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.stat-mini { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px 18px; backdrop-filter: blur(12px); transition: all 0.3s; }
+.stat-mini:hover { border-color: rgba(99,102,241,0.2); transform: translateY(-2px); }
+.stat-mini .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.stat-mini .value { font-size: 22px; font-weight: 700; }
+.stat-mini .value.green { color: #22c55e; }
+.stat-mini .value.red { color: #ef4444; }
+.stat-mini .value.blue { color: #6366f1; }
+.stat-mini .value.yellow { color: #facc15; }
+
+/* FILTERS */
+.filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-btn { padding: 7px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #94a3b8; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.25s; font-family: 'Inter', sans-serif; }
+.filter-btn:hover { border-color: rgba(99,102,241,0.3); color: #e2e8f0; }
+.filter-btn.active { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); color: #a5b4fc; }
+.filter-btn.active.f-accepted { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.3); color: #22c55e; }
+.filter-btn.active.f-wrong { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); color: #ef4444; }
+.filter-btn.active.f-tle { background: rgba(250,204,21,0.15); border-color: rgba(250,204,21,0.3); color: #facc15; }
+.filter-btn.active.f-error { background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.3); color: #a855f7; }
+
+/* SUBMISSION LIST */
+.submission-list { display: flex; flex-direction: column; gap: 8px; }
+.sub-card { display: grid; grid-template-columns: 100px 1fr 140px 90px 90px; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: all 0.25s; cursor: pointer; }
+.sub-card:hover { border-color: rgba(99,102,241,0.25); background: rgba(255,255,255,0.05); transform: translateX(4px); }
+.sub-problem { font-weight: 600; font-size: 14px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
+.sub-verdict-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; width: fit-content; }
+.v-accepted { background: rgba(34,197,94,0.15); color: #22c55e; }
+.v-wrong { background: rgba(239,68,68,0.15); color: #ef4444; }
+.v-tle { background: rgba(250,204,21,0.15); color: #facc15; }
+.v-compile { background: rgba(168,85,247,0.15); color: #a855f7; }
+.v-runtime { background: rgba(251,146,60,0.15); color: #fb923c; }
+.sub-time { font-size: 12px; color: #475569; }
+.sub-runtime { font-size: 12px; color: #64748b; font-family: 'JetBrains Mono', monospace; }
+.sub-passed { font-size: 12px; color: #64748b; }
+
+/* TABLE HEADER */
+.table-header { display: grid; grid-template-columns: 100px 1fr 140px 90px 90px; gap: 12px; padding: 10px 20px; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: #475569; }
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; color: #64748b; margin-bottom: 8px; }
+.empty-state p { font-size: 13px; }
+
+.loading { text-align: center; padding: 60px; color: #64748b; font-size: 14px; }
+.spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.count-label { font-size: 12px; color: #475569; margin-bottom: 12px; }
+
+@media (max-width: 768px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .sub-card { grid-template-columns: 1fr 1fr; }
+    .table-header { display: none; }
+    .sub-time, .sub-passed { font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="dashboard.html" class="topbar-brand">
+        <img src="img/logo.png" alt="Logo" />
+        <div style="display:flex; flex-direction:column; line-height:1.2;">
+            <span class="vm-text">DevAssist AI</span>
+            <small style="color:#94a3b8; font-size:12px; margin-top: -2px;">History</small>
+        </div>
+    </a>
+    <div class="topbar-nav">
+        <a href="voidmain.html">Dashboard</a>
+        <a href="vm-problems.html">Problems</a>
+        <a href="vm-history.html" class="active">History</a>
+        <a href="vm-leaderboard.html">Leaderboard</a>
+    </div>
+    <div class="user-badge" id="userBadge">guest</div>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1>📋 Submission <span>History</span></h1>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-mini">
+            <div class="label">Total Submissions</div>
+            <div class="value blue" id="statTotal">0</div>
+        </div>
+        <div class="stat-mini">
+            <div class="label">Accepted</div>
+            <div class="value green" id="statAccepted">0</div>
+        </div>
+        <div class="stat-mini">
+            <div class="label">Wrong Answer</div>
+            <div class="value red" id="statWrong">0</div>
+        </div>
+        <div class="stat-mini">
+            <div class="label">Acceptance Rate</div>
+            <div class="value yellow" id="statRate">0%</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterSubs('ALL', this)">All</button>
+        <button class="filter-btn" onclick="filterSubs('Accepted', this)">✓ Accepted</button>
+        <button class="filter-btn" onclick="filterSubs('Wrong Answer', this)">✗ Wrong Answer</button>
+        <button class="filter-btn" onclick="filterSubs('Time Limit Exceeded', this)">⏱ TLE</button>
+        <button class="filter-btn" onclick="filterSubs('Compilation Error', this)">🔴 Compile Error</button>
+        <button class="filter-btn" onclick="filterSubs('Runtime Error', this)">💥 Runtime Error</button>
+    </div>
+
+    <div class="count-label" id="countLabel">Loading...</div>
+
+    <!-- Table Header -->
+    <div class="table-header">
+        <span>Problem</span>
+        <span>Verdict</span>
+        <span>Time</span>
+        <span>Runtime</span>
+        <span>Cases</span>
+    </div>
+
+    <!-- Submissions -->
+    <div class="submission-list" id="subList">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading submissions...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = "http://localhost:8080/vm";
+const username = localStorage.getItem("username") || "guest";
+document.getElementById("userBadge").textContent = username;
+
+let allSubs = [];
+let currentFilter = "ALL";
+
+async function loadHistory() {
+    try {
+        const res = await fetch(`${API}/submissions/${username}`);
+        allSubs = await res.json();
+        updateStats();
+        renderSubs();
+    } catch (e) {
+        document.getElementById("subList").innerHTML = `
+            <div class="empty-state">
+                <div class="icon">❌</div>
+                <h3>Failed to load</h3>
+                <p>${e.message}</p>
+            </div>`;
+    }
+}
+
+function updateStats() {
+    const total = allSubs.length;
+    const accepted = allSubs.filter(s => s.verdict === "Accepted").length;
+    const wrong = allSubs.filter(s => s.verdict === "Wrong Answer").length;
+    const rate = total > 0 ? Math.round((accepted / total) * 100) : 0;
+
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statAccepted").textContent = accepted;
+    document.getElementById("statWrong").textContent = wrong;
+    document.getElementById("statRate").textContent = rate + "%";
+}
+
+function renderSubs() {
+    let filtered = allSubs;
+    if (currentFilter !== "ALL") {
+        filtered = allSubs.filter(s => s.verdict === currentFilter);
+    }
+
+    document.getElementById("countLabel").textContent = `${filtered.length} submission${filtered.length !== 1 ? 's' : ''}`;
+
+    const container = document.getElementById("subList");
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">📭</div>
+                <h3>No submissions found</h3>
+                <p>${currentFilter === "ALL" ? "Start solving problems to see your history here" : "No submissions with this verdict"}</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map(s => {
+        const vc = getVerdictClass(s.verdict);
+        const time = s.submittedAt ? new Date(s.submittedAt).toLocaleString("en-IN", {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        }) : "—";
+        const passed = s.passed !== null && s.failed !== null ? `${s.passed}/${s.passed + s.failed}` : "—";
+
+        return `<div class="sub-card" onclick="location.href='vm-compiler.html?questionId=${s.problemId}'">
+            <div class="sub-problem">${s.problemId}</div>
+            <div><span class="sub-verdict-badge ${vc}">${s.verdict}</span></div>
+            <div class="sub-time">${time}</div>
+            <div class="sub-runtime">${s.executionTime || 0}ms</div>
+            <div class="sub-passed">${passed}</div>
+        </div>`;
+    }).join("");
+}
+
+function getVerdictClass(verdict) {
+    if (verdict === "Accepted") return "v-accepted";
+    if (verdict === "Wrong Answer") return "v-wrong";
+    if (verdict.includes("Time")) return "v-tle";
+    if (verdict.includes("Compilation")) return "v-compile";
+    return "v-runtime";
+}
+
+function filterSubs(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll(".filter-btn").forEach(b => {
+        b.classList.remove("active", "f-accepted", "f-wrong", "f-tle", "f-error");
+    });
+    el.classList.add("active");
+    if (filter === "Accepted") el.classList.add("f-accepted");
+    else if (filter === "Wrong Answer") el.classList.add("f-wrong");
+    else if (filter === "Time Limit Exceeded") el.classList.add("f-tle");
+    else if (filter.includes("Error")) el.classList.add("f-error");
+    renderSubs();
+}
+
+loadHistory();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+ID: M015
+TITLE: Matrix Transpose
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a matrix, print its transpose.
+
+INPUT FORMAT:
+- First line contains rows R and columns C
+- Next R lines contain C integers each
+
+OUTPUT FORMAT:
+- Print transpose of the matrix
+
+SAMPLE TEST CASES:
+INPUT:
+2 3
+1 2 3
+4 5 6
+OUTPUT:
+1 4
+2 5
+3 6
+EXPLANATION:
+Rows become columns.
+
+INPUT:
+1 2
+7 8
+OUTPUT:
+7
+8
+EXPLANATION:
+Transpose of 1×2 matrix.
+
+INPUT:
+2 1
+5
+6
+OUTPUT:
+5 6
+EXPLANATION:
+Transpose of 2×1 matrix.
+
+HIDDEN TEST CASES:
+INPUT:
+3 3
+1 2 3
+4 5 6
+7 8 9
+OUTPUT:
+1 4 7
+2 5 8
+3 6 9
+
+INPUT:
+1 1
+10
+OUTPUT:
+10
+
+CONSTRAINTS:
+- 1 ≤ R, C ≤ 100

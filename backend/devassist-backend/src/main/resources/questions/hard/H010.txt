@@ -1,0 +1,67 @@
+ID: H010
+TITLE: LRU Cache Simulation
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Simulate an LRU cache of given capacity and process queries.
+
+INPUT FORMAT:
+- First line contains capacity C
+- Second line contains Q queries
+- Each query is GET x or PUT x
+
+OUTPUT FORMAT:
+- Print cache state after all operations
+
+SAMPLE TEST CASES:
+INPUT:
+2
+4
+PUT 1
+PUT 2
+GET 1
+PUT 3
+OUTPUT:
+3 1
+EXPLANATION:
+2 is evicted.
+
+INPUT:
+1
+2
+PUT 5
+PUT 6
+OUTPUT:
+6
+EXPLANATION:
+Only latest remains.
+
+INPUT:
+3
+1
+PUT 7
+OUTPUT:
+7
+EXPLANATION:
+Single entry.
+
+HIDDEN TEST CASES:
+INPUT:
+2
+5
+PUT 1
+PUT 2
+PUT 3
+GET 2
+PUT 4
+OUTPUT:
+4 2
+
+INPUT:
+3
+0
+OUTPUT:
+EMPTY
+
+CONSTRAINTS:
+- 0 ≤ Q ≤ 10^5

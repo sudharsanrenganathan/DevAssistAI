@@ -1,0 +1,48 @@
+ID: M001
+TITLE: Reverse Words in a String
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a sentence, reverse the order of words in the sentence.
+
+INPUT FORMAT:
+- One line containing a sentence
+
+OUTPUT FORMAT:
+- Print the sentence with words in reversed order
+
+SAMPLE TEST CASES:
+INPUT:
+hello world
+OUTPUT:
+world hello
+EXPLANATION:
+The order of words is reversed.
+
+INPUT:
+one two three
+OUTPUT:
+three two one
+EXPLANATION:
+Words are reversed.
+
+INPUT:
+a
+OUTPUT:
+a
+EXPLANATION:
+Single word remains unchanged.
+
+HIDDEN TEST CASES:
+INPUT:
+welcome to voidmain platform
+OUTPUT:
+platform voidmain to welcome
+
+INPUT:
+java is powerful
+OUTPUT:
+powerful is java
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

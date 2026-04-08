@@ -1,0 +1,48 @@
+ID: E004
+TITLE: Sum of Digits
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a number, find the sum of its digits.
+
+INPUT FORMAT:
+- One line containing an integer
+
+OUTPUT FORMAT:
+- Print the sum of digits
+
+SAMPLE TEST CASES:
+INPUT:
+123
+OUTPUT:
+6
+EXPLANATION:
+1 + 2 + 3 = 6
+
+INPUT:
+5
+OUTPUT:
+5
+EXPLANATION:
+Single digit number.
+
+INPUT:
+100
+OUTPUT:
+1
+EXPLANATION:
+1 + 0 + 0 = 1
+
+HIDDEN TEST CASES:
+INPUT:
+9999
+OUTPUT:
+36
+
+INPUT:
+10
+OUTPUT:
+1
+
+CONSTRAINTS:
+- 0 ≤ number ≤ 10^18

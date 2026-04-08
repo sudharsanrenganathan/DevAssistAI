@@ -1,0 +1,49 @@
+ID: H009
+TITLE: N-Queens Count
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given N, count number of ways to place N queens on N×N board.
+
+INPUT FORMAT:
+- One line containing integer N
+
+OUTPUT FORMAT:
+- Print number of possible arrangements
+
+SAMPLE TEST CASES:
+INPUT:
+4
+OUTPUT:
+2
+EXPLANATION:
+Two valid arrangements.
+
+INPUT:
+1
+OUTPUT:
+1
+EXPLANATION:
+Single queen.
+
+INPUT:
+2
+OUTPUT:
+0
+EXPLANATION:
+No valid arrangement.
+
+HIDDEN TEST CASES:
+INPUT:
+3
+OUTPUT:
+0
+
+INPUT:
+5
+OUTPUT:
+10
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 14
+    

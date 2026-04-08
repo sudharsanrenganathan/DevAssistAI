@@ -1,0 +1,54 @@
+ID: M008
+TITLE: Maximum Subarray Sum
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given an array of integers, find the maximum sum of a contiguous subarray.
+
+INPUT FORMAT:
+- First line contains integer N
+- Second line contains N space-separated integers
+
+OUTPUT FORMAT:
+- Print the maximum subarray sum
+
+SAMPLE TEST CASES:
+INPUT:
+5
+-2 1 -3 4 -1
+OUTPUT:
+4
+EXPLANATION:
+Maximum subarray is [4].
+
+INPUT:
+4
+1 2 3 4
+OUTPUT:
+10
+EXPLANATION:
+Entire array gives maximum sum.
+
+INPUT:
+3
+-1 -2 -3
+OUTPUT:
+-1
+EXPLANATION:
+Maximum element is -1.
+
+HIDDEN TEST CASES:
+INPUT:
+6
+-2 -3 4 -1 -2 1
+OUTPUT:
+4
+
+INPUT:
+5
+5 -1 5 -1 5
+OUTPUT:
+13
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 10^5

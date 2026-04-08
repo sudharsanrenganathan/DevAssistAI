@@ -1,0 +1,60 @@
+ID: H003
+TITLE: Kth Largest Element
+DIFFICULTY: HARD
+
+DESCRIPTION:
+Given an array, find the Kth largest element.
+
+INPUT FORMAT:
+- First line contains N
+- Second line contains N integers
+- Third line contains K
+
+OUTPUT FORMAT:
+- Print the Kth largest element
+
+SAMPLE TEST CASES:
+INPUT:
+5
+3 2 1 5 6
+2
+OUTPUT:
+5
+EXPLANATION:
+2nd largest element is 5.
+
+INPUT:
+3
+7 10 4
+1
+OUTPUT:
+10
+EXPLANATION:
+Largest element.
+
+INPUT:
+4
+1 2 3 4
+4
+OUTPUT:
+1
+EXPLANATION:
+4th largest is smallest.
+
+HIDDEN TEST CASES:
+INPUT:
+6
+5 3 1 6 4 2
+3
+OUTPUT:
+4
+
+INPUT:
+5
+-1 -2 -3 -4 -5
+2
+OUTPUT:
+-2
+
+CONSTRAINTS:
+- 1 ≤ N ≤ 10^5

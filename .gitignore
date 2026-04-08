@@ -1,0 +1,26 @@
+# Java
+target/
+*.class
+.mvn/
+mvnw
+mvnw.cmd
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+uploads/
+
+# Node
+node_modules/
+.vercel
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

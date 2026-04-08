@@ -1,0 +1,48 @@
+ID: E003
+TITLE: Count Vowels
+DIFFICULTY: EASY
+
+DESCRIPTION:
+Given a string, count the number of vowels in it.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print the number of vowels
+
+SAMPLE TEST CASES:
+INPUT:
+hello
+OUTPUT:
+2
+EXPLANATION:
+Vowels are 'e' and 'o'.
+
+INPUT:
+aeiou
+OUTPUT:
+5
+EXPLANATION:
+All characters are vowels.
+
+INPUT:
+bcdf
+OUTPUT:
+0
+EXPLANATION:
+No vowels present.
+
+HIDDEN TEST CASES:
+INPUT:
+programming
+OUTPUT:
+3
+
+INPUT:
+xyz
+OUTPUT:
+0
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

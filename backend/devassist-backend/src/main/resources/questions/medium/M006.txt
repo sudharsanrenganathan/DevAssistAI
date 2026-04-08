@@ -1,0 +1,49 @@
+ID: M007
+TITLE: First Non-Repeating Character
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a string, find the first non-repeating character.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print the first non-repeating character
+- Print -1 if none exists
+
+SAMPLE TEST CASES:
+INPUT:
+aabbc
+OUTPUT:
+c
+EXPLANATION:
+c appears only once.
+
+INPUT:
+aabb
+OUTPUT:
+-1
+EXPLANATION:
+All characters repeat.
+
+INPUT:
+abc
+OUTPUT:
+a
+EXPLANATION:
+a is the first non-repeating.
+
+HIDDEN TEST CASES:
+INPUT:
+programming
+OUTPUT:
+p
+
+INPUT:
+zzxyyx
+OUTPUT:
+z
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

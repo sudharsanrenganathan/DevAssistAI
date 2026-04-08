@@ -1,0 +1,59 @@
+ID: M005
+TITLE: Frequency of Characters
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given a string, print the frequency of each character in the string in alphabetical order.
+
+INPUT FORMAT:
+- One line containing a string
+
+OUTPUT FORMAT:
+- Print each character followed by its frequency in a new line
+
+SAMPLE TEST CASES:
+INPUT:
+aab
+OUTPUT:
+a 2
+b 1
+EXPLANATION:
+'a' appears twice, 'b' once.
+
+INPUT:
+abc
+OUTPUT:
+a 1
+b 1
+c 1
+EXPLANATION:
+Each character appears once.
+
+INPUT:
+zz
+OUTPUT:
+z 2
+EXPLANATION:
+'z' appears twice.
+
+HIDDEN TEST CASES:
+INPUT:
+programming
+OUTPUT:
+g 2
+m 2
+o 1
+p 1
+r 2
+a 1
+i 1
+n 1
+
+INPUT:
+aaaab
+OUTPUT:
+a 4
+b 1
+
+CONSTRAINTS:
+- 1 ≤ length of string ≤ 10^5

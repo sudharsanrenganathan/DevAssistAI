@@ -1,0 +1,54 @@
+ID: M013
+TITLE: Find Missing Number
+DIFFICULTY: MEDIUM
+
+DESCRIPTION:
+Given an array containing numbers from 1 to N with one missing, find the missing number.
+
+INPUT FORMAT:
+- First line contains integer N
+- Second line contains N-1 integers
+
+OUTPUT FORMAT:
+- Print the missing number
+
+SAMPLE TEST CASES:
+INPUT:
+5
+1 2 3 5
+OUTPUT:
+4
+EXPLANATION:
+4 is missing.
+
+INPUT:
+3
+1 3
+OUTPUT:
+2
+EXPLANATION:
+2 is missing.
+
+INPUT:
+2
+1
+OUTPUT:
+2
+EXPLANATION:
+2 is missing.
+
+HIDDEN TEST CASES:
+INPUT:
+6
+1 2 4 5 6
+OUTPUT:
+3
+
+INPUT:
+4
+2 3 4
+OUTPUT:
+1
+
+CONSTRAINTS:
+- 2 ≤ N ≤ 10^5
