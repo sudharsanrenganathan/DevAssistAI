@@ -1,10 +1,13 @@
-from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
 from rag.text_splitter import split_document
 
+# Note: Heavy AI libraries are imported inside create_vector_store
+# to ensure the server starts instantly on Render.
+
 
 def create_vector_store(file_path):
+    from sentence_transformers import SentenceTransformer
+    import faiss
 
     # Load chunks from document
     chunks = split_document(file_path)
