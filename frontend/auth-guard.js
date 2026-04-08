@@ -16,7 +16,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Replace with your Render URL (e.g., https://devassist-api.onrender.com)
 const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? 'http://localhost:8080' 
-    : 'https://devassist-backend-qyfvanrender.com';
+    : 'https://devassist-backend-qyfvan.onrender.com';
 window.BACKEND_URL = BACKEND_URL;
 
 // ==================== INITIALIZE CLIENT ====================

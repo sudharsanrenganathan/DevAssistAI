@@ -8,7 +8,7 @@ const API_CONFIG = {
     // Automatically detects if we are on localhost or production
     BACKEND_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:8080'
-        : 'https://devassist-backend-qyfvanrender.com', // Replace with your exact Render URL
+        : 'https://devassist-backend-qyfvan.onrender.com', // Corrected Render URL
     
     // Supabase credentials (same as in auth-guard.js)
     SUPABASE_URL: 'https://xovfufudevsqdmqxmyge.supabase.co',
