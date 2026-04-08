@@ -1,18 +1,15 @@
-from fastapi import FastAPI, UploadFile, File
-from pydantic import BaseModel
-from typing import Optional
-import shutil
-import json
-import re
-import os
-import base64
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
+from fastapi.responses import StreamingResponse
 import os
 
-# All heavy imports moved inside functions to allow instant startup.
+# ABSOLUTE MINIMAL STARTUP - ALL LIBRARIES LOADED ON-DEMAND
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # ========================= CACHE =========================
 rag_cache = {}
@@ -32,7 +29,10 @@ app.add_middleware(
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ========================= MODELS =========================
+# Models moved inside routes or defined minimally
+from pydantic import BaseModel
+from typing import Optional, Union
+
 class AIRequest(BaseModel):
     question: str
     file_text: Optional[str] = None
@@ -44,7 +44,7 @@ class RagRequest(BaseModel):
     question: str
     file_path: str
     model: Optional[str] = None
-    session_id: Optional[str | int] = None
+    session_id: Optional[Union[str, int]] = None
 
 class CodeRequest(BaseModel):
     code: str
@@ -195,10 +195,9 @@ User: {request.question}"""
     return {"answer": answer}
 
 # ========================= LOCAL AI =========================
-import requests
-
 @app.post("/local-ai")
 async def local_ai(request: AIRequest):
+    import json, requests
     print(f"🏠 Local AI | Q: {request.question} | Model: {request.model}")
 
     def generate_local():
@@ -221,18 +220,20 @@ async def local_ai(request: AIRequest):
         except Exception as e:
             print(f"❌ Local AI Error: {e} - Falling back to Cloud AI")
             try:
+                from services.global_ai import global_chat
                 fallback_ans = global_chat(request.question, request.file_text, request.has_file, "llama-3.1-70b-versatile")
                 yield f"[Fallback to Cloud] {fallback_ans}"
             except Exception as fallback_e:
                 yield f"❌ Local execution failed and Cloud API fallback error: {str(fallback_e)}"
 
-    from fastapi.responses import StreamingResponse
     return StreamingResponse(generate_local(), media_type="text/plain")
 
 # ========================= UPLOAD DOCUMENT =========================
+from fastapi import UploadFile, File
+
 @app.post("/upload-doc")
 async def upload_doc(file: UploadFile = File(...)):
-    import uuid
+    import uuid, base64
     try:
         unique_name = str(uuid.uuid4()) + "_" + file.filename
         file_path = os.path.join(UPLOAD_DIR, unique_name)
@@ -267,11 +268,10 @@ async def upload_doc(file: UploadFile = File(...)):
         return {"message": "Failed to process document", "error": str(e)}
 
 # ========================= RAG ASK (SECRET AI) =========================
-from fastapi.responses import StreamingResponse
-from rag.question_answering import ask_question_stream  # chat_history param added
-
 @app.post("/rag-ask")
 async def rag_ask(request: RagRequest):
+    from rag.question_answering import ask_question_stream
+    import base64
     try:
         print("📨 Question:", request.question)
         print("📄 File:", request.file_path)
@@ -281,8 +281,7 @@ async def rag_ask(request: RagRequest):
         # Handle remote URLs (Cloud Migration Fix)
         if file_path.startswith("http"):
             print(f"🌐 Remote document detected: {file_path}")
-            import urllib.request
-            import uuid
+            import urllib.request, uuid
             local_filename = f"remote_{uuid.uuid4()}.pdf"
             local_path = os.path.join(UPLOAD_DIR, local_filename)
             try:
@@ -370,8 +369,6 @@ async def rag_ask(request: RagRequest):
                     print(f"⚠ Could not load history from DB: {e}")
         history = doc_chat_history[session_key]
         print(f"📜 Chat history length: {len(history)}")
-        for i, h in enumerate(history):
-            print(f"   [{i}] Q: {h['q'][:50]}...")
 
         def generate():
             full_answer = ""
@@ -402,6 +399,7 @@ async def rag_ask(request: RagRequest):
 # ========================= CODE ANALYZER =========================
 @app.post("/code-analyze")
 async def code_analyze(request: CodeRequest):
+    import re, json
     try:
         lang_map = {"cpp": "C++", "c": "C", "javascript": "JavaScript"}
         language = lang_map.get(request.language, request.language)
@@ -445,6 +443,7 @@ Return this exact JSON structure:
 CODE:
 {code}"""
 
+        from core.llm import safe_generate
         raw_output = safe_generate(prompt, request.model, system=system_prompt)
 
         if not raw_output:
