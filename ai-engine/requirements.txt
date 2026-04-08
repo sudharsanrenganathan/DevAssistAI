@@ -10,4 +10,5 @@ pypdf
 psycopg2-binary
 requests
 pydantic
+python-multipart
 torch --index-url https://download.pytorch.org/whl/cpu
