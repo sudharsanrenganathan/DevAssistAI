@@ -7,11 +7,10 @@ import re
 import os
 import base64
 from fastapi.middleware.cors import CORSMiddleware
-from rag.vector_store import create_vector_store
 from dotenv import load_dotenv
-from services.global_ai import global_chat
-from core.llm import safe_generate
-import psycopg2
+import os
+
+# All heavy imports moved inside functions to allow instant startup.
 
 load_dotenv()
 
@@ -54,6 +53,7 @@ class CodeRequest(BaseModel):
 
 # ========================= DB HELPERS =========================
 def get_db():
+    import psycopg2
     return psycopg2.connect(os.getenv("DATABASE_URL"))
 
 def get_chat_history(session_id):
@@ -173,6 +173,7 @@ User: {request.question}"""
     else:
         full_prompt = request.question
 
+    from services.global_ai import global_chat
     answer = global_chat(
         full_prompt,
         request.file_text,
@@ -254,6 +255,7 @@ async def upload_doc(file: UploadFile = File(...)):
 
         print(f"📁 Saved file: {file_path} ({len(raw)} bytes)")
 
+        from rag.vector_store import create_vector_store
         rag_index, rag_chunks, rag_model = create_vector_store(file_path)
         rag_cache[file_path] = (rag_index, rag_chunks, rag_model)
 
@@ -333,6 +335,7 @@ async def rag_ask(request: RagRequest):
             rag_index, rag_chunks, rag_model = rag_cache[file_path]
         else:
             print("⏳ Creating new vector store")
+            from rag.vector_store import create_vector_store
             rag_index, rag_chunks, rag_model = create_vector_store(file_path)
             rag_cache[file_path] = (rag_index, rag_chunks, rag_model)
 
