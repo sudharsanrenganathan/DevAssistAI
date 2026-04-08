@@ -232,7 +232,7 @@ async def local_ai(request: AIRequest):
 from fastapi import UploadFile, File
 
 @app.post("/upload-doc")
-async def upload_doc(file: UploadFile = File(...)):
+async def upload_doc(file: Union[UploadFile, any] = File(...)):
     import uuid, base64
     try:
         unique_name = str(uuid.uuid4()) + "_" + file.filename
