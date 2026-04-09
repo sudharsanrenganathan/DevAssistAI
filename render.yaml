@@ -20,11 +20,13 @@ services:
         sync: false # Set this manually in Render dashboard
       - key: SUPABASE_JWT_SECRET
         sync: false # Set this manually in Render dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false # Set this manually in Render dashboard
       - key: AI_ENGINE_URL
         fromService:
           name: devassist-ai-engine
           type: web
-          property: host
+          property: hostport
 
   # 2. Python AI Engine
   - type: web
@@ -37,4 +39,4 @@ services:
       - key: GROQ_API_KEY
         sync: false # Set this manually in Render dashboard
       - key: DATABASE_URL
-        value: postgresql://postgres:Sudharsan@2005@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres
+        sync: false # Set this manually in Render dashboard

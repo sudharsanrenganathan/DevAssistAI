@@ -15,7 +15,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/vm")
-@CrossOrigin("*")
 public class VoidMainController {
 
     @Autowired private VmProblemRepository problemRepo;

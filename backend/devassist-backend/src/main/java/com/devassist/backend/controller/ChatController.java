@@ -16,7 +16,6 @@ import com.devassist.backend.repository.ChatThreadRepository;
 
 @RestController
 @RequestMapping("/api/chat")
-@CrossOrigin("*")
 public class ChatController {
 
     @Autowired

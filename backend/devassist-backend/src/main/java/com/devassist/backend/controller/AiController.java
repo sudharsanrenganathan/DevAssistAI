@@ -22,7 +22,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/ai")
-@CrossOrigin
 public class AiController {
 
     @Autowired

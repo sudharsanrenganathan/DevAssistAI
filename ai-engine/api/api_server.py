@@ -239,7 +239,7 @@ async def local_ai(request: AIRequest):
 # ========================= UPLOAD DOCUMENT =========================
 from fastapi import UploadFile, File
 
-@app.post("/upload-doc")
+@app.post("/upload-doc", response_model=None)
 async def upload_doc(file: UploadFile = File(...)):
     import uuid, base64
     try:

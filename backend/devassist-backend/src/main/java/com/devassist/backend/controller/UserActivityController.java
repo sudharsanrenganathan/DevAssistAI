@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/activity")
-@CrossOrigin("*")
 public class UserActivityController {
 
     @Autowired

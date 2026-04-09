@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 @RestController
 @RequestMapping("/ai")
-@CrossOrigin
 public class CodeAnalyzerController {
 
     @org.springframework.beans.factory.annotation.Value("${ai.engine.url:http://127.0.0.1:8000}")
