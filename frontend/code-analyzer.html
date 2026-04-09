@@ -359,8 +359,8 @@ async function analyzeCode() {
     const code = editor.getValue();
     const language = document.getElementById("languageSelect").value;
     try {
-        const res = await fetch(`${BACKEND_URL}/ai/analyze`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+        const res = await authFetch(`/ai/analyze`, {
+            method: "POST",
             body: JSON.stringify({ code: code, language: language, session_id: currentChatId || 1, model: selectedModel })
         });
         const data = await res.json();
