@@ -29,28 +29,44 @@ public class GlobalChatController {
 
     // ✅ CREATE CHAT — scoped to user
     @PostMapping("/create")
-    public GlobalChatThread createChat(@RequestBody Map<String, String> body) {
-        String firstMessage = body.get("message");
-        String supabaseUserId = body.get("userId");
+    public ResponseEntity<?> createChat(@RequestBody Map<String, String> body) {
+        try {
+            String firstMessage = body.get("message");
+            String supabaseUserId = body.get("userId");
 
-        GlobalChatThread chat = new GlobalChatThread();
-        chat.setSupabaseUserId(supabaseUserId);
-        chat.setTitle(generateTitle(firstMessage));
-        return chatRepository.save(chat);
+            if (supabaseUserId == null || supabaseUserId.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "userId is required"));
+            }
+
+            GlobalChatThread chat = new GlobalChatThread();
+            chat.setSupabaseUserId(supabaseUserId);
+            chat.setTitle(generateTitle(firstMessage));
+            GlobalChatThread saved = chatRepository.save(chat);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            System.out.println("❌ createChat error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to create chat: " + e.getMessage()));
+        }
     }
 
     // ✅ PIN / UNPIN
     @PutMapping("/{chatId}/pin")
-    public GlobalChatThread pinChat(@PathVariable Long chatId) {
-        GlobalChatThread chat = chatRepository.findById(chatId).orElseThrow();
-        if (chat.isPinned()) {
-            chat.setPinned(false);
-            chat.setPinOrder(0L);
-        } else {
-            chat.setPinned(true);
-            chat.setPinOrder(System.currentTimeMillis());
+    public ResponseEntity<?> pinChat(@PathVariable Long chatId) {
+        try {
+            GlobalChatThread chat = chatRepository.findById(chatId)
+                    .orElseThrow(() -> new RuntimeException("Chat not found: " + chatId));
+            if (chat.isPinned()) {
+                chat.setPinned(false);
+                chat.setPinOrder(0L);
+            } else {
+                chat.setPinned(true);
+                chat.setPinOrder(System.currentTimeMillis());
+            }
+            return ResponseEntity.ok(chatRepository.saveAndFlush(chat));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
-        return chatRepository.saveAndFlush(chat);
     }
 
     // ✅ RENAME
@@ -88,31 +104,44 @@ public class GlobalChatController {
 
     // ✅ LOAD MESSAGES
     @GetMapping("/{chatId}")
-    public List<GlobalMessage> getChat(@PathVariable Long chatId) {
-        return globalMessageRepository.findByChatIdOrderByTimestampAsc(chatId);
+    public ResponseEntity<?> getChat(@PathVariable Long chatId) {
+        try {
+            List<GlobalMessage> messages = globalMessageRepository.findByChatIdOrderByTimestampAsc(chatId);
+            return ResponseEntity.ok(messages);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
     // ✅ LOAD ALL CHATS — filtered by user
     @GetMapping("/all")
-    public List<GlobalChatThread> getAllChats(@RequestParam(required = false) String userId) {
-        Sort sort = Sort.by(
-            Sort.Order.desc("isPinned"),
-            Sort.Order.desc("pinOrder"),
-            Sort.Order.desc("createdAt")
-        );
+    public ResponseEntity<?> getAllChats(@RequestParam(required = false) String userId) {
+        try {
+            Sort sort = Sort.by(
+                Sort.Order.desc("isPinned"),
+                Sort.Order.desc("pinOrder"),
+                Sort.Order.desc("createdAt")
+            );
 
-        if (userId != null && !userId.isEmpty()) {
-            return chatRepository.findBySupabaseUserId(userId, sort);
+            if (userId != null && !userId.isEmpty()) {
+                List<GlobalChatThread> chats = chatRepository.findBySupabaseUserId(userId, sort);
+                return ResponseEntity.ok(chats);
+            }
+            return ResponseEntity.ok(List.of());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
-        // Fallback: return empty if no userId (shouldn't happen with auth)
-        return List.of();
     }
 
     // ✅ DELETE CHAT
     @DeleteMapping("/{chatId}")
     public ResponseEntity<?> deleteChat(@PathVariable Long chatId) {
-        chatRepository.deleteById(chatId);
-        return ResponseEntity.ok().build();
+        try {
+            chatRepository.deleteById(chatId);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 
     // ✅ TITLE GENERATOR
