@@ -40,6 +40,9 @@ public class AiController {
     @Value("${supabase.key:}") // Allow empty for now, user needs to set this
     private String supabaseKey;
 
+    @Value("${supabase.anon-key:}")
+    private String supabaseAnonKey;
+
     @Value("${ai.engine.url:http://127.0.0.1:8000}")
     private String aiEngineUrl;
 
@@ -56,7 +59,7 @@ public class AiController {
         try {
             System.out.println("UPLOAD API HIT");
             System.out.println("Supabase URL: " + supabaseUrl);
-            System.out.println("Supabase Key (first 20 chars): " + (supabaseKey != null ? supabaseKey.substring(0, Math.min(20, supabaseKey.length())) : "NULL"));
+            System.out.println("Using anon key for Storage upload");
 
             // --- Supabase Storage Upload ---
             String bucketName = "documents";
@@ -69,7 +72,8 @@ public class AiController {
             System.out.println("Upload URL: " + supabaseStorageUrl);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + supabaseKey);
+            // Use anon key for public bucket access
+            headers.set("Authorization", "Bearer " + supabaseAnonKey);
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.set("x-upsert", "true");
 
