@@ -126,6 +126,8 @@ public class GlobalChatController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllChats(@RequestParam(required = false) String userId) {
         try {
+            System.out.println("🔍 getAllChats called with userId: " + userId);
+            
             Sort sort = Sort.by(
                 Sort.Order.desc("isPinned"),
                 Sort.Order.desc("pinOrder"),
@@ -134,10 +136,14 @@ public class GlobalChatController {
 
             if (userId != null && !userId.isEmpty()) {
                 List<GlobalChatThread> chats = chatRepository.findBySupabaseUserId(userId, sort);
+                System.out.println("✅ Found " + chats.size() + " chats for user: " + userId);
                 return ResponseEntity.ok(chats);
             }
+            System.out.println("⚠️ userId is null or empty");
             return ResponseEntity.ok(List.of());
         } catch (Exception e) {
+            System.out.println("❌ getAllChats error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
