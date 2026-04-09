@@ -1,7 +1,7 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rag.document_loader import load_pdf
 
 def split_document(file_path):
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
 
     # Load document
     text = load_pdf(file_path)

@@ -29,13 +29,14 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC ROUTES (no auth required) =====
-                // Static pages: login, signup, auth-guard
+                // Static pages: login, signup, auth-guard, etc.
                 .requestMatchers(
                     "/", "/index.html",
                     "/login.html", "/signup.html",
-                    "/auth-guard.js",
+                    "/dashboard.html", "/auth-guard.js",
                     "/favicon.ico",
-                    "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico"
+                    "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.html",
+                    "/img/**"
                 ).permitAll()
                 // Auth API endpoints
                 .requestMatchers("/api/auth/**").permitAll()
@@ -43,9 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health", "/health").permitAll()
 
                 // ===== PROTECTED ROUTES (require valid JWT) =====
-                // For now, keep all other routes open to avoid breaking existing functionality
-                // TODO: After verifying auth works, change this to .authenticated()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
             )
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())

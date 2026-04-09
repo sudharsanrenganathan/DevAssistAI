@@ -25,6 +25,9 @@ public class GlobalChatController {
     @Autowired
     private GlobalMessageRepository globalMessageRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${ai.engine.url:http://127.0.0.1:8000}")
+    private String aiEngineUrl;
+
     // ✅ CREATE CHAT — scoped to user
     @PostMapping("/create")
     public GlobalChatThread createChat(@RequestBody Map<String, String> body) {
@@ -143,7 +146,7 @@ public class GlobalChatController {
             
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restTemplate.postForObject(
-                "http://127.0.0.1:8000/global-ai", entity, Map.class
+                aiEngineUrl + "/global-ai", entity, Map.class
             );
             
             return ResponseEntity.ok(response);
@@ -172,7 +175,7 @@ public class GlobalChatController {
             
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restTemplate.postForObject(
-                "http://127.0.0.1:8000/local-ai", entity, Map.class
+                aiEngineUrl + "/local-ai", entity, Map.class
             );
             
             return ResponseEntity.ok(response);

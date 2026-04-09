@@ -29,6 +29,14 @@ app.add_middleware(
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+@app.get("/")
+async def root():
+    return {"status": "online", "service": "DevAssist AI Engine"}
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
 # Models moved inside routes or defined minimally
 from pydantic import BaseModel
 from typing import Optional, Union
@@ -232,7 +240,7 @@ async def local_ai(request: AIRequest):
 from fastapi import UploadFile, File
 
 @app.post("/upload-doc")
-async def upload_doc(file: Union[UploadFile, any] = File(...)):
+async def upload_doc(file: UploadFile = File(...)):
     import uuid, base64
     try:
         unique_name = str(uuid.uuid4()) + "_" + file.filename
