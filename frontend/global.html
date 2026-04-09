@@ -662,7 +662,11 @@ async function send() {
             body: JSON.stringify({ role: "ai", content: answer })
         });
         if (!aiSave.ok) console.error("❌ AI message save failed:", aiSave.status);
-    } catch (err) { console.error("send() error:", err); alert("AI request failed"); }
+    } catch (err) { 
+        console.error("send() error:", err);
+        console.error("Attempted to reach:", BACKEND_URL); 
+        alert(`AI request failed. Check the console (F12) to see why.\n(Trying to hit: ${BACKEND_URL})`); 
+    }
     sendBtn.style.pointerEvents = "auto"; sendBtn.style.opacity = "1";
 }
 

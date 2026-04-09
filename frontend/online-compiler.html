@@ -300,7 +300,9 @@
             outTarget.innerHTML = resultHtml;
             
         } catch(e) {
-            outTarget.innerHTML = `<div class="output-stderr"><strong>Network Error:</strong>\nCould not reach compiler service. ${escapeHtml(e.message)}</div>`;
+            console.error("runDryCode() error:", e);
+            console.error("Attempted URL:", `${API}/execute`);
+            outTarget.innerHTML = `<div class="output-stderr"><strong>Network Error:</strong>\nCould not reach compiler service at: ${API}\n\nError: ${escapeHtml(e.message)}</div>`;
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<span>▶</span> Run Code';

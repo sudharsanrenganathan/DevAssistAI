@@ -388,7 +388,15 @@ async function analyzeCode() {
         window.currentTime = data.before_time; window.currentSpace = data.before_space;
         window.optimalTime = data.time_complexity; window.optimalSpace = data.space_complexity;
         updateComplexityUI();
-    } catch (e) { document.querySelector(".middle").innerHTML = "<span style='color:#ef4444'>❌ Request failed</span>"; }
+    } catch (e) { 
+        console.error("analyzeCode() error:", e);
+        console.error("Attempted URL:", `${BACKEND_URL}/ai/analyze`);
+        document.querySelector(".middle").innerHTML = `<div style='color:#ef4444; padding:20px; border:1px solid rgba(239,68,68,0.2); border-radius:12px; background:rgba(239,68,68,0.05)'>
+            <h3>❌ Request failed</h3>
+            <p style="font-size:12px; margin-top:8px; opacity:0.8">Could not reach the backend at: <br><code>${BACKEND_URL}</code></p>
+            <p style="font-size:11px; margin-top:12px;">Check if the backend service is live on Render and that CORS is allowed.</p>
+        </div>`; 
+    }
     btn.innerHTML = "▶ Analyze"; btn.disabled = false;
 }
 
