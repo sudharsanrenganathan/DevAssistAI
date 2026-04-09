@@ -66,15 +66,18 @@ public class AiController {
             String supabaseStorageUrl = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + fileName;
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(supabaseKey); // Use the Service Role Key or Anon Key
-            headers.setContentType(MediaType.valueOf(file.getContentType()));
+            headers.setBearerAuth(supabaseKey); // Use the Service Role Key
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM); // Use generic binary type
+            headers.set("x-upsert", "true"); // Allow overwrite
 
             HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
 
             try {
                 restTemplate.postForObject(supabaseStorageUrl, requestEntity, String.class);
-                System.out.println("File uploaded to Supabase Storage: " + fileName);
+                System.out.println("✅ File uploaded to Supabase Storage: " + fileName);
             } catch (Exception e) {
+                System.out.println("❌ Supabase Storage upload error: " + e.getMessage());
+                e.printStackTrace();
                 throw new RuntimeException("Supabase Storage upload failed: " + e.getMessage());
             }
 
@@ -91,25 +94,23 @@ public class AiController {
             );
             doc.setUploadedAt(LocalDateTime.now());
             documentRepository.save(doc);
-            System.out.println("Saved to DB");
+            System.out.println("✅ Saved to DB");
 
-            // Forward to FastAPI for vector indexing
-            try {
-                // Since FastAPI needs a physical file or a stream, and we just uploaded to Supabase,
-                // we'll pass the publicUrl to FastAPI instead of the local file, 
-                // but FastAPI needs to be updated to handle URLs.
-                // For now, we'll send the publicUrl as a param if FastAPI supports it.
-                // Alternatively, we skip this if FastAPI indexing is not ready for URLs.
-                System.out.println("Note: FastAPI indexing may need the public URL: " + publicUrl);
-            } catch (Exception e) {
-                System.out.println("FastAPI indexing failed (non-critical): " + e.getMessage());
-            }
-
-            return ResponseEntity.ok(doc);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "File uploaded successfully",
+                "fileName", fileName,
+                "publicUrl", publicUrl,
+                "document", doc
+            ));
 
         } catch (Exception e) {
+            System.out.println("❌ Upload failed: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", "Upload failed: " + e.getMessage()
+            ));
         }
     }
 
