@@ -64,7 +64,9 @@ public class JwtUtil {
     public boolean isTokenValid(String token) {
         try {
             Claims claims = parseToken(token);
-            return "authenticated".equals(claims.get("role", String.class));
+            // Accept any valid token, not just "authenticated" role
+            // Supabase tokens may have different roles
+            return true;
         } catch (Exception e) {
             return false;
         }
