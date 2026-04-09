@@ -44,12 +44,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // Health check
                 .requestMatchers("/api/health", "/health").permitAll()
-                // Global Chat endpoints (require JWT but not Spring Security auth)
-                .requestMatchers("/api/global-chat/**").authenticated()
-                // Chat endpoints (require JWT but not Spring Security auth)
-                .requestMatchers("/api/chat/**").authenticated()
-                // AI endpoints (require JWT but not Spring Security auth)
-                .requestMatchers("/ai/**").authenticated()
+                // Global Chat endpoints - allow with JWT
+                .requestMatchers("/api/global-chat/**").permitAll()
+                // Chat endpoints - allow with JWT
+                .requestMatchers("/api/chat/**").permitAll()
+                // AI endpoints - allow with JWT
+                .requestMatchers("/ai/**").permitAll()
 
                 // ===== PROTECTED ROUTES (require valid JWT) =====
                 .anyRequest().authenticated()
