@@ -9,7 +9,6 @@ services:
     name: devassist-backend
     runtime: docker
     dockerContext: backend/devassist-backend
-    dockerfile: Dockerfile
     plan: free # Change to 'starter' if memory is an issue
     envVars:
       - key: SPRING_DATASOURCE_URL
@@ -23,10 +22,7 @@ services:
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false # Set this manually in Render dashboard
       - key: AI_ENGINE_URL
-        fromService:
-          name: devassist-ai-engine
-          type: web
-          property: hostport
+        sync: false # Set this manually in Render dashboard
 
   # 2. Python AI Engine
   - type: web

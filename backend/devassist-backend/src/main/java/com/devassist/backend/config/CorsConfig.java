@@ -19,6 +19,7 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                             "https://devassist-ai.vercel.app",
+                            "https://devassist-ai-vercel.app",
                             "http://localhost:3000",
                             "http://localhost:5173",
                             "http://127.0.0.1:3000"
