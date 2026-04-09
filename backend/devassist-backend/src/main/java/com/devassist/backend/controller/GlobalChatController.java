@@ -27,6 +27,15 @@ public class GlobalChatController {
     @org.springframework.beans.factory.annotation.Value("${ai.engine.url:http://127.0.0.1:8000}")
     private String aiEngineUrl;
 
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        return ResponseEntity.ok(Map.of(
+            "status", "ok",
+            "message", "Backend is running with error handling v2",
+            "timestamp", System.currentTimeMillis()
+        ));
+    }
+
     // ✅ CREATE CHAT — scoped to user
     @PostMapping("/create")
     public ResponseEntity<?> createChat(@RequestBody Map<String, String> body) {
