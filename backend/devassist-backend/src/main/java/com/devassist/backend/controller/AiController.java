@@ -55,6 +55,8 @@ public class AiController {
 
         try {
             System.out.println("UPLOAD API HIT");
+            System.out.println("Supabase URL: " + supabaseUrl);
+            System.out.println("Supabase Key (first 20 chars): " + (supabaseKey != null ? supabaseKey.substring(0, Math.min(20, supabaseKey.length())) : "NULL"));
 
             // --- Supabase Storage Upload ---
             String bucketName = "documents";
@@ -64,11 +66,12 @@ public class AiController {
 
             // Supabase Storage API Endpoint
             String supabaseStorageUrl = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + fileName;
+            System.out.println("Upload URL: " + supabaseStorageUrl);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(supabaseKey); // Use the Service Role Key
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM); // Use generic binary type
-            headers.set("x-upsert", "true"); // Allow overwrite
+            headers.set("Authorization", "Bearer " + supabaseKey);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.set("x-upsert", "true");
 
             HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
 
