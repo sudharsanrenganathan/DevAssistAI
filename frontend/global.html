@@ -613,8 +613,8 @@ async function send() {
     add(q, "user");
     try {
         if (!currentChatId) {
-            const res = await fetch(`${BACKEND_URL}/api/global-chat/create`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
+            const res = await authFetch(`/api/global-chat/create`, {
+                method: "POST",
                 body: JSON.stringify({ message: q, userId: localStorage.getItem('userId') })
             });
             const chat = await res.json();
@@ -622,8 +622,8 @@ async function send() {
             loadSessions();
         }
         const activeChatId = currentChatId;
-        const userSave = await fetch(`${BACKEND_URL}/api/global-chat/${activeChatId}/message`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+        const userSave = await authFetch(`/api/global-chat/${activeChatId}/message`, {
+            method: "POST",
             body: JSON.stringify({ role: "user", content: q })
         });
         if (!userSave.ok) console.error("❌ User message save failed:", userSave.status);
@@ -632,9 +632,9 @@ async function send() {
         botDiv.className = "msg bot"; botDiv.style.display = "none";
         document.getElementById("messages").appendChild(botDiv);
         
-        const endpoint = selectedModel.includes("local") ? `${BACKEND_URL}/api/global-chat/local-ask` : `${BACKEND_URL}/api/global-chat/ask`;
-        const response = await fetch(endpoint, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+        const endpoint = selectedModel.includes("local") ? `/api/global-chat/local-ask` : `/api/global-chat/ask`;
+        const response = await authFetch(endpoint, {
+            method: "POST",
             body: JSON.stringify({ question: q, session_id: activeChatId, model: selectedModel })
         });
         const data = await response.json();
@@ -657,8 +657,8 @@ async function send() {
                 }
             }, speed);
         });
-        const aiSave = await fetch(`${BACKEND_URL}/api/global-chat/${activeChatId}/message`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
+        const aiSave = await authFetch(`/api/global-chat/${activeChatId}/message`, {
+            method: "POST",
             body: JSON.stringify({ role: "ai", content: answer })
         });
         if (!aiSave.ok) console.error("❌ AI message save failed:", aiSave.status);
@@ -680,7 +680,7 @@ function copyMsg(btn) {
 
 async function loadSessions() {
     const uid = localStorage.getItem('userId');
-    const res = await fetch(`${BACKEND_URL}/api/global-chat/all?userId=${uid}&ts=${Date.now()}`);
+    const res = await authFetch(`/api/global-chat/all?userId=${uid}&ts=${Date.now()}`);
     let chats = await res.json();
     const search = document.getElementById("chatSearch").value.toLowerCase();
     if (search) { chats = chats.filter(c => c.title.toLowerCase().includes(search)); }
@@ -699,9 +699,9 @@ async function loadSessions() {
             e.stopPropagation();
             const item = e.target.closest(".menu-item"); if (!item) return;
             const action = item.dataset.action; if (!action) return;
-            if (action === "pin" || action === "unpin") { await fetch(`${BACKEND_URL}/api/global-chat/${chat.id}/pin`, { method: "PUT" }); }
-            else if (action === "rename") { const newTitle = prompt("Rename chat:", chat.title); if (!newTitle || !newTitle.trim()) return; await fetch(`${BACKEND_URL}/api/global-chat/${chat.id}/rename`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: newTitle.trim() }) }); }
-            else if (action === "delete") { if (!confirm("Delete chat?")) return; await fetch(`${BACKEND_URL}/api/global-chat/${chat.id}`, { method: "DELETE" }); if (currentChatId === chat.id) { currentChatId = null; document.getElementById("messages").innerHTML = ""; document.querySelector(".chat-box").classList.remove("active"); } }
+            if (action === "pin" || action === "unpin") { await authFetch(`/api/global-chat/${chat.id}/pin`, { method: "PUT" }); }
+            else if (action === "rename") { const newTitle = prompt("Rename chat:", chat.title); if (!newTitle || !newTitle.trim()) return; await authFetch(`/api/global-chat/${chat.id}/rename`, { method: "PUT", body: JSON.stringify({ title: newTitle.trim() }) }); }
+            else if (action === "delete") { if (!confirm("Delete chat?")) return; await authFetch(`/api/global-chat/${chat.id}`, { method: "DELETE" }); if (currentChatId === chat.id) { currentChatId = null; document.getElementById("messages").innerHTML = ""; document.querySelector(".chat-box").classList.remove("active"); } }
             dropdown.style.display = "none"; loadSessions();
         });
         div.addEventListener("click", async (e) => { if (e.target.closest(".menu-wrapper")) return; document.querySelectorAll(".history-item").forEach(el => el.classList.remove("active")); div.classList.add("active"); currentChatId = chat.id; loadChat(chat.id); });
@@ -722,7 +722,7 @@ async function createChat() {
 
 async function loadChat(chatId) {
     try {
-        const res = await fetch(`${BACKEND_URL}/api/global-chat/${chatId}`);
+        const res = await authFetch(`/api/global-chat/${chatId}`);
         if (!res.ok) { console.error("Failed to load chat:", res.status); return; }
         const messages = await res.json();
         const box = document.getElementById("messages");
