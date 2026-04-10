@@ -35,7 +35,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.get("/")
 async def root():
-    return {"status": "online", "service": "DevAssist AI Engine"}
+    return {"status": "online", "service": "DevAssist AI Engine v2"}
 
 @app.get("/health")
 async def health():
