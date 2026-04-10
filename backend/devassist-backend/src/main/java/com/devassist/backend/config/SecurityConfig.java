@@ -27,7 +27,7 @@ public class SecurityConfig {
 
         http
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable()) // CSRF disabled for all endpoints
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/global-chat/**",
                     "/api/upload-doc",
-                    "/ai/**"
+                    "/ai/**"  // All AI endpoints are public
                 ).permitAll()
                 
                 // ===== PUBLIC STATIC ROUTES =====
