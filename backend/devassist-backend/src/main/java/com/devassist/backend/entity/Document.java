@@ -23,7 +23,7 @@ public class Document {
     @Column(name = "file_path")
     private String filePath;
 
-    @Column(name = "created_at")
+    @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
     @Column(name = "user_id")
