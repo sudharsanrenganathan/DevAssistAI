@@ -34,7 +34,6 @@ public class JwtFilter extends OncePerRequestFilter {
                path.startsWith("/api/auth/") || 
                path.startsWith("/api/global-chat/") ||
                path.startsWith("/api/chat/") ||
-               path.equals("/api/rag") ||
                path.equals("/api/upload-doc") ||
                path.equals("/health") ||
                path.equals("/api/health") ||

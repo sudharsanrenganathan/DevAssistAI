@@ -172,11 +172,11 @@ public class AiController {
     // ================================================================
     // RAG ASK — ask question about a specific document (NEW ENDPOINT)
     // ================================================================
-    @PostMapping("/api/rag")
+    @PostMapping("/rag")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> askRagNew(@RequestBody Map<String, Object> request) {
 
-        System.out.println("🔥 /api/rag ENDPOINT HIT");
+        System.out.println("🔥 /ai/rag ENDPOINT HIT");
         
         try {
             // Extract and validate request parameters

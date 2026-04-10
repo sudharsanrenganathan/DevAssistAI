@@ -34,7 +34,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC API ROUTES (no auth required) =====
                 .requestMatchers(
-                    "/api/rag",
                     "/api/global-chat/**",
                     "/api/upload-doc",
                     "/ai/**"
