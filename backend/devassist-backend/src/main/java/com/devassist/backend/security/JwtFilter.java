@@ -30,14 +30,19 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Skip JWT validation for public endpoints
-        return path.startsWith("/ai/") || 
+        boolean shouldSkip = path.startsWith("/ai/") || 
                path.startsWith("/api/auth/") || 
                path.startsWith("/api/global-chat/") ||
                path.startsWith("/api/chat/") ||
                path.equals("/health") ||
                path.equals("/api/health") ||
                path.equals("/");
+        
+        if (shouldSkip) {
+            System.out.println("✅ JWT Filter SKIPPED for path: " + path);
+        }
+        
+        return shouldSkip;
     }
 
     @Override

@@ -177,10 +177,13 @@ public class AiController {
     // ================================================================
     @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping("/rag/{docId}")
+    @ResponseBody
     public ResponseEntity<Map<String, Object>> askRag(
             @PathVariable Long docId,
             @RequestBody QuestionRequest request) {
 
+        System.out.println("🔥 RAG ENDPOINT HIT - DocID: " + docId);
+        
         String question = request.getQuestion();
         if (question == null || question.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Question cannot be empty"));

@@ -23,6 +23,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        JwtFilter jwtFilter = new JwtFilter(jwtUtil);
+
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
@@ -44,11 +46,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // Health check
                 .requestMatchers("/api/health", "/health").permitAll()
-                // Global Chat endpoints - allow with JWT
+                // Global Chat endpoints
                 .requestMatchers("/api/global-chat/**").permitAll()
-                // Chat endpoints - allow with JWT
+                // Chat endpoints
                 .requestMatchers("/api/chat/**").permitAll()
-                // AI endpoints - allow with JWT
+                // AI endpoints - CRITICAL: Must be public for RAG to work
                 .requestMatchers("/ai/**").permitAll()
 
                 // ===== PROTECTED ROUTES (require valid JWT) =====
@@ -57,7 +59,7 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             // Add JWT filter BEFORE Spring's auth filter
-            .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
