@@ -3,6 +3,7 @@ package com.devassist.backend.controller;
 import com.devassist.backend.entity.Document;
 import com.devassist.backend.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
 import com.devassist.backend.entity.*;
 import com.devassist.backend.repository.*;
@@ -174,6 +175,7 @@ public class AiController {
     // ================================================================
     // RAG ASK — ask question about a specific document
     // ================================================================
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping("/rag/{docId}")
     public ResponseEntity<Map<String, Object>> askRag(
             @PathVariable Long docId,
