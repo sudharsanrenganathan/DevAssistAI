@@ -184,7 +184,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
 
 ### 3. Backend Fixes (Java Spring Boot)
 
-- [ ] 3.1 Configure RestTemplate with Timeout and Streaming Support
+- [x] 3.1 Configure RestTemplate with Timeout and Streaming Support
   - **File**: `backend/devassist-backend/src/main/java/com/devassist/backend/AppConfig.java`
   - Create `@Bean` method for RestTemplate configuration
   - Set connection timeout to 10 seconds: `factory.setConnectTimeout(10000)`
@@ -197,7 +197,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Global AI and other endpoints continue to use same RestTemplate with proper timeouts_
   - _Requirements: 1.4, 1.5, 2.4, 3.3_
 
-- [ ] 3.2 Replace RestTemplate.postForObject() with Streaming-Capable Client
+- [x] 3.2 Replace RestTemplate.postForObject() with Streaming-Capable Client
   - **File**: `backend/devassist-backend/src/main/java/com/devassist/backend/controller/AiController.java`
   - **Function**: `askRag()`
   - Remove: `String answer = restTemplate.postForObject(aiUrl, entity, String.class);`
@@ -222,7 +222,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Global AI endpoint continues to use postForObject() for non-streaming responses_
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3_
 
-- [ ] 3.3 Remove Manual URL Encoding from File Path
+- [x] 3.3 Remove Manual URL Encoding from File Path
   - **File**: `backend/devassist-backend/src/main/java/com/devassist/backend/controller/AiController.java`
   - **Function**: `askRag()`
   - Remove: `encodedFilePath = baseUrl + java.net.URLEncoder.encode(filename, "UTF-8").replace("+", "%20");`
@@ -235,7 +235,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Document upload/delete operations continue to work with file paths_
   - _Requirements: 1.7, 1.8, 2.7, 2.8_
 
-- [ ] 3.4 Add Detailed Error Logging with Response Preview
+- [x] 3.4 Add Detailed Error Logging with Response Preview
   - **File**: `backend/devassist-backend/src/main/java/com/devassist/backend/controller/AiController.java`
   - **Function**: `askRag()` catch block
   - Change catch block to log response content
@@ -262,7 +262,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Other error handling continues to work as before_
   - _Requirements: 1.12, 1.13, 2.12, 2.13_
 
-- [ ] 3.5 Fix JWT Filter Order for /ai/** Endpoints
+- [x] 3.5 Fix JWT Filter Order for /ai/** Endpoints
   - **File**: `backend/devassist-backend/src/main/java/com/devassist/backend/config/SecurityConfig.java`
   - **Function**: `filterChain()`
   - Ensure `/ai/**` endpoints skip JWT filter before authentication check
@@ -284,7 +284,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Authentication for protected endpoints continues to work_
   - _Requirements: 1.10, 2.10, 3.1_
 
-- [ ] 3.6 Verify CORS Configuration
+- [x] 3.6 Verify CORS Configuration
   - **File**: `backend/devassist-backend/src/main/java/com/devassist/backend/config/CorsConfig.java`
   - **Function**: `corsConfigurer()`
   - Verify all required headers are included
@@ -316,7 +316,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
 
 ### 4. AI Engine Fixes (Python FastAPI)
 
-- [ ] 4.1 Add Thread-Safe Cache with Locks
+- [x] 4.1 Add Thread-Safe Cache with Locks
   - **File**: `ai-engine/api/api_server.py`
   - **Function**: `rag_ask()`
   - Import threading module: `from threading import Lock`
@@ -341,7 +341,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Cache functionality continues to work, just with thread safety_
   - _Requirements: 1.6, 2.6_
 
-- [ ] 4.2 Improve Error Response Format with Recognizable Markers
+- [x] 4.2 Improve Error Response Format with Recognizable Markers
   - **File**: `ai-engine/api/api_server.py`
   - **Function**: `rag_ask()` exception handler
   - Add structured error responses with "ERROR:" prefix
@@ -362,7 +362,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Error handling continues to work, just with better format_
   - _Requirements: 1.14, 2.14_
 
-- [ ] 4.3 Fix URL Encoding in File Download
+- [x] 4.3 Fix URL Encoding in File Download
   - **File**: `ai-engine/rag/document_loader.py` or `ai-engine/api/api_server.py`
   - **Function**: File download logic in `rag_ask()`
   - Ensure `urllib.request.urlretrieve()` handles encoded URLs correctly

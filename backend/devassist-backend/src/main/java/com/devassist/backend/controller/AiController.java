@@ -8,13 +8,17 @@ import com.devassist.backend.entity.*;
 import com.devassist.backend.repository.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import com.devassist.backend.dto.QuestionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -201,18 +205,15 @@ public class AiController {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            // Use execute() with ResponseExtractor to read full streaming response
-            String answer = restTemplate.execute(aiUrl, org.springframework.http.HttpMethod.POST,
-                request -> {
-                    request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                    mapper.writeValue(request.getBody(), requestBody);
-                },
-                response -> {
-                    // Read entire stream into string
-                    return new String(response.getBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-                }
+            // Use exchange() to get full response with proper timeout handling
+            ResponseEntity<String> response = restTemplate.exchange(
+                aiUrl, 
+                HttpMethod.POST, 
+                entity, 
+                String.class
             );
+            
+            String answer = response.getBody();
             
             if (answer == null || answer.isEmpty()) {
                 throw new RuntimeException("AI returned empty response");
@@ -223,9 +224,8 @@ public class AiController {
             String errorMsg = "RAG request failed: " + e.getMessage();
             
             // Add detailed error logging with response preview
-            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
-                org.springframework.web.client.HttpClientErrorException httpEx = 
-                    (org.springframework.web.client.HttpClientErrorException) e;
+            if (e instanceof HttpClientErrorException) {
+                HttpClientErrorException httpEx = (HttpClientErrorException) e;
                 String responseBody = httpEx.getResponseBodyAsString();
                 String preview = responseBody.length() > 200 
                     ? responseBody.substring(0, 200) + "..." 
