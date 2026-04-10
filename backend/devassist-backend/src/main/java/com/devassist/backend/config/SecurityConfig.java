@@ -72,6 +72,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/global-chat/**").permitAll()
                 // Chat endpoints
                 .requestMatchers("/api/chat/**").permitAll()
+                // NEW RAG endpoint
+                .requestMatchers("/api/rag").permitAll()
 
                 // ===== PROTECTED ROUTES (require valid JWT) =====
                 .anyRequest().authenticated()

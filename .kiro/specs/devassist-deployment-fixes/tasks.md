@@ -314,6 +314,27 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
   - _Preservation: Existing CORS configuration continues to work_
   - _Requirements: 1.11, 2.11, 3.12_
 
+- [x] 3.7 Remove JWT Authentication from Frontend RAG Calls
+  - **File**: `frontend/secret.html`
+  - **Function**: `send()` function
+  - **Issue**: Frontend was using `authFetch()` which automatically adds JWT token to Authorization header
+  - **Problem**: Even though backend JWT filter has `shouldNotFilter()` for `/ai/**` paths, Spring Security was rejecting requests with invalid/expired JWT tokens before reaching the filter
+  - **Solution**: Changed RAG endpoint calls to use regular `fetch()` without authentication
+  - Implementation:
+    ```javascript
+    // Use regular fetch (no auth) for /ai/rag endpoint since it's public
+    const ragUrl = `${BACKEND_URL}/ai/rag/${selectedDocId}`;
+    response = await fetch(ragUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q, model: selectedModel })
+    });
+    ```
+  - _Bug_Condition: isBugCondition(input) where frontend sends JWT token to public endpoint causing 401/403 errors_
+  - _Expected_Behavior: RAG requests succeed without authentication_
+  - _Preservation: Other authenticated endpoints continue to use authFetch()_
+  - _Requirements: 1.10, 2.10, 3.1_
+
 ### 4. AI Engine Fixes (Python FastAPI)
 
 - [x] 4.1 Add Thread-Safe Cache with Locks

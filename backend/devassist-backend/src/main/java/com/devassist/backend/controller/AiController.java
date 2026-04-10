@@ -170,7 +170,89 @@ public class AiController {
     }
 
     // ================================================================
-    // RAG ASK — ask question about a specific document
+    // RAG ASK — ask question about a specific document (NEW ENDPOINT)
+    // ================================================================
+    @PostMapping("/api/rag")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> askRagNew(@RequestBody Map<String, Object> request) {
+
+        System.out.println("🔥 NEW RAG ENDPOINT HIT");
+        
+        String question = (String) request.get("question");
+        String filePath = (String) request.get("file_path");
+        Object sessionId = request.get("session_id");
+        
+        if (question == null || question.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Question cannot be empty"));
+        }
+        
+        if (filePath == null || filePath.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "File path cannot be empty"));
+        }
+
+        System.out.println("📨 NEW RAG Request - Question: " + question);
+        System.out.println("📄 File Path: " + filePath);
+        System.out.println("🔑 Session ID: " + sessionId);
+
+        // Forward to AI Engine
+        String aiUrl = aiEngineUrl + "/rag-ask";
+        Map<String, Object> requestBody = Map.of(
+                "question", question,
+                "file_path", filePath,
+                "session_id", sessionId != null ? sessionId : "default"
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            System.out.println("🚀 Forwarding to AI Engine: " + aiUrl);
+            
+            ResponseEntity<String> response = restTemplate.exchange(
+                aiUrl, 
+                HttpMethod.POST, 
+                entity, 
+                String.class
+            );
+            
+            String answer = response.getBody();
+            System.out.println("✅ Received response from AI Engine (length: " + (answer != null ? answer.length() : 0) + ")");
+            
+            if (answer == null || answer.isEmpty()) {
+                System.out.println("⚠️ AI Engine returned empty response");
+                return ResponseEntity.status(500).body(Map.of("error", "AI returned empty response"));
+            }
+            
+            if (answer.startsWith("ERROR:") || answer.startsWith("❌")) {
+                System.out.println("❌ AI Engine returned error: " + answer);
+                return ResponseEntity.status(500).body(Map.of("error", answer));
+            }
+            
+            return ResponseEntity.ok(Map.of("answer", answer));
+            
+        } catch (HttpClientErrorException e) {
+            String errorMsg = "RAG request failed with HTTP " + e.getStatusCode() + ": " + e.getMessage();
+            String responseBody = e.getResponseBodyAsString();
+            String preview = responseBody.length() > 200 
+                ? responseBody.substring(0, 200) + "..." 
+                : responseBody;
+            errorMsg += " | Response: " + preview;
+            
+            System.out.println("❌ " + errorMsg);
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
+            
+        } catch (Exception e) {
+            String errorMsg = "RAG request failed: " + e.getMessage();
+            System.out.println("❌ " + errorMsg);
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
+        }
+    }
+
+    // ================================================================
+    // RAG ASK — ask question about a specific document (OLD ENDPOINT)
     // ================================================================
     @PostMapping("/rag/{docId}")
     @ResponseBody
