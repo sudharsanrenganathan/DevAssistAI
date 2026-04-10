@@ -33,6 +33,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC ROUTES (no auth required) =====
+                // AI endpoints - CRITICAL: Must be FIRST and public for RAG to work
+                .requestMatchers("/ai/**").permitAll()
                 // Static pages: login, signup, auth-guard, etc.
                 .requestMatchers(
                     "/", "/index.html",
@@ -50,8 +52,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/global-chat/**").permitAll()
                 // Chat endpoints
                 .requestMatchers("/api/chat/**").permitAll()
-                // AI endpoints - CRITICAL: Must be public for RAG to work
-                .requestMatchers("/ai/**").permitAll()
 
                 // ===== PROTECTED ROUTES (require valid JWT) =====
                 .anyRequest().authenticated()
