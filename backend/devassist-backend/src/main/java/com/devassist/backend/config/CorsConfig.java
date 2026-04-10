@@ -17,13 +17,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                            "https://devassist-ai.vercel.app",
-                            "https://devassist-ai-vercel.app",
-                            "http://localhost:3000",
-                            "http://localhost:5173",
-                            "http://127.0.0.1:3000"
-                        )
+                        .allowedOriginPatterns("*")  // Use allowedOriginPatterns instead of allowedOrigins when credentials are enabled
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("Authorization")
