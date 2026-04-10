@@ -175,13 +175,13 @@ public class AiController {
     // RAG ASK — ask question about a specific document
     // ================================================================
     @PostMapping("/rag/{docId}")
-    public Map<String, Object> askRag(
+    public ResponseEntity<Map<String, Object>> askRag(
             @PathVariable Long docId,
             @RequestBody QuestionRequest request) {
 
         String question = request.getQuestion();
         if (question == null || question.isEmpty()) {
-            throw new RuntimeException("Question cannot be empty");
+            return ResponseEntity.badRequest().body(Map.of("error", "Question cannot be empty"));
         }
 
         Document doc = documentRepository.findById(docId)
@@ -189,8 +189,11 @@ public class AiController {
 
         String filePath = doc.getFilePath();
         if (filePath == null || filePath.isEmpty()) {
-            throw new RuntimeException("Invalid file path");
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid file path"));
         }
+
+        System.out.println("📨 RAG Request - DocID: " + docId + " | Question: " + question);
+        System.out.println("📄 File Path: " + filePath);
 
         // Send raw file path - let HTTP client handle encoding
         String aiUrl = aiEngineUrl + "/rag-ask";
@@ -205,6 +208,8 @@ public class AiController {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
+            System.out.println("🚀 Sending request to AI Engine: " + aiUrl);
+            
             // Use exchange() to get full response with proper timeout handling
             ResponseEntity<String> response = restTemplate.exchange(
                 aiUrl, 
@@ -214,28 +219,38 @@ public class AiController {
             );
             
             String answer = response.getBody();
+            System.out.println("✅ Received response from AI Engine (length: " + (answer != null ? answer.length() : 0) + ")");
             
             if (answer == null || answer.isEmpty()) {
-                throw new RuntimeException("AI returned empty response");
+                System.out.println("⚠️ AI Engine returned empty response");
+                return ResponseEntity.status(500).body(Map.of("error", "AI returned empty response"));
             }
             
-            return Map.of("answer", answer);
-        } catch (Exception e) {
-            String errorMsg = "RAG request failed: " + e.getMessage();
-            
-            // Add detailed error logging with response preview
-            if (e instanceof HttpClientErrorException) {
-                HttpClientErrorException httpEx = (HttpClientErrorException) e;
-                String responseBody = httpEx.getResponseBodyAsString();
-                String preview = responseBody.length() > 200 
-                    ? responseBody.substring(0, 200) + "..." 
-                    : responseBody;
-                errorMsg += " | Response: " + preview;
+            // Check if response is an error message
+            if (answer.startsWith("ERROR:") || answer.startsWith("❌")) {
+                System.out.println("❌ AI Engine returned error: " + answer);
+                return ResponseEntity.status(500).body(Map.of("error", answer));
             }
+            
+            return ResponseEntity.ok(Map.of("answer", answer));
+            
+        } catch (HttpClientErrorException e) {
+            String errorMsg = "RAG request failed with HTTP " + e.getStatusCode() + ": " + e.getMessage();
+            String responseBody = e.getResponseBodyAsString();
+            String preview = responseBody.length() > 200 
+                ? responseBody.substring(0, 200) + "..." 
+                : responseBody;
+            errorMsg += " | Response: " + preview;
             
             System.out.println("❌ " + errorMsg);
             e.printStackTrace();
-            throw new RuntimeException(errorMsg);
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
+            
+        } catch (Exception e) {
+            String errorMsg = "RAG request failed: " + e.getMessage();
+            System.out.println("❌ " + errorMsg);
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
         }
     }
 
