@@ -28,23 +28,23 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // Skip JWT validation for public endpoints
+        return path.startsWith("/ai/") || 
+               path.startsWith("/api/auth/") || 
+               path.startsWith("/api/global-chat/") ||
+               path.startsWith("/api/chat/") ||
+               path.equals("/health") ||
+               path.equals("/api/health") ||
+               path.equals("/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-
-        String path = request.getRequestURI();
-        
-        // Skip JWT validation for public endpoints
-        if (path.startsWith("/ai/") || 
-            path.startsWith("/api/auth/") || 
-            path.startsWith("/api/global-chat/") ||
-            path.startsWith("/api/chat/") ||
-            path.equals("/health") ||
-            path.equals("/api/health")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String authHeader = request.getHeader("Authorization");
 

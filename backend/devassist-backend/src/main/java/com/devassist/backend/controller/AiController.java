@@ -46,7 +46,8 @@ public class AiController {
     @Value("${ai.engine.url:http://127.0.0.1:8000}")
     private String aiEngineUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private RestTemplate restTemplate;
 
     // ================================================================
     // UPLOAD DOCUMENT — saves to disk + DB + forwards to FastAPI
@@ -187,24 +188,11 @@ public class AiController {
             throw new RuntimeException("Invalid file path");
         }
 
-        // URL encode the file path to handle spaces and special characters
-        String encodedFilePath = filePath;
-        try {
-            // Only encode the filename part after the last slash
-            int lastSlash = filePath.lastIndexOf('/');
-            if (lastSlash >= 0) {
-                String baseUrl = filePath.substring(0, lastSlash + 1);
-                String filename = filePath.substring(lastSlash + 1);
-                encodedFilePath = baseUrl + java.net.URLEncoder.encode(filename, "UTF-8").replace("+", "%20");
-            }
-        } catch (Exception e) {
-            System.out.println("⚠ Failed to encode file path: " + e.getMessage());
-        }
-
+        // Send raw file path - let HTTP client handle encoding
         String aiUrl = aiEngineUrl + "/rag-ask";
         Map<String, Object> requestBody = Map.of(
                 "question", question,
-                "file_path", encodedFilePath,
+                "file_path", filePath,  // Raw path, no manual encoding
                 "session_id", docId // Using docId as session_id for document-specific context
         );
 
@@ -213,8 +201,18 @@ public class AiController {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            // AI Engine returns streaming text, not JSON
-            String answer = restTemplate.postForObject(aiUrl, entity, String.class);
+            // Use execute() with ResponseExtractor to read full streaming response
+            String answer = restTemplate.execute(aiUrl, org.springframework.http.HttpMethod.POST,
+                request -> {
+                    request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    mapper.writeValue(request.getBody(), requestBody);
+                },
+                response -> {
+                    // Read entire stream into string
+                    return new String(response.getBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                }
+            );
             
             if (answer == null || answer.isEmpty()) {
                 throw new RuntimeException("AI returned empty response");
@@ -222,9 +220,22 @@ public class AiController {
             
             return Map.of("answer", answer);
         } catch (Exception e) {
-            System.out.println("❌ RAG request failed: " + e.getMessage());
+            String errorMsg = "RAG request failed: " + e.getMessage();
+            
+            // Add detailed error logging with response preview
+            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
+                org.springframework.web.client.HttpClientErrorException httpEx = 
+                    (org.springframework.web.client.HttpClientErrorException) e;
+                String responseBody = httpEx.getResponseBodyAsString();
+                String preview = responseBody.length() > 200 
+                    ? responseBody.substring(0, 200) + "..." 
+                    : responseBody;
+                errorMsg += " | Response: " + preview;
+            }
+            
+            System.out.println("❌ " + errorMsg);
             e.printStackTrace();
-            throw new RuntimeException("AI Engine error: " + e.getMessage());
+            throw new RuntimeException(errorMsg);
         }
     }
 

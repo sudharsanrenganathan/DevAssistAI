@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from threading import Lock
 import os
 
 # ABSOLUTE MINIMAL STARTUP - ALL LIBRARIES LOADED ON-DEMAND
@@ -11,10 +12,13 @@ try:
 except ImportError:
     pass
 
-# ========================= CACHE =========================
+# ========================= CACHE (THREAD-SAFE) =========================
 rag_cache = {}
+rag_cache_lock = Lock()
 doc_chat_history = {}
+doc_history_lock = Lock()
 global_chat_history = {}
+global_history_lock = Lock()
 
 app = FastAPI()
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8080")
@@ -134,31 +138,33 @@ async def global_ai(request: AIRequest):
     session_key = str(request.session_id) if request.session_id else "default"
     print(f"🌍 Global AI | Session: {session_key} | Q: {request.question}")
 
-    # In-memory per-chat history
-    if session_key not in global_chat_history:
-        global_chat_history[session_key] = []
-        # ✅ PERSIST FIX: Load existing messages from DB via Spring Boot API
-        if request.session_id:
-            try:
-                import urllib.request, json as _json
-                db_url = f"{BACKEND_URL}/api/global-chat/{request.session_id}"
-                req = urllib.request.Request(db_url)
-                with urllib.request.urlopen(req, timeout=3) as resp:
-                    db_msgs = _json.loads(resp.read().decode())
-                i = 0
-                while i < len(db_msgs) - 1:
-                    if db_msgs[i].get("role") == "user" and db_msgs[i+1].get("role") == "ai":
-                        global_chat_history[session_key].append({
-                            "q": db_msgs[i]["content"],
-                            "a": db_msgs[i+1]["content"]
-                        })
-                        i += 2
-                    else:
-                        i += 1
-                print(f"📥 Loaded {len(global_chat_history[session_key])} global history pairs from DB for session {session_key}")
-            except Exception as e:
-                print(f"⚠ Could not load global history from DB: {e}")
-    history = global_chat_history[session_key]
+    # In-memory per-chat history (thread-safe)
+    with global_history_lock:
+        if session_key not in global_chat_history:
+            global_chat_history[session_key] = []
+            # ✅ PERSIST FIX: Load existing messages from DB via Spring Boot API
+            if request.session_id:
+                try:
+                    import urllib.request, json as _json
+                    db_url = f"{BACKEND_URL}/api/global-chat/{request.session_id}"
+                    req = urllib.request.Request(db_url)
+                    with urllib.request.urlopen(req, timeout=3) as resp:
+                        db_msgs = _json.loads(resp.read().decode())
+                    i = 0
+                    while i < len(db_msgs) - 1:
+                        if db_msgs[i].get("role") == "user" and db_msgs[i+1].get("role") == "ai":
+                            global_chat_history[session_key].append({
+                                "q": db_msgs[i]["content"],
+                                "a": db_msgs[i+1]["content"]
+                            })
+                            i += 2
+                        else:
+                            i += 1
+                    print(f"📥 Loaded {len(global_chat_history[session_key])} global history pairs from DB for session {session_key}")
+                except Exception as e:
+                    print(f"⚠ Could not load global history from DB: {e}")
+        history = global_chat_history[session_key]
+    
     print(f"📜 Global history length: {len(history)}")
 
     # Build conversation history string
@@ -181,26 +187,33 @@ User: {request.question}"""
     else:
         full_prompt = request.question
 
-    from services.global_ai import global_chat
-    answer = global_chat(
-        full_prompt,
-        request.file_text,
-        request.has_file,
-        request.model
-    )
-
-    # Save to in-memory history
-    history.append({"q": request.question, "a": answer})
-    print(f"✅ Global history saved. New length: {len(history)}")
-
-    # Also save to DB for persistence
     try:
-        session_int = int(request.session_id) if request.session_id else 1
-        save_chat(session_int, request.question, answer)
-    except Exception as e:
-        print(f"⚠ DB save failed (non-critical): {e}")
+        from services.global_ai import global_chat
+        answer = global_chat(
+            full_prompt,
+            request.file_text,
+            request.has_file,
+            request.model
+        )
 
-    return {"answer": answer}
+        # Save to in-memory history (thread-safe)
+        with global_history_lock:
+            history.append({"q": request.question, "a": answer})
+        print(f"✅ Global history saved. New length: {len(history)}")
+
+        # Also save to DB for persistence
+        try:
+            session_int = int(request.session_id) if request.session_id else 1
+            save_chat(session_int, request.question, answer)
+        except Exception as e:
+            print(f"⚠ DB save failed (non-critical): {e}")
+
+        return {"answer": answer}
+    
+    except Exception as e:
+        error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
+        print(f"❌ global_ai ERROR: {error_msg}")
+        return {"error": error_msg}
 
 # ========================= LOCAL AI =========================
 @app.post("/local-ai")
@@ -280,6 +293,7 @@ async def upload_doc(file: UploadFile = File(...)):
 async def rag_ask(request: RagRequest):
     from rag.question_answering import ask_question_stream
     import base64
+    import urllib.parse
     try:
         print("📨 Question:", request.question)
         print("📄 File:", request.file_path)
@@ -290,24 +304,33 @@ async def rag_ask(request: RagRequest):
         if file_path.startswith("http"):
             print(f"🌐 Remote document detected: {file_path}")
             import urllib.request, uuid
+            
+            # Decode URL if it's already encoded (fix double encoding)
+            decoded_url = urllib.parse.unquote(file_path)
+            
             local_filename = f"remote_{uuid.uuid4()}.pdf"
             local_path = os.path.join(UPLOAD_DIR, local_filename)
             try:
-                urllib.request.urlretrieve(file_path, local_path)
+                urllib.request.urlretrieve(decoded_url, local_path)
                 file_path = local_path
                 print(f"📥 Downloaded to: {file_path}")
             except Exception as download_err:
-                print(f"❌ Download failed: {download_err}")
+                error_msg = f"ERROR: DownloadError: Failed to download document from storage: {str(download_err)}"
+                print(f"❌ {error_msg}")
                 return StreamingResponse(
-                    iter([f"❌ Failed to download document from storage: {str(download_err)}"]),
-                    media_type="text/plain"
+                    iter([error_msg]),
+                    media_type="text/plain",
+                    status_code=500
                 )
 
         # ✅ FIX: validate file exists and is real PDF before processing
         if not os.path.exists(file_path):
+            error_msg = "ERROR: FileNotFoundError: File not found. Please re-upload your document."
+            print(f"❌ {error_msg}")
             return StreamingResponse(
-                iter(["❌ File not found. Please re-upload your document."]),
-                media_type="text/plain"
+                iter([error_msg]),
+                media_type="text/plain",
+                status_code=404
             )
 
         with open(file_path, "rb") as f:
@@ -324,84 +347,102 @@ async def rag_ask(request: RagRequest):
                         f.write(decoded)
                     print("✅ Fixed corrupted PDF in-place")
                     # Clear cache so it rebuilds
-                    rag_cache.pop(file_path, None)
+                    with rag_cache_lock:
+                        rag_cache.pop(file_path, None)
                 else:
+                    error_msg = "ERROR: CorruptedFileError: This file appears corrupted. Please re-upload a valid PDF."
+                    print(f"❌ {error_msg}")
                     return StreamingResponse(
-                        iter(["❌ This file appears corrupted. Please re-upload a valid PDF."]),
-                        media_type="text/plain"
+                        iter([error_msg]),
+                        media_type="text/plain",
+                        status_code=400
                     )
             except Exception:
+                error_msg = "ERROR: CorruptedFileError: This file appears corrupted. Please re-upload a valid PDF."
+                print(f"❌ {error_msg}")
                 return StreamingResponse(
-                    iter(["❌ This file appears corrupted. Please re-upload a valid PDF."]),
-                    media_type="text/plain"
+                    iter([error_msg]),
+                    media_type="text/plain",
+                    status_code=400
                 )
 
-        # Cache check
-        if file_path in rag_cache:
-            print("⚡ Using cached vector store")
-            rag_index, rag_chunks, rag_model = rag_cache[file_path]
-        else:
-            print("⏳ Creating new vector store")
-            from rag.vector_store import create_vector_store
-            rag_index, rag_chunks, rag_model = create_vector_store(file_path)
-            rag_cache[file_path] = (rag_index, rag_chunks, rag_model)
+        # Cache check (thread-safe)
+        with rag_cache_lock:
+            if file_path in rag_cache:
+                print("⚡ Using cached vector store")
+                rag_index, rag_chunks, rag_model = rag_cache[file_path]
+            else:
+                print("⏳ Creating new vector store")
+                from rag.vector_store import create_vector_store
+                rag_index, rag_chunks, rag_model = create_vector_store(file_path)
+                rag_cache[file_path] = (rag_index, rag_chunks, rag_model)
 
-        # Chat history keyed by session_id (per-chat memory)
+        # Chat history keyed by session_id (per-chat memory, thread-safe)
         session_key = str(request.session_id) if request.session_id else file_path
         print(f"🔑 Session key: {session_key}")
         
-        # Initialize history list in dict if not present (ensures same list reference)
-        if session_key not in doc_chat_history:
-            doc_chat_history[session_key] = []
-            # ✅ PERSIST FIX: Load existing messages from DB via Spring Boot API
-            if request.session_id:
-                try:
-                    import urllib.request, json as _json
-                    db_url = f"{BACKEND_URL}/api/chat/{request.session_id}"
-                    req = urllib.request.Request(db_url)
-                    with urllib.request.urlopen(req, timeout=3) as resp:
-                        db_msgs = _json.loads(resp.read().decode())
-                    # Pair user+ai messages into history entries
-                    i = 0
-                    while i < len(db_msgs) - 1:
-                        if db_msgs[i].get("role") == "user" and db_msgs[i+1].get("role") == "ai":
-                            doc_chat_history[session_key].append({
-                                "q": db_msgs[i]["content"],
-                                "a": db_msgs[i+1]["content"]
-                            })
-                            i += 2
-                        else:
-                            i += 1
-                    print(f"📥 Loaded {len(doc_chat_history[session_key])} history pairs from DB for session {session_key}")
-                except Exception as e:
-                    print(f"⚠ Could not load history from DB: {e}")
-        history = doc_chat_history[session_key]
+        # Initialize history list in dict if not present (thread-safe)
+        with doc_history_lock:
+            if session_key not in doc_chat_history:
+                doc_chat_history[session_key] = []
+                # ✅ PERSIST FIX: Load existing messages from DB via Spring Boot API
+                if request.session_id:
+                    try:
+                        import urllib.request, json as _json
+                        db_url = f"{BACKEND_URL}/api/chat/{request.session_id}"
+                        req = urllib.request.Request(db_url)
+                        with urllib.request.urlopen(req, timeout=3) as resp:
+                            db_msgs = _json.loads(resp.read().decode())
+                        # Pair user+ai messages into history entries
+                        i = 0
+                        while i < len(db_msgs) - 1:
+                            if db_msgs[i].get("role") == "user" and db_msgs[i+1].get("role") == "ai":
+                                doc_chat_history[session_key].append({
+                                    "q": db_msgs[i]["content"],
+                                    "a": db_msgs[i+1]["content"]
+                                })
+                                i += 2
+                            else:
+                                i += 1
+                        print(f"📥 Loaded {len(doc_chat_history[session_key])} history pairs from DB for session {session_key}")
+                    except Exception as e:
+                        print(f"⚠ Could not load history from DB: {e}")
+            history = doc_chat_history[session_key]
+        
         print(f"📜 Chat history length: {len(history)}")
 
         def generate():
             full_answer = ""
-            for chunk in ask_question_stream(
-                request.question,
-                rag_index,
-                rag_chunks,
-                rag_model,
-                model_name=request.model,
-                chat_history=list(history)  # pass a snapshot so it doesn't change mid-stream
-            ):
-                full_answer += chunk
-                yield chunk
+            try:
+                for chunk in ask_question_stream(
+                    request.question,
+                    rag_index,
+                    rag_chunks,
+                    rag_model,
+                    model_name=request.model,
+                    chat_history=list(history)  # pass a snapshot so it doesn't change mid-stream
+                ):
+                    full_answer += chunk
+                    yield chunk
 
-            # Append to the shared list reference (already in doc_chat_history)
-            history.append({"q": request.question, "a": full_answer})
-            print(f"✅ Saved to history. New length: {len(history)}")
+                # Append to the shared list reference (thread-safe)
+                with doc_history_lock:
+                    history.append({"q": request.question, "a": full_answer})
+                print(f"✅ Saved to history. New length: {len(history)}")
+            except Exception as e:
+                error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
+                print(f"❌ generate ERROR: {error_msg}")
+                yield error_msg
 
         return StreamingResponse(generate(), media_type="text/plain")
 
     except Exception as e:
-        print("❌ rag_ask ERROR:", str(e))
+        error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
+        print(f"❌ rag_ask ERROR: {error_msg}")
         return StreamingResponse(
-            iter([f"❌ Error processing document: {str(e)}"]),
-            media_type="text/plain"
+            iter([error_msg]),
+            media_type="text/plain",
+            status_code=500
         )
 
 # ========================= CODE ANALYZER =========================
