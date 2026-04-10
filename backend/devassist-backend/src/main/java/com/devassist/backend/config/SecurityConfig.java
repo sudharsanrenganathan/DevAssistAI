@@ -5,6 +5,7 @@ import com.devassist.backend.security.JwtUtil;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,7 +21,28 @@ public class SecurityConfig {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * Security filter chain for /ai/** endpoints - completely public, no authentication required
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain aiSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/ai/**")
+            .cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
+            );
+        
+        return http.build();
+    }
+
+    /**
+     * Main security filter chain for all other endpoints
+     */
+    @Bean
+    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         JwtFilter jwtFilter = new JwtFilter(jwtUtil);
@@ -33,9 +55,6 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC ROUTES (no auth required) =====
-                // AI endpoints - MUST be first to take precedence
-                .requestMatchers("/ai/**").permitAll()
-                
                 // Static pages: login, signup, auth-guard, etc.
                 .requestMatchers(
                     "/", "/index.html",
