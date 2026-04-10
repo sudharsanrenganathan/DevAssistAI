@@ -3,7 +3,6 @@ package com.devassist.backend.controller;
 import com.devassist.backend.entity.Document;
 import com.devassist.backend.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
 import com.devassist.backend.entity.*;
 import com.devassist.backend.repository.*;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import com.devassist.backend.dto.QuestionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -175,7 +172,6 @@ public class AiController {
     // ================================================================
     // RAG ASK — ask question about a specific document
     // ================================================================
-    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping("/rag/{docId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> askRag(
