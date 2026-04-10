@@ -82,13 +82,20 @@ public class GlobalChatController {
     @PutMapping("/{chatId}/rename")
     public ResponseEntity<?> renameChat(@PathVariable Long chatId,
                                         @RequestBody Map<String, String> body) {
-        GlobalChatThread chat = chatRepository.findById(chatId).orElseThrow();
-        String newTitle = body.get("title");
-        if (newTitle != null && !newTitle.trim().isEmpty()) {
-            chat.setTitle(newTitle.trim());
+        try {
+            GlobalChatThread chat = chatRepository.findById(chatId)
+                    .orElseThrow(() -> new RuntimeException("Chat not found: " + chatId));
+            String newTitle = body.get("title");
+            if (newTitle != null && !newTitle.trim().isEmpty()) {
+                chat.setTitle(newTitle.trim());
+            }
+            chatRepository.save(chat);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.out.println("❌ renameChat error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
-        chatRepository.save(chat);
-        return ResponseEntity.ok().build();
     }
 
     // ✅ SAVE MESSAGE
