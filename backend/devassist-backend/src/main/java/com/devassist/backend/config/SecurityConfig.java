@@ -31,10 +31,10 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            // Completely bypass security for /ai/** paths
+            .securityMatcher(request -> !request.getRequestURI().startsWith("/ai/"))
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC ROUTES (no auth required) =====
-                // AI endpoints - CRITICAL: Must be FIRST and public for RAG to work
-                .requestMatchers("/ai/**").permitAll()
                 // Static pages: login, signup, auth-guard, etc.
                 .requestMatchers(
                     "/", "/index.html",
