@@ -187,10 +187,24 @@ public class AiController {
             throw new RuntimeException("Invalid file path");
         }
 
+        // URL encode the file path to handle spaces and special characters
+        String encodedFilePath = filePath;
+        try {
+            // Only encode the filename part after the last slash
+            int lastSlash = filePath.lastIndexOf('/');
+            if (lastSlash >= 0) {
+                String baseUrl = filePath.substring(0, lastSlash + 1);
+                String filename = filePath.substring(lastSlash + 1);
+                encodedFilePath = baseUrl + java.net.URLEncoder.encode(filename, "UTF-8").replace("+", "%20");
+            }
+        } catch (Exception e) {
+            System.out.println("⚠ Failed to encode file path: " + e.getMessage());
+        }
+
         String aiUrl = aiEngineUrl + "/rag-ask";
         Map<String, Object> requestBody = Map.of(
                 "question", question,
-                "file_path", filePath,
+                "file_path", encodedFilePath,
                 "session_id", docId // Using docId as session_id for document-specific context
         );
 
