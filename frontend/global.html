@@ -810,7 +810,7 @@ async function loadSessions() {
             else if (action === "rename") { const newTitle = prompt("Rename chat:", chat.title); if (!newTitle || !newTitle.trim()) return; await authFetch(`/api/global-chat/${chat.id}/rename`, { method: "PUT", body: JSON.stringify({ title: newTitle.trim() }) }); }
             else if (action === "delete") { if (!confirm("Delete chat?")) return; await authFetch(`/api/global-chat/${chat.id}`, { method: "DELETE" }); if (currentChatId === chat.id) { currentChatId = null; document.getElementById("messages").innerHTML = ""; document.querySelector(".chat-box").classList.remove("active"); } }
             dropdown.style.display = "none"; loadSessions();
-        });
+        };
         div.onclick = async (e) => { if (e.target.closest(".menu-wrapper")) return; document.querySelectorAll(".history-item").forEach(el => el.classList.remove("active")); div.classList.add("active"); currentChatId = chat.id; loadChat(chat.id); };
         container.appendChild(div);
         if (chat.id === currentChatId) div.classList.add("active");
