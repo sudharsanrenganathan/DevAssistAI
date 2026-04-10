@@ -31,10 +31,11 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // Completely bypass security for /ai/** paths
-            .securityMatcher(request -> !request.getRequestURI().startsWith("/ai/"))
             .authorizeHttpRequests(auth -> auth
                 // ===== PUBLIC ROUTES (no auth required) =====
+                // AI endpoints - MUST be first to take precedence
+                .requestMatchers("/ai/**").permitAll()
+                
                 // Static pages: login, signup, auth-guard, etc.
                 .requestMatchers(
                     "/", "/index.html",
