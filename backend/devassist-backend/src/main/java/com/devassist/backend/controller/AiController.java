@@ -198,18 +198,20 @@ public class AiController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-        Map<String, Object> response;
         try {
-            response = restTemplate.postForObject(aiUrl, entity, Map.class);
+            // AI Engine returns streaming text, not JSON
+            String answer = restTemplate.postForObject(aiUrl, entity, String.class);
+            
+            if (answer == null || answer.isEmpty()) {
+                throw new RuntimeException("AI returned empty response");
+            }
+            
+            return Map.of("answer", answer);
         } catch (Exception e) {
-            throw new RuntimeException("FastAPI server not running");
+            System.out.println("❌ RAG request failed: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("AI Engine error: " + e.getMessage());
         }
-
-        if (response == null || response.get("answer") == null) {
-            throw new RuntimeException("AI not responding");
-        }
-
-        return response;
     }
 
     // ================================================================
