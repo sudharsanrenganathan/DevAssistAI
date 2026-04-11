@@ -23,12 +23,27 @@ public class VmDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        loadQuestions();
-        System.out.println("✅ VoidMain data loaded");
+        try {
+            loadQuestions();
+            System.out.println("✅ VoidMain data loaded");
+        } catch (Exception e) {
+            System.out.println("⚠ Failed to load VoidMain data: " + e.getMessage());
+        }
     }
 
     private void loadQuestions() {
         String[] folders = {"easy", "medium", "hard"};
+        
+        // Single remote query to prevent N+1 query latency (150s startup timeout risk on Render)
+        Set<String> existingIds = new HashSet<>();
+        try {
+            for (VmProblem p : problemRepo.findAll()) {
+                existingIds.add(p.getId());
+            }
+        } catch (Exception e) {
+            System.out.println("⚠ Could not fetch existing problems: " + e.getMessage());
+            return;
+        }
 
         for (String folder : folders) {
             try {
@@ -76,10 +91,11 @@ public class VmDataLoader implements CommandLineRunner {
                             }
                         }
 
-                        if (!id.isEmpty() && !problemRepo.existsById(id)) {
+                        if (!id.isEmpty() && !existingIds.contains(id)) {
                             VmProblem problem = new VmProblem(id, title, difficulty,
                                     description.toString(), fullContent);
                             problemRepo.save(problem);
+                            existingIds.add(id); // track locally
                         }
 
                     } catch (Exception e) {
