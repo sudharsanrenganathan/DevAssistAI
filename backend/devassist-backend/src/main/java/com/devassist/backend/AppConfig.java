@@ -11,8 +11,8 @@ public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(10000);  // 10 seconds connection timeout
-        factory.setReadTimeout(120000);    // 120 seconds read timeout (prevent 500 error on Render cold start)
+        factory.setConnectTimeout(60000); // 60 seconds
+        factory.setReadTimeout(300000);   // 5 minutes read timeout (prevent 500 error on Render cold start)
         return new RestTemplate(factory);
     }
 }

@@ -375,16 +375,21 @@ async def rag_ask(request: RagRequest):
                     status_code=400
                 )
 
-        # Cache check (thread-safe)
+        # Cache check (thread-safe) - Bybass FAISS/RAG to avoid Render timeouts + OOM
+        # Instead of heavy PyTorch embeddings, we extract text and send it directly to the LLM
         with rag_cache_lock:
             if file_path in rag_cache:
-                print("⚡ Using cached vector store")
-                rag_index, rag_chunks, rag_model = rag_cache[file_path]
+                print("⚡ Using previously loaded document text")
+                doc_text = rag_cache[file_path]
             else:
-                print("⏳ Creating new vector store")
-                from rag.vector_store import create_vector_store
-                rag_index, rag_chunks, rag_model = create_vector_store(file_path)
-                rag_cache[file_path] = (rag_index, rag_chunks, rag_model)
+                print("⏳ Extracting document text")
+                from rag.document_loader import load_pdf
+                doc_text = load_pdf(file_path)
+                # Keep text within token limits to avoid LLM context overflow
+                doc_text = doc_text[:30000] 
+                rag_cache[file_path] = doc_text
+                # Free memory immediately
+                gc.collect()
 
         # Chat history keyed by session_id (per-chat memory, thread-safe)
         session_key = str(request.session_id) if request.session_id else file_path
@@ -394,11 +399,11 @@ async def rag_ask(request: RagRequest):
         with doc_history_lock:
             if session_key not in doc_chat_history:
                 doc_chat_history[session_key] = []
-                # ✅ PERSIST FIX: Load existing messages from DB via Spring Boot API
+                # Load existing messages from DB via Spring Boot API
                 if request.session_id:
                     try:
                         import urllib.request, json as _json
-                        db_url = f"{BACKEND_URL}/api/chat/{request.session_id}"
+                        db_url = f"{BACKEND_URL}/api/messages/{request.session_id}"
                         req = urllib.request.Request(db_url)
                         with urllib.request.urlopen(req, timeout=3) as resp:
                             db_msgs = _json.loads(resp.read().decode())
@@ -421,23 +426,42 @@ async def rag_ask(request: RagRequest):
         print(f"📜 Chat history length: {len(history)}")
 
         def generate():
-            full_answer = ""
             try:
-                for chunk in ask_question_stream(
-                    request.question,
-                    rag_index,
-                    rag_chunks,
-                    rag_model,
-                    model_name=request.model,
-                    chat_history=list(history)  # pass a snapshot so it doesn't change mid-stream
-                ):
-                    full_answer += chunk
-                    yield chunk
+                # Build context
+                history_text = ""
+                if history:
+                    history_lines = []
+                    for h in history[-5:]:
+                        history_lines.append(f"User: {h['q']}")
+                        ans = h['a'][:300] if len(h['a']) > 300 else h['a']
+                        history_lines.append(f"Assistant: {ans}")
+                    history_text = "\n".join(history_lines)
+                
+                full_prompt = f"""<document>
+{doc_text}
+</document>
+
+<conversation_history>
+{history_text}
+</conversation_history>
+
+User: {request.question}"""
+
+                from services.global_ai import global_chat
+                full_answer = global_chat(
+                    full_prompt,
+                    None,
+                    False,
+                    request.model
+                )
+                
+                yield full_answer
 
                 # Append to the shared list reference (thread-safe)
                 with doc_history_lock:
                     history.append({"q": request.question, "a": full_answer})
                 print(f"✅ Saved to history. New length: {len(history)}")
+                
             except Exception as e:
                 error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
                 print(f"❌ generate ERROR: {error_msg}")
