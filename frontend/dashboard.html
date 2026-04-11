@@ -1041,7 +1041,7 @@
             if (userId === "null") userId = "Guest";
 
             try {
-                await fetch("/api/activity/log", {
+                await fetch(`${BACKEND_URL}/api/activity/log`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ userId, toolName, pageUrl, icon })
@@ -1056,7 +1056,7 @@
             if (userId === "null") userId = "Guest";
 
             try {
-                const res = await fetch(`/api/activity/recent/${userId}`);
+                const res = await fetch(`${BACKEND_URL}/api/activity/recent/${userId}`);
                 const data = await res.json();
                 const container = document.getElementById("recentActivityContainer");
                 const listSection = document.getElementById("recentList");
