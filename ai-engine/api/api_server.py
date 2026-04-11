@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from threading import Lock
 import os
+# Prevent PyTorch from spawning many threads and causing out of memory on Render Free Tier
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+import gc
 
 # ABSOLUTE MINIMAL STARTUP - ALL LIBRARIES LOADED ON-DEMAND
 
@@ -282,6 +287,10 @@ async def upload_doc(file: UploadFile = File(...)):
         rag_cache[file_path] = (rag_index, rag_chunks, rag_model)
 
         print("✅ RAG index created")
+        
+        # Free up memory immediately after heavy model activity
+        gc.collect()
+        
         return {"message": "Document processed successfully", "file_path": file_path}
 
     except Exception as e:
@@ -433,6 +442,8 @@ async def rag_ask(request: RagRequest):
                 error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
                 print(f"❌ generate ERROR: {error_msg}")
                 yield error_msg
+            finally:
+                gc.collect()
 
         return StreamingResponse(generate(), media_type="text/plain")
 
