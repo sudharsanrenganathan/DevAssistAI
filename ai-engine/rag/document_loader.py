@@ -21,8 +21,13 @@ def load_pdf(file_path):
     try:
         if file_path.startswith("http://") or file_path.startswith("https://"):
             import urllib.request
+            import urllib.parse
             import io
-            req = urllib.request.Request(file_path, headers={'User-Agent': 'Mozilla/5.0'})
+            
+            # URL encode the path to handle spaces (common in uploaded files)
+            safe_url = urllib.parse.quote(file_path, safe=":/_.-?=&")
+            
+            req = urllib.request.Request(safe_url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=10) as response:
                 pdf_bytes = response.read()
             reader = PdfReader(io.BytesIO(pdf_bytes))
