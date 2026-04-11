@@ -10,7 +10,7 @@ This implementation plan follows the exploratory bugfix workflow: Explore → Pr
 
 ### 1. Write Bug Condition Exploration Tests
 
-- [ ] 1.1 Streaming Response Bug Exploration Test
+- [-] 1.1 Streaming Response Bug Exploration Test
   - **Property 1: Bug Condition** - Streaming Response Handling Failure
   - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
   - **DO NOT attempt to fix the test or the code when it fails**
