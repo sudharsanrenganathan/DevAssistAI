@@ -314,13 +314,21 @@ async def rag_ask(request: RagRequest):
             print(f"🌐 Remote document detected: {file_path}")
             import urllib.request, uuid
             
-            # Decode URL if it's already encoded (fix double encoding)
+            # Properly encode URL: decode first to normalize, then re-encode only the path
             decoded_url = urllib.parse.unquote(file_path)
+            parsed = urllib.parse.urlparse(decoded_url)
+            # Re-encode the path portion so spaces become %20
+            encoded_path = urllib.parse.quote(parsed.path, safe="/:@!$&'()*+,;=-._~")
+            safe_url = urllib.parse.urlunparse((parsed.scheme, parsed.netloc, encoded_path, parsed.params, parsed.query, parsed.fragment))
+            print(f"🔗 Encoded URL: {safe_url}")
             
             local_filename = f"remote_{uuid.uuid4()}.pdf"
             local_path = os.path.join(UPLOAD_DIR, local_filename)
             try:
-                urllib.request.urlretrieve(decoded_url, local_path)
+                req = urllib.request.Request(safe_url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=30) as response:
+                    with open(local_path, 'wb') as out_file:
+                        out_file.write(response.read())
                 file_path = local_path
                 print(f"📥 Downloaded to: {file_path}")
             except Exception as download_err:
@@ -427,7 +435,7 @@ async def rag_ask(request: RagRequest):
 
         def generate():
             try:
-                # Build context
+                # Build context with history
                 history_text = ""
                 if history:
                     history_lines = []
@@ -437,21 +445,21 @@ async def rag_ask(request: RagRequest):
                         history_lines.append(f"Assistant: {ans}")
                     history_text = "\n".join(history_lines)
                 
-                full_prompt = f"""<document>
-{doc_text}
-</document>
-
-<conversation_history>
+                # Build question with history context
+                if history_text:
+                    question_with_history = f"""<conversation_history>
 {history_text}
 </conversation_history>
 
 User: {request.question}"""
+                else:
+                    question_with_history = request.question
 
                 from services.global_ai import global_chat
                 full_answer = global_chat(
-                    full_prompt,
-                    None,
-                    False,
+                    question_with_history,  # Question with history
+                    doc_text,               # Pass the document text
+                    True,                   # has_file=True to trigger document-only mode
                     request.model
                 )
                 

@@ -36,7 +36,9 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/global-chat/**",
                     "/api/upload-doc",
-                    "/ai/**"  // All AI endpoints are public
+                    "/api/activity/**",
+                    "/ai/**",  // All AI endpoints are public
+                    "/vm/**"   // VoidMain endpoints are public
                 ).permitAll()
                 
                 // ===== PUBLIC STATIC ROUTES =====

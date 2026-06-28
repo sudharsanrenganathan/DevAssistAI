@@ -63,6 +63,7 @@ textarea {
     outline: none; resize: none; padding: 10px;
     overflow-y: hidden; line-height: 24px; max-height: 120px;
     scrollbar-width: thin; scrollbar-color: rgba(99,102,241,0.6) transparent;
+    pointer-events: auto; z-index: 101; position: relative;
 }
 textarea::-webkit-scrollbar { width: 4px; }
 textarea::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(99,102,241,0.6), rgba(34,197,94,0.6)); border-radius: 10px; }
@@ -81,6 +82,7 @@ textarea::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(99,
     box-shadow: 0 0 25px rgba(34,197,94,0.15); transition: all 0.35s ease;
     position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%);
     max-width: 700px; width: calc(100% - 40px);
+    z-index: 100; pointer-events: auto;
 }
 .input-row { display: flex; align-items: center; padding: 12px 12px 8px 12px; }
 .input-footer {
@@ -109,7 +111,7 @@ textarea::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(99,
 .messages {
     display: none; flex-direction: column; align-items: stretch; gap: 20px;
     width: 100%; max-width: 800px; margin: 0 auto;
-    overflow-y: auto; padding: 20px; padding-bottom: 160px;
+    overflow-y: auto; padding: 20px; padding-bottom: 200px;
     /* CRITICAL: Prevent stacking issues */
     position: relative;
     z-index: 1;
@@ -616,7 +618,6 @@ function add(text, type) {
     const empty = document.getElementById("emptyState");
     if (empty) empty.style.display = "none";
     
-    // CREATE MESSAGE ELEMENT PROPERLY
     const messageDiv = document.createElement("div");
     messageDiv.className = "msg " + type;
     
@@ -629,12 +630,71 @@ function add(text, type) {
     
     messageDiv.innerHTML = `<div class="msg-wrapper">${copyBtn}<div class="content">${formatResponse(text)}</div></div>`;
     
-    // APPEND TO CONTAINER (NOT innerHTML +=)
     const container = document.getElementById("messages");
     container.appendChild(messageDiv);
-    
-    // PROPER SCROLL
     container.scrollTop = container.scrollHeight;
+}
+
+// ChatGPT-style word-by-word typing effect (BULLETPROOF)
+function addTyping(text, type) {
+    return new Promise((resolve) => {
+        try {
+        document.querySelector(".chat-box").classList.add("active");
+        const empty = document.getElementById("emptyState");
+        if (empty) empty.style.display = "none";
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "msg " + type;
+        messageDiv.innerHTML = `<div class="msg-wrapper"><div class="content"><span class="cursor"></span></div></div>`;
+
+        const container = document.getElementById("messages");
+        container.appendChild(messageDiv);
+        const contentEl = messageDiv.querySelector(".content");
+
+        const words = text.split(/(\s+)/);
+        let wordIndex = 0;
+        let accumulated = "";
+
+        // Safety: auto-resolve after 60 seconds max
+        const safetyTimeout = setTimeout(() => {
+            clearInterval(timer);
+            finalize();
+        }, 60000);
+
+        function finalize() {
+            clearTimeout(safetyTimeout);
+            try {
+                const copyBtn = `<button class="copy-btn" onclick="copyMsg(this)"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v12h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>`;
+                messageDiv.innerHTML = `<div class="msg-wrapper">${copyBtn}<div class="content">${formatResponse(text)}</div></div>`;
+            } catch(e) { console.warn('finalize render error:', e); }
+            container.scrollTop = container.scrollHeight;
+            resolve();
+        }
+
+        const speed = 20;
+        const timer = setInterval(() => {
+            try {
+                if (wordIndex >= words.length) {
+                    clearInterval(timer);
+                    finalize();
+                    return;
+                }
+                const chunk = words.slice(wordIndex, wordIndex + 3).join("");
+                wordIndex += 3;
+                accumulated += chunk;
+                contentEl.innerHTML = formatResponse(accumulated) + `<span class="cursor"></span>`;
+                container.scrollTop = container.scrollHeight;
+            } catch(e) {
+                console.warn('typing tick error:', e);
+                clearInterval(timer);
+                finalize();
+            }
+        }, speed);
+        } catch(e) {
+            console.warn('addTyping setup error:', e);
+            resolve();
+        }
+    });
 }
 function createTypingBubble() {
     const div = document.createElement("div");
@@ -670,7 +730,6 @@ async function send() {
     // SET LOADING STATE
     isLoading = true;
     sendBtn.disabled = true;
-    sendBtn.style.pointerEvents = "none"; 
     sendBtn.style.opacity = "0.6";
     
     // CLEAR INPUT IMMEDIATELY
@@ -744,9 +803,9 @@ async function send() {
         const data = await response.json();
         const answer = data?.answer || "⚠️ No response.";
         
-        // REMOVE LOADING AND ADD RESPONSE
+        // REMOVE LOADING AND ADD RESPONSE WITH TYPING EFFECT
         loadingDiv.remove();
-        add(answer, "bot");
+        await addTyping(answer, "bot");
         
         // Save AI message
         const aiSave = await authFetch(`/api/global-chat/${activeChatId}/message`, {
@@ -772,7 +831,6 @@ async function send() {
         // ALWAYS RESET LOADING STATE
         isLoading = false;
         sendBtn.disabled = false;
-        sendBtn.style.pointerEvents = "auto"; 
         sendBtn.style.opacity = "1";
     }
 }
@@ -786,11 +844,16 @@ function copyMsg(btn) {
 }
 
 async function loadSessions() {
+    try {
     const uid = localStorage.getItem('userId');
+    if (!uid) return;
     const res = await authFetch(`/api/global-chat/all?userId=${uid}&ts=${Date.now()}`);
+    if (!res.ok) { console.warn('loadSessions: bad response', res.status); return; }
     let chats = await res.json();
+    // CRITICAL: Guard against non-array responses (e.g. error objects)
+    if (!Array.isArray(chats)) { console.warn('loadSessions: response is not an array', chats); chats = []; }
     const search = document.getElementById("chatSearch").value.toLowerCase();
-    if (search) { chats = chats.filter(c => c.title.toLowerCase().includes(search)); }
+    if (search) { chats = chats.filter(c => c.title && c.title.toLowerCase().includes(search)); }
     const isPinnedChat = (chat) => chat?.isPinned === true || chat?.pinned === true;
     const container = document.getElementById("sessions");
     container.innerHTML = "";
@@ -815,6 +878,7 @@ async function loadSessions() {
         container.appendChild(div);
         if (chat.id === currentChatId) div.classList.add("active");
     });
+    } catch(err) { console.warn('loadSessions error (non-fatal):', err); }
 }
 
 async function createChat() {
@@ -846,6 +910,16 @@ async function loadChat(chatId) {
 loadSessions();
 document.querySelector(".chat-box").classList.remove("active");
 document.getElementById("chatSearch").oninput = loadSessions;
+
+// SAFETY: Reset loading state if user switches tabs and comes back
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isLoading) {
+        console.warn('Safety reset: isLoading was stuck, resetting...');
+        isLoading = false;
+        const btn = document.querySelector('.send-btn');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+    }
+});
 document.addEventListener("click", () => {
     document.querySelectorAll(".menu-dropdown").forEach(d => d.style.display = "none");
     document.getElementById("modelDropdown").classList.remove("open");

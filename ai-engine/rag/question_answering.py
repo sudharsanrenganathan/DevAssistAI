@@ -33,6 +33,37 @@ def is_greeting(question: str) -> bool:
     q = question.strip().lower().rstrip("!.,?")
     return q in GREETINGS
 
+# ========================= GENERAL/CASUAL DETECTOR =========================
+GENERAL_PATTERNS = [
+    "how are you", "how r u", "how do you do", "what can you do",
+    "who are you", "what are you", "tell me about yourself",
+    "tell me a joke", "say something funny", "make me laugh",
+    "what is your name", "what's your name", "whats your name",
+    "who made you", "who created you", "who built you",
+    "can you help", "help me", "what do you know",
+    "are you ai", "are you a bot", "are you real",
+    "what time", "what day", "what date",
+    "tell me something", "talk to me", "chat with me",
+    "how's it going", "hows it going", "what's happening",
+    "good job", "well done", "you're smart", "youre smart",
+    "i'm bored", "im bored", "entertain me",
+    "bye", "goodbye", "see you", "take care", "later",
+]
+
+def is_general_question(question: str) -> bool:
+    q = question.strip().lower().rstrip("!.,?")
+    return any(p in q for p in GENERAL_PATTERNS)
+
+def stream_general(question, model_name=None):
+    system = """You are SecretAI, a friendly and smart document analyst assistant.
+The user asked a general/casual question that is NOT about their uploaded document.
+Respond naturally, warmly, and briefly (2-3 sentences max).
+At the end, gently remind them you're here to help with their document.
+Never use filler like "Certainly!" or "Of course!"."""
+
+    prompt = f'User said: "{question}". Reply naturally.'
+    yield from stream_answer(prompt, model_name, system=system)
+
 # ========================= REACTIONS =========================
 REACTIONS = {
     "ok", "okay", "ohho", "ohh", "oh", "alright", "fine", "got it",
@@ -71,7 +102,12 @@ def ask_question_stream(question, index, chunks, model, model_name=None, chat_hi
         yield from stream_greeting(model_name)
         return
 
-    # Reaction check — only shortcut if no chat history (otherwise user might be asking about prior context)
+    # General/casual question check (NOT about the document)
+    if is_general_question(question):
+        yield from stream_general(question, model_name)
+        return
+
+    # Reaction check — only shortcut if no chat history
     q_clean = question.strip().lower().rstrip("!.,?")
     if q_clean in REACTIONS and not chat_history:
         system = """You are SecretAI. Be brief and natural.
