@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="300" viewBox="0 0 620 300" font-family="'Times New Roman',Times,serif">
+  <rect width="620" height="300" fill="#fff"/>
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 z" fill="#000"/>
+    </marker>
+  </defs>
+  <g stroke="#000" stroke-width="1.1" fill="#fff">
+    <rect x="18" y="8" width="380" height="56" rx="3"/>
+    <rect x="430" y="8" width="172" height="56" rx="3" fill="#f2f2f2"/>
+    <rect x="18" y="112" width="380" height="72" rx="3"/>
+    <rect x="430" y="112" width="172" height="72" rx="3" fill="#f2f2f2"/>
+    <rect x="18" y="228" width="380" height="64" rx="3"/>
+    <rect x="430" y="228" width="172" height="64" rx="3" fill="#f2f2f2"/>
+  </g>
+  <g font-size="11.5" font-weight="bold" text-anchor="middle">
+    <text x="208" y="27">PRESENTATION TIER — Browser</text>
+    <text x="516" y="30">Supabase Auth</text>
+    <text x="208" y="132">APPLICATION TIER — Spring Boot 3 / Java 21</text>
+    <text x="516" y="136">Supabase PostgreSQL</text>
+    <text x="208" y="248">INFERENCE TIER — FastAPI / Python 3.11</text>
+    <text x="516" y="250">External Services</text>
+  </g>
+  <g font-size="9.5" text-anchor="middle" fill="#222">
+    <text x="208" y="42">Static hosting (CDN) · HTML5, CSS3, vanilla JavaScript</text>
+    <text x="208" y="55">Monaco editor · auth-guard.js attaches the bearer token</text>
+    <text x="516" y="44">JWT issuance,</text>
+    <text x="516" y="56">federated sign-in</text>
+    <text x="208" y="148">Docker container · Controller → Service → Repository → Entity</text>
+    <text x="208" y="161">JwtFilter · CorsConfig · RateLimitService</text>
+    <text x="208" y="174">KeepAliveService · 14-minute warm-up schedule</text>
+    <text x="516" y="150">Transaction pooler</text>
+    <text x="516" y="163">Object storage for</text>
+    <text x="516" y="176">uploaded documents</text>
+    <text x="208" y="264">safe_generate · provider registry · token ledger</text>
+    <text x="208" y="277">Thread-locked in-process caches · schema validation</text>
+    <text x="516" y="266">Groq · NVIDIA NIM</text>
+    <text x="516" y="279">Wandbox sandbox</text>
+  </g>
+  <g stroke="#000" stroke-width="1.1" marker-end="url(#ah)" fill="none">
+    <path d="M208,64 L208,110"/>
+    <path d="M208,184 L208,226"/>
+    <path d="M398,140 L428,140"/>
+    <path d="M398,256 L428,256"/>
+    <path d="M398,36 L428,36"/>
+  </g>
+  <g font-size="9" fill="#000">
+    <text x="214" y="82">HTTPS request + Bearer JWT</text>
+    <text x="214" y="98">(authFetch)</text>
+    <text x="214" y="205">Internal REST call</text>
+    <text x="214" y="219">(server to server only)</text>
+    <text x="345" y="30" text-anchor="end">verify</text>
+    <text x="396" y="134" text-anchor="end">JPA</text>
+    <text x="396" y="250" text-anchor="end">HTTPS</text>
+  </g>
+</svg>

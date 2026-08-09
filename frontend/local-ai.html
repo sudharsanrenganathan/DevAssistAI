@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline Studio — DevAssist AI</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<style id="pageCss">
+* { margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --teal:#06f5cd; --purple:#7c3aed; --bg:#0a0a0a;
+  --txt:#e2e8f0; --mut:#94a3b8; --dim:#64748b; --faint:#475569;
+  --line:rgba(255,255,255,0.08); --glass:rgba(255,255,255,0.03);
+  --orange:#fb923c;
+}
+body{
+  font-family:'Inter',system-ui,sans-serif; background:var(--bg);
+  background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size:20px 20px; color:#fff; height:100vh; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.mono{ font-family:'JetBrains Mono','Consolas',monospace; }
+.grad-text{ background:linear-gradient(135deg,var(--teal),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.grad-btn{ background:linear-gradient(135deg,var(--teal),var(--purple)); color:#0a0a0a; font-weight:700; border:none; border-radius:8px; cursor:pointer; }
+.grad-btn:hover{ filter:brightness(1.1); }
+.ghost-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; border-radius:8px; cursor:pointer; }
+.ghost-btn:hover{ background:rgba(255,255,255,0.1); }
+.glass{ background:var(--glass); border:1px solid var(--line); border-radius:12px; }
+
+/* ---------- TOP BAR ---------- */
+.topbar{ height:56px; flex-shrink:0; display:flex; align-items:center; padding:0 20px; gap:14px;
+  background:rgba(10,10,10,0.9); border-bottom:1px solid var(--line); }
+.logo{ font-weight:800; font-size:17px; cursor:pointer; }
+.crumb{ color:var(--dim); font-size:13px; }
+.offline-badge{ font-size:10px; font-weight:700; letter-spacing:1px; padding:3px 9px; border-radius:20px;
+  background:rgba(251,146,60,0.2); color:#fdba74; border:1px solid rgba(251,146,60,0.4); }
+.conn-pill{ margin-left:auto; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--mut);
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:20px; }
+.dot{ width:8px; height:8px; border-radius:50%; background:var(--faint); flex-shrink:0; }
+.dot.on{ background:#4ade80; box-shadow:0 0 7px #4ade80; }
+.dot.off{ background:#f87171; box-shadow:0 0 7px #f87171; }
+.hbtn{ padding:7px 13px; font-size:12.5px; display:flex; align-items:center; gap:6px; }
+
+/* ---------- SETUP GATE ---------- */
+#gate{ flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
+.gate-card{ width:min(640px,94vw); padding:30px 34px; }
+.gate-h{ font-size:26px; font-weight:800; margin-bottom:8px; }
+.gate-sub{ color:var(--mut); font-size:14px; margin-bottom:24px; line-height:1.5; }
+.setup-step{ display:flex; gap:14px; margin-bottom:18px; }
+.setup-num{ width:28px; height:28px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:13px; color:#0a0a0a; background:linear-gradient(135deg,var(--teal),var(--purple)); }
+.setup-body{ flex:1; }
+.setup-title{ font-size:14px; font-weight:700; margin-bottom:5px; }
+.setup-desc{ font-size:12.5px; color:var(--mut); margin-bottom:8px; line-height:1.5; }
+.code-box{ display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.4); border:1px solid var(--line);
+  border-radius:8px; padding:9px 12px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--teal); }
+.code-box span{ flex:1; overflow-x:auto; white-space:nowrap; }
+.copy-btn{ font-size:11px; padding:4px 10px; flex-shrink:0; }
+.gate-foot{ display:flex; align-items:center; gap:10px; margin-top:22px; flex-wrap:wrap; }
+.gate-err{ font-size:12px; color:#f87171; margin-top:10px; min-height:16px; }
+
+/* ---------- STUDIO ---------- */
+#studio{ flex:1; display:none; overflow:hidden; }
+.tabs{ display:flex; gap:6px; padding:10px 16px 0; }
+.tab{ padding:9px 18px; font-size:13px; font-weight:600; color:var(--mut); cursor:pointer;
+  border:1px solid transparent; border-bottom:none; border-radius:10px 10px 0 0; }
+.tab:hover{ color:var(--txt); }
+.tab.active{ color:var(--teal); background:var(--glass); border-color:var(--line); }
+.pane{ display:none; flex-direction:column; height:calc(100% - 47px); padding:12px 16px 16px; }
+.pane.active{ display:flex; }
+
+/* chat shared */
+.chat-scroll{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:16px 6px; }
+.chat-scroll::-webkit-scrollbar{ width:6px; } .chat-scroll::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.1); border-radius:3px; }
+.msg{ max-width:80%; padding:12px 15px; font-size:13.5px; line-height:1.6; border-radius:12px; white-space:pre-wrap; word-wrap:break-word; }
+.msg.user{ align-self:flex-end; background:rgba(124,58,237,0.2); border:1px solid #7c3aed44; border-radius:12px 12px 2px 12px; }
+.msg.ai{ align-self:flex-start; background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:12px 12px 12px 2px; color:#cbd5e1; }
+.msg.ai .cursor{ display:inline-block; width:7px; height:14px; background:var(--teal); margin-left:2px; animation:blink 1s step-end infinite; vertical-align:middle; }
+@keyframes blink{ 50%{ opacity:0; } }
+.empty{ margin:auto; text-align:center; color:var(--dim); font-size:14px; line-height:1.8; max-width:440px; }
+.empty .big{ font-size:34px; margin-bottom:10px; }
+
+.composer{ display:flex; align-items:flex-end; gap:10px; padding:10px 12px; margin-top:8px; }
+.composer textarea{ flex:1; background:transparent; border:none; outline:none; resize:none; color:var(--txt);
+  font-family:inherit; font-size:14px; max-height:130px; line-height:1.5; }
+.composer textarea::placeholder{ color:var(--faint); }
+.send{ width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.send:disabled{ opacity:0.4; cursor:not-allowed; }
+.toolrow{ display:flex; align-items:center; gap:10px; margin-bottom:4px; flex-wrap:wrap; }
+.select{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1;
+  border-radius:8px; padding:7px 10px; font-size:12px; cursor:pointer; outline:none; }
+.select option{ background:#16181d; }
+.mini-note{ font-size:11.5px; color:var(--dim); }
+
+/* docs */
+.doc-bar{ display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:8px; flex-wrap:wrap; }
+.doc-chip{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--teal);
+  background:rgba(6,245,205,0.08); border:1px solid rgba(6,245,205,0.3); padding:6px 12px; border-radius:20px; }
+.doc-chip .x{ cursor:pointer; color:var(--mut); }
+.prog{ height:5px; border-radius:3px; background:rgba(255,255,255,0.1); overflow:hidden; flex:1; min-width:120px; max-width:260px; display:none; }
+.prog .bar{ height:100%; width:0; background:linear-gradient(90deg,var(--teal),var(--purple)); transition:width .2s; }
+.doc-mode{ font-size:11px; padding:3px 9px; border-radius:20px; }
+.doc-mode.embed{ background:rgba(74,222,128,0.14); color:#4ade80; border:1px solid rgba(74,222,128,0.3); }
+.doc-mode.stuff{ background:rgba(251,191,36,0.14); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); }
+
+#toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(80px); transition:transform .3s;
+  background:#16181d; border:1px solid rgba(6,245,205,0.4); color:var(--txt); font-size:13px; padding:12px 20px;
+  border-radius:12px; z-index:50; box-shadow:0 8px 30px rgba(0,0,0,0.5); }
+#toast.show{ transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ================= TOP BAR ================= -->
+<div class="topbar">
+  <div class="logo" onclick="window.location.href='dashboard.html'" title="Back to dashboard">⚡ DevAssist</div>
+  <div class="crumb">/</div>
+  <div class="logo grad-text" style="font-size:15px;">Offline Studio</div>
+  <div class="offline-badge">100% LOCAL</div>
+  <div class="conn-pill"><span class="dot" id="connDot"></span><span id="connText">checking Ollama…</span></div>
+  <button class="ghost-btn hbtn" id="installBtn" style="display:none" onclick="installApp()">⬇ Install app</button>
+  <button class="ghost-btn hbtn" onclick="checkConnection(true)">↻ Reconnect</button>
+</div>
+
+<!-- ================= SETUP GATE ================= -->
+<div id="gate">
+  <div class="gate-card glass">
+    <div class="gate-h">Run DevAssist <span class="grad-text">on your own machine</span></div>
+    <div class="gate-sub">Offline Studio talks straight to a local AI model on your computer — no internet, no account, nothing leaves your device. Three one-time steps:</div>
+
+    <div class="setup-step">
+      <div class="setup-num">1</div>
+      <div class="setup-body">
+        <div class="setup-title">Install Ollama (the local engine)</div>
+        <div class="setup-desc">A tiny app that runs open AI models on your machine.</div>
+        <a href="https://ollama.com/download" target="_blank" class="grad-btn hbtn" style="display:inline-flex; text-decoration:none;">Go to Ollama.com ↗</a>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-num">2</div>
+      <div class="setup-body">
+        <div class="setup-title">Pull the models</div>
+        <div class="setup-desc">In your terminal. The chat model powers Chat &amp; Docs; the embed model makes Docs understand large files.</div>
+        <div class="code-box" style="margin-bottom:8px;"><span>ollama pull llama3</span><button class="ghost-btn copy-btn" onclick="copyText('ollama pull llama3', this)">Copy</button></div>
+        <div class="code-box"><span>ollama pull nomic-embed-text</span><button class="ghost-btn copy-btn" onclick="copyText('ollama pull nomic-embed-text', this)">Copy</button></div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-num">3</div>
+      <div class="setup-body">
+        <div class="setup-title">Allow this page to reach Ollama</div>
+        <div class="setup-desc">Start Ollama so it accepts requests from the browser, then keep this window open:</div>
+        <div class="code-box"><span id="serveCmd">OLLAMA_ORIGINS=* ollama serve</span><button class="ghost-btn copy-btn" onclick="copyText(document.getElementById('serveCmd').textContent, this)">Copy</button></div>
+        <div class="setup-desc" style="margin-top:6px;">On Windows PowerShell: <span class="mono" style="color:var(--teal)">$env:OLLAMA_ORIGINS="*"; ollama serve</span></div>
+      </div>
+    </div>
+
+    <div class="gate-foot">
+      <button class="grad-btn hbtn" onclick="checkConnection(true)">✓ I'm ready — Connect</button>
+      <button class="ghost-btn hbtn" id="gateInstall" style="display:none" onclick="installApp()">⬇ Install as offline app</button>
+    </div>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<!-- ================= STUDIO ================= -->
+<div id="studio">
+  <div class="tabs">
+    <div class="tab active" id="tab-chat" onclick="switchTab('chat')">💬 Chat</div>
+    <div class="tab" id="tab-docs" onclick="switchTab('docs')">📄 Docs</div>
+  </div>
+
+  <!-- CHAT PANE -->
+  <div class="pane active glass" id="pane-chat">
+    <div class="toolrow">
+      <select class="select" id="chatModel" title="Local chat model"></select>
+      <button class="ghost-btn hbtn" onclick="newChat()">✦ New chat</button>
+      <span class="mini-note">History is saved only in this browser.</span>
+    </div>
+    <div class="chat-scroll" id="chatScroll">
+      <div class="empty"><div class="big">💬</div>Ask anything — it runs entirely on your computer.<br>Try “explain closures in JavaScript” or “write a haiku about the sea”.</div>
+    </div>
+    <div class="composer glass">
+      <textarea id="chatInput" rows="1" placeholder="Message your local model…  (Enter to send, Shift+Enter for newline)"></textarea>
+      <button class="grad-btn send" id="chatSend" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+
+  <!-- DOCS PANE -->
+  <div class="pane glass" id="pane-docs">
+    <div class="doc-bar">
+      <input type="file" id="docFile" accept=".pdf,.txt,.md,.markdown,.text" style="display:none" onchange="onDocPicked(this)">
+      <button class="grad-btn hbtn" onclick="document.getElementById('docFile').click()">📎 Upload a document</button>
+      <span id="docChipWrap"></span>
+      <div class="prog" id="docProg"><div class="bar" id="docProgBar"></div></div>
+      <span class="mini-note" id="docStatus"></span>
+    </div>
+    <div class="chat-scroll" id="docScroll">
+      <div class="empty"><div class="big">📄</div>Upload a <b>.pdf</b>, <b>.txt</b> or <b>.md</b> and ask questions about it —<br>read, chunked, and answered fully offline on your machine.</div>
+    </div>
+    <div class="composer glass">
+      <textarea id="docInput" rows="1" placeholder="Ask about your document…" disabled></textarea>
+      <button class="grad-btn send" id="docSend" onclick="sendDoc()" disabled>➤</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="lib/pdf.min.js"></script>
+<script>
+/* ============================================================
+   OFFLINE STUDIO — talks DIRECTLY to Ollama on localhost.
+   No backend, no Supabase, no internet. Chat = Global AI clone,
+   Docs = Secret AI clone (in-browser PDF extract + embeddings RAG).
+   ============================================================ */
+var OLLAMA = 'http://localhost:11434';
+var EMBED_MODEL = 'nomic-embed-text';
+
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'lib/pdf.worker.min.js';
+
+var models = { chat: [], hasEmbed: false };
+var chat = { messages: [], busy: false };
+var doc = { name: '', chunks: [], vectors: null, mode: 'none', messages: [], busy: false };
+
+/* ---------------- helpers ---------------- */
+function $(id){ return document.getElementById(id); }
+function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+function toast(m){ var t = $('toast'); t.textContent = m; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove('show'); }, 2600); }
+function copyText(txt, btn){
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(
+    function(){ var o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function(){ btn.textContent = o; }, 1400); },
+    function(){ toast('Copy not available'); });
+}
+function autts(ta){ ta.style.height = 'auto'; ta.style.height = Math.min(130, ta.scrollHeight) + 'px'; }
+
+/* ---------------- connection gate ---------------- */
+async function checkConnection(fromButton){
+  setConn('checking', 'checking Ollama…');
+  if (fromButton) $('gateErr').textContent = '';
+  try {
+    var res = await fetch(OLLAMA + '/api/tags', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    var names = (data.models || []).map(function(m){ return m.name; });
+    models.chat = names.filter(function(n){ return n.indexOf('embed') === -1; });
+    models.hasEmbed = names.some(function(n){ return n.indexOf('embed') !== -1; });
+    if (!models.chat.length){
+      showGate('Ollama is running, but no chat model is installed yet. Run “ollama pull llama3”, then Connect.');
+      return;
+    }
+    fillModels();
+    showStudio();
+    setConn('on', 'Ollama · ' + models.chat.length + ' model' + (models.chat.length === 1 ? '' : 's'));
+  } catch (e) {
+    setConn('off', 'Ollama not reachable');
+    showGate(fromButton ? 'Still can\'t reach Ollama at ' + OLLAMA +
+      '. Make sure it\'s running with OLLAMA_ORIGINS=* (step 3).' : '');
+  }
+}
+function setConn(state, text){
+  var d = $('connDot');
+  d.className = 'dot' + (state === 'on' ? ' on' : state === 'off' ? ' off' : '');
+  $('connText').textContent = text;
+}
+function showGate(err){ $('studio').style.display = 'none'; $('gate').style.display = 'flex'; if (err !== undefined) $('gateErr').textContent = err; }
+function showStudio(){ $('gate').style.display = 'none'; $('studio').style.display = 'flex'; }
+
+function fillModels(){
+  var sel = $('chatModel'); sel.innerHTML = '';
+  // prefer a llama model as the default
+  var ordered = models.chat.slice().sort(function(a, b){
+    return (b.indexOf('llama') > -1) - (a.indexOf('llama') > -1);
+  });
+  ordered.forEach(function(n){
+    var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
+  });
+}
+
+/* ---------------- tabs ---------------- */
+function switchTab(which){
+  ['chat', 'docs'].forEach(function(t){
+    $('tab-' + t).classList.toggle('active', t === which);
+    $('pane-' + t).classList.toggle('active', t === which);
+  });
+}
+
+/* ---------------- Ollama streaming chat ---------------- */
+/** Streams an Ollama /api/chat response, calling onToken(text) per chunk.
+    Returns the full text. Works on the NDJSON the API emits. */
+async function ollamaChat(model, messages, onToken){
+  var res = await fetch(OLLAMA + '/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: model, messages: messages, stream: true })
+  });
+  if (!res.ok) throw new Error('chat HTTP ' + res.status);
+  var reader = res.body.getReader(), dec = new TextDecoder(), buf = '', full = '';
+  while (true){
+    var r = await reader.read(); if (r.done) break;
+    buf += dec.decode(r.value, { stream: true });
+    var lines = buf.split('\n'); buf = lines.pop();
+    for (var i = 0; i < lines.length; i++){
+      var line = lines[i].trim(); if (!line) continue;
+      try {
+        var j = JSON.parse(line);
+        if (j.message && j.message.content){ full += j.message.content; if (onToken) onToken(full); }
+      } catch (e) { /* partial line — ignore */ }
+    }
+  }
+  return full;
+}
+
+/* ---------------- CHAT tab ---------------- */
+var CHAT_KEY = 'devassist_offline_chat';
+function loadChat(){
+  try {
+    var saved = JSON.parse(localStorage.getItem(CHAT_KEY) || 'null');
+    if (saved && Array.isArray(saved.messages)) chat.messages = saved.messages;
+  } catch (e) {}
+  renderChat();
+}
+function saveChat(){
+  try { localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: chat.messages.slice(-60) })); } catch (e) {}
+}
+function newChat(){ chat.messages = []; saveChat(); renderChat(); }
+function renderChat(){
+  var box = $('chatScroll');
+  if (!chat.messages.length){
+    box.innerHTML = '<div class="empty"><div class="big">💬</div>Ask anything — it runs entirely on your computer.<br>Try “explain closures in JavaScript” or “write a haiku about the sea”.</div>';
+    return;
+  }
+  box.innerHTML = '';
+  chat.messages.forEach(function(m){
+    var d = document.createElement('div'); d.className = 'msg ' + (m.role === 'user' ? 'user' : 'ai');
+    d.textContent = m.content; box.appendChild(d);
+  });
+  box.scrollTop = 1e9;
+}
+async function sendChat(){
+  if (chat.busy) return;
+  var ta = $('chatInput'), text = ta.value.trim(); if (!text) return;
+  var model = $('chatModel').value; if (!model){ toast('No local model available'); return; }
+  ta.value = ''; autts(ta);
+  chat.messages.push({ role: 'user', content: text });
+  renderChat(); saveChat();
+  chat.busy = true; $('chatSend').disabled = true;
+
+  var box = $('chatScroll');
+  var bubble = document.createElement('div'); bubble.className = 'msg ai';
+  bubble.innerHTML = '<span class="cursor"></span>';
+  box.appendChild(bubble); box.scrollTop = 1e9;
+  try {
+    var full = await ollamaChat(model, chat.messages, function(t){
+      bubble.textContent = t; box.scrollTop = 1e9;
+    });
+    bubble.textContent = full || '(empty response)';
+    chat.messages.push({ role: 'assistant', content: full });
+    saveChat();
+  } catch (e) {
+    bubble.textContent = '⚠ ' + friendlyErr(e);
+    bubble.classList.add('ai');
+  } finally {
+    chat.busy = false; $('chatSend').disabled = false;
+  }
+}
+
+/* ---------------- DOCS tab: extract → chunk → embed → retrieve ---------------- */
+async function onDocPicked(input){
+  var f = input.files && input.files[0]; if (!f) return;
+  input.value = '';
+  setDocStatus('reading ' + f.name + '…');
+  doc = { name: f.name, chunks: [], vectors: null, mode: 'none', messages: [], busy: false };
+  renderDocChip(); renderDoc(); disableDocInput(true);
+  try {
+    var text = await extractText(f);
+    if (!text || !text.trim()){ setDocStatus(''); toast('No readable text found in that file'); return; }
+    doc.chunks = chunkText(text);
+    // Decide mode: embeddings if the embed model is present, else stuffing.
+    if (models.hasEmbed && doc.chunks.length > 1){
+      await embedChunks();
+      doc.mode = 'embed';
+    } else {
+      doc.mode = 'stuff';
+    }
+    setDocStatus('');
+    renderDocChip();
+    disableDocInput(false);
+    addDocMsg('ai', 'Loaded <b>' + esc(doc.name) + '</b> — ' + doc.chunks.length + ' chunk' +
+      (doc.chunks.length === 1 ? '' : 's') + '. Ask me anything about it.', true);
+  } catch (e) {
+    setDocStatus(''); toast(friendlyErr(e));
+  }
+}
+
+async function extractText(file){
+  var lower = file.name.toLowerCase();
+  if (lower.endsWith('.pdf')){
+    if (!window.pdfjsLib) throw new Error('PDF reader not loaded');
+    var buf = await file.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    var out = '';
+    for (var p = 1; p <= pdf.numPages; p++){
+      setDocStatus('reading page ' + p + ' / ' + pdf.numPages + '…');
+      var page = await pdf.getPage(p);
+      var content = await page.getTextContent();
+      out += content.items.map(function(it){ return it.str; }).join(' ') + '\n\n';
+    }
+    return out;
+  }
+  return await file.text(); // .txt / .md / plain
+}
+
+function chunkText(text, size, overlap){
+  size = size || 900; overlap = overlap || 150;
+  var clean = text.replace(/\s+/g, ' ').trim();
+  var chunks = [];
+  for (var i = 0; i < clean.length; i += (size - overlap)){
+    chunks.push(clean.slice(i, i + size));
+    if (i + size >= clean.length) break;
+  }
+  return chunks.slice(0, 400); // safety cap
+}
+
+async function embedOne(text){
+  var res = await fetch(OLLAMA + '/api/embeddings', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: EMBED_MODEL, prompt: text })
+  });
+  if (!res.ok) throw new Error('embed HTTP ' + res.status);
+  var j = await res.json();
+  return j.embedding;
+}
+async function embedChunks(){
+  var prog = $('docProg'), bar = $('docProgBar');
+  prog.style.display = 'block'; bar.style.width = '0%';
+  doc.vectors = [];
+  for (var i = 0; i < doc.chunks.length; i++){
+    setDocStatus('embedding ' + (i + 1) + ' / ' + doc.chunks.length + '…');
+    doc.vectors.push(await embedOne(doc.chunks[i]));
+    bar.style.width = Math.round(((i + 1) / doc.chunks.length) * 100) + '%';
+  }
+  prog.style.display = 'none';
+}
+function cosine(a, b){
+  var dot = 0, na = 0, nb = 0;
+  for (var i = 0; i < a.length; i++){ dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-9);
+}
+async function topChunks(question, k){
+  if (doc.mode === 'embed' && doc.vectors){
+    var qv = await embedOne(question);
+    var scored = doc.chunks.map(function(c, i){ return { c: c, s: cosine(qv, doc.vectors[i]) }; });
+    scored.sort(function(a, b){ return b.s - a.s; });
+    return scored.slice(0, k || 4).map(function(x){ return x.c; });
+  }
+  // stuffing: take as much of the doc as comfortably fits
+  var joined = doc.chunks.join('\n\n');
+  return [joined.slice(0, 6000)];
+}
+
+async function sendDoc(){
+  if (doc.busy || !doc.chunks.length) return;
+  var ta = $('docInput'), text = ta.value.trim(); if (!text) return;
+  var model = $('chatModel').value; if (!model){ toast('No local model available'); return; }
+  ta.value = ''; autts(ta);
+  addDocMsg('user', esc(text));
+  doc.busy = true; $('docSend').disabled = true;
+
+  var box = $('docScroll');
+  var bubble = document.createElement('div'); bubble.className = 'msg ai'; bubble.innerHTML = '<span class="cursor"></span>';
+  box.appendChild(bubble); box.scrollTop = 1e9;
+  try {
+    setDocStatus('finding relevant parts…');
+    var ctx = await topChunks(text, 4);
+    setDocStatus('');
+    var sys = 'You are a helpful assistant answering ONLY from the document excerpts below. ' +
+      'If the answer is not in them, say you could not find it in the document.\n\n' +
+      'DOCUMENT EXCERPTS:\n' + ctx.join('\n---\n');
+    var msgs = [{ role: 'system', content: sys }]
+      .concat(doc.messages.slice(-6))
+      .concat([{ role: 'user', content: text }]);
+    var full = await ollamaChat(model, msgs, function(t){ bubble.textContent = t; box.scrollTop = 1e9; });
+    bubble.textContent = full || '(empty response)';
+    doc.messages.push({ role: 'user', content: text });
+    doc.messages.push({ role: 'assistant', content: full });
+  } catch (e) {
+    setDocStatus(''); bubble.textContent = '⚠ ' + friendlyErr(e);
+  } finally {
+    doc.busy = false; $('docSend').disabled = false;
+  }
+}
+
+function renderDoc(){
+  var box = $('docScroll');
+  box.innerHTML = '<div class="empty"><div class="big">📄</div>Upload a <b>.pdf</b>, <b>.txt</b> or <b>.md</b> and ask questions about it —<br>read, chunked, and answered fully offline on your machine.</div>';
+}
+function addDocMsg(role, html, isHtml){
+  var box = $('docScroll');
+  if (box.querySelector('.empty')) box.innerHTML = '';
+  var d = document.createElement('div'); d.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  if (isHtml) d.innerHTML = html; else d.textContent = html.replace(/<[^>]+>/g, '');
+  box.appendChild(d); box.scrollTop = 1e9;
+}
+function renderDocChip(){
+  var wrap = $('docChipWrap');
+  if (!doc.name){ wrap.innerHTML = ''; return; }
+  var mode = doc.mode === 'embed'
+    ? '<span class="doc-mode embed" title="Chunked &amp; embedded for precise retrieval">⚡ smart</span>'
+    : doc.mode === 'stuff'
+      ? '<span class="doc-mode stuff" title="Whole-document mode (pull nomic-embed-text for large files)">📄 basic</span>'
+      : '';
+  wrap.innerHTML = '<span class="doc-chip">' + esc(doc.name) +
+    '<span class="x" onclick="clearDoc()" title="Remove">✕</span></span>' + mode;
+}
+function clearDoc(){ doc = { name: '', chunks: [], vectors: null, mode: 'none', messages: [], busy: false };
+  renderDocChip(); renderDoc(); disableDocInput(true); setDocStatus(''); }
+function disableDocInput(off){ $('docInput').disabled = off; $('docSend').disabled = off;
+  $('docInput').placeholder = off ? 'Upload a document first…' : 'Ask about your document…'; }
+function setDocStatus(t){ $('docStatus').textContent = t; }
+
+/* ---------------- shared ---------------- */
+function friendlyErr(e){
+  var m = (e && e.message) || '';
+  if (/Failed to fetch|NetworkError|HTTP 403/i.test(m))
+    return 'Lost the connection to Ollama. Is it running with OLLAMA_ORIGINS=*? Click ↻ Reconnect.';
+  return m || 'Something went wrong.';
+}
+
+/* Enter-to-send on both composers */
+['chatInput', 'docInput'].forEach(function(id){
+  var ta = $(id);
+  ta.addEventListener('input', function(){ autts(ta); });
+  ta.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); id === 'chatInput' ? sendChat() : sendDoc(); }
+  });
+});
+
+/* ---------------- PWA install ---------------- */
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt = e;
+  $('installBtn').style.display = 'inline-flex';
+  $('gateInstall').style.display = 'inline-flex';
+});
+async function installApp(){
+  if (!deferredPrompt){ toast('Already installed, or install not available in this browser'); return; }
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  $('installBtn').style.display = 'none'; $('gateInstall').style.display = 'none';
+}
+window.addEventListener('appinstalled', function(){ toast('Installed! Launch DevAssist Offline any time — even with no internet 🎉'); });
+
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('service-worker.js').catch(function(){ /* offline caching is best-effort */ });
+  });
+}
+
+/* ---------------- boot ---------------- */
+loadChat();
+checkConnection(false);
+</script>
+</body>
+</html>

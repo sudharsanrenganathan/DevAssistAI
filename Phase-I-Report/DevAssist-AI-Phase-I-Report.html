@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+<meta charset="utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Originator" content="Microsoft Word 15">
+<title>DevAssist AI — Project Report Phase I</title>
+
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml><![endif]-->
+
+<style>
+/* ============================================================
+   SATHYABAMA INSTITUTE OF SCIENCE AND TECHNOLOGY
+   Project Report Phase I — print stylesheet
+   Paper  : A4 (210 x 297 mm)
+   Margins: Left 1.25in (31.75mm) | Top/Right/Bottom 1in (25.4mm)
+   Body   : Times New Roman 12pt, line spacing 1.5, justified
+   Heading: Chapter 14pt bold caps centred | Section 12pt bold
+   Numbers: front matter roman, body arabic, bottom centre
+   ============================================================ */
+
+@page { size: A4 portrait; margin: 0; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+  text-align: justify;
+}
+
+.page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+}
+
+/* Text block. Hard-bounded and shorter than the printable area, so running
+   text can never reach the page number sitting in the bottom margin.
+   Top 25.4mm + height 238mm = text ends 263.4mm down; the number sits at
+   284mm — a guaranteed 16mm of clear space between them. */
+.cbox {
+  position: absolute;
+  top: 25.4mm;
+  left: 31.75mm;
+  right: 25.4mm;
+  height: 238mm;
+  overflow: hidden;
+}
+.page:last-of-type { page-break-after: auto; break-after: auto; }
+
+/* --- screen preview only --- */
+@media screen {
+  html { background: #6b6b6b; }
+  body { padding: 18px 0; }
+  .page { margin: 0 auto 18px; box-shadow: 0 2px 14px rgba(0,0,0,.45); }
+}
+
+/* --- page number --- */
+.pno {
+  position: absolute;
+  left: 0; right: 0; bottom: 13mm;
+  text-align: center;
+  font-size: 12pt;
+  line-height: 1;
+}
+
+/* --- headings --- */
+h1.chapter {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  margin: 0 0 14pt 0;
+  line-height: 1.5;
+}
+h1.chapter .cno { display: block; margin-bottom: 4pt; }
+
+h2 {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 12pt 0 5pt 0;
+  line-height: 1.5;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 12pt;
+  font-weight: bold;
+  font-style: italic;
+  text-align: left;
+  margin: 9pt 0 3pt 0;
+  line-height: 1.5;
+}
+
+p { margin: 0 0 7pt 0; text-indent: 0; }
+p.tight { margin-bottom: 3pt; }
+
+ul, ol { margin: 0 0 7pt 0; padding-left: 20pt; }
+li { margin-bottom: 2pt; text-align: justify; }
+
+b, strong { font-weight: bold; }
+
+/* --- tables --- */
+table.t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  line-height: 1.18;
+  margin: 3pt 0 5pt 0;
+}
+table.t th, table.t td {
+  border: 0.6pt solid #000;
+  padding: 2pt 4pt;
+  text-align: left;
+  vertical-align: top;
+}
+table.t th { font-weight: bold; text-align: center; background: #ececec; }
+table.t td.c { text-align: center; }
+.cap {
+  text-align: center;
+  font-size: 11pt;
+  line-height: 1.3;
+  margin: 4pt 0 10pt 0;
+}
+.capt { text-align: center; font-size: 11pt; margin: 0 0 3pt 0; line-height: 1.3; }
+
+/* --- figures --- */
+.fig { text-align: center; margin: 6pt 0 0 0; }
+.fig svg { max-width: 100%; height: auto; }
+
+/* screenshot placeholder frame */
+.shot {
+  border: 1pt dashed #555;
+  background: repeating-linear-gradient(45deg,#fafafa,#fafafa 8px,#f0f0f0 8px,#f0f0f0 16px);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  font-size: 9.5pt; color: #444; font-style: italic;
+  padding: 4pt;
+}
+
+/* ============ FRONT MATTER ============ */
+.cover { text-align: center; line-height: 1.35; }
+.cover .title  { font-size: 13pt; font-weight: bold; text-transform: uppercase; margin-bottom: 26pt; line-height: 1.4; }
+.cover .phase  { font-size: 12pt; font-weight: bold; margin-bottom: 22pt; }
+.cover .sub    { font-size: 12pt; margin-bottom: 22pt; }
+.cover .by     { font-size: 12pt; margin-bottom: 4pt; }
+.cover .names  { font-size: 12pt; font-weight: bold; margin-bottom: 20pt; }
+.cover .dept   { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-bottom: 6pt; }
+.cover .school { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-bottom: 14pt; }
+.cover .uni    { font-size: 24pt; font-weight: bold; letter-spacing: 1px; margin-bottom: 6pt; }
+.cover .uni2   { font-size: 11.5pt; font-weight: bold; line-height: 1.45; }
+.cover .date   { font-size: 12pt; font-weight: bold; margin-top: 20pt; }
+
+.logo-box {
+  width: 30mm; height: 30mm; margin: 0 auto 20pt;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-box img { width: 30mm; height: 30mm; object-fit: contain; }
+.logo-fallback {
+  width: 30mm; height: 30mm; border: 1pt dashed #777; border-radius: 3pt;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7.5pt; font-style: italic; color: #555; text-align: center;
+  padding: 3pt; line-height: 1.25;
+}
+
+.centre { text-align: center; }
+.ftitle { font-size: 13pt; font-weight: bold; text-align: center; text-transform: uppercase; margin: 0 0 18pt 0; }
+.sign { margin-top: 30pt; }
+.sign td { font-size: 12pt; padding-top: 26pt; vertical-align: bottom; }
+
+/* table of contents */
+table.toc { width: 100%; border-collapse: collapse; font-size: 12pt; line-height: 1.5; }
+table.toc td { padding: 0 0 1pt 0; vertical-align: top; }
+table.toc td.n  { width: 46pt; }
+table.toc td.pg { width: 42pt; text-align: right; }
+table.toc tr.ch td { font-weight: bold; padding-top: 6pt; }
+table.toc td.d { padding-left: 0; }
+.dots { border-bottom: 1px dotted #999; display: block; height: .82em; }
+
+/* reference list — denser so all twenty entries sit on one page */
+.refs { font-size: 9.9pt; line-height: 1.34; text-align: left; }
+.refs p { margin: 0 0 2.6pt 0; }
+</style>
+
+<!-- ============================================================
+     WORD-ONLY OVERRIDES
+     Browsers treat this whole block as a comment and ignore it.
+     Word reads it, and it undoes the fixed-height / absolutely
+     positioned page boxes that only make sense for printing from
+     a browser, replacing them with real Word page breaks, a real
+     A4 section setup and an automatic page-number footer.
+     ============================================================ -->
+<!--[if gte mso 9]>
+<style>
+  @page WordSection1 {
+    size: 21.0cm 29.7cm;
+    margin: 2.54cm 2.54cm 2.54cm 3.17cm;
+    mso-page-orientation: portrait;
+    mso-paper-source: 0;
+    mso-footer: f1;
+    mso-footer-margin: 1.25cm;
+  }
+  div.WordSection1 { page: WordSection1; }
+
+  .page  { width:auto; height:auto; padding:0; overflow:visible;
+           page-break-after:always; mso-break-type:page-break; }
+  .cbox  { position:static; height:auto; overflow:visible; }
+  .pno   { display:none; }
+  body   { font-family:"Times New Roman",serif; font-size:12.0pt; }
+  p      { line-height:150%; margin:0cm 0cm 6.0pt 0cm; text-align:justify; }
+  li     { line-height:150%; }
+  table.t{ mso-table-lspace:0cm; mso-table-rspace:0cm; }
+  .fig svg { width:15.5cm; }
+</style>
+<![endif]-->
+
+<style>
+</style>
+</head>
+<body>
+<div class="WordSection1">
+
+<!-- ==================== PAGE i — COVER ==================== -->
+<section class="page"><div class="cbox">
+  <div class="cover">
+    <div class="title">DevAssist AI: An LLM-Powered<br>Intelligent Developer Assistance Platform</div>
+    <div class="phase">PROJECT REPORT &ndash; PHASE I</div>
+    <div class="sub">Submitted in partial fulfillment of the requirements for the award of<br>
+      Bachelor of Engineering degree in Computer Science and Engineering</div>
+    <div class="by">By</div>
+    <div class="names">Sudharsan R (Reg. No &ndash; 43110923)<br>
+      Sayan Bhowmick (Reg. No &ndash; 43110850)</div>
+
+    <div class="logo-box">
+      <img src="sathyabama-logo.png" alt=""
+           onerror="this.outerHTML='&lt;div class=\'logo-fallback\'&gt;Place sathyabama-logo.png in this folder&lt;/div&gt;'">
+    </div>
+
+    <div class="dept">Department of Computer Science and Engineering</div>
+    <div class="school">School of Computing</div>
+    <div class="uni">SATHYABAMA</div>
+    <div class="uni2">INSTITUTE OF SCIENCE AND TECHNOLOGY<br>
+      (DEEMED TO BE UNIVERSITY)<br>
+      CATEGORY - 1 UNIVERSITY BY UGC<br>
+      Accredited &ldquo;A++&rdquo; by NAAC I Approved by AICTE<br>
+      JEPPIAAR NAGAR, RAJIV GANDHI SALAI, CHENNAI - 600119</div>
+    <div class="date">AUGUST - 2026</div>
+  </div>
+  </div>
+</section>
+
+<!-- ==================== PAGE ii — BONAFIDE CERTIFICATE ==================== -->
+<section class="page"><div class="cbox">
+  <div class="centre" style="margin-bottom:14pt">
+    <div style="font-size:12pt;font-weight:bold;text-transform:uppercase;line-height:1.4">
+      Department of Computer Science and Engineering<br>School of Computing
+    </div>
+    <div style="font-size:12pt;font-weight:bold;margin-top:4pt">
+      SATHYABAMA INSTITUTE OF SCIENCE AND TECHNOLOGY
+    </div>
+    <div style="font-size:11pt;">(DEEMED TO BE UNIVERSITY)</div>
+    <div style="font-size:11pt;">Jeppiaar Nagar, Rajiv Gandhi Salai, Chennai &ndash; 600119</div>
+  </div>
+
+  <div class="ftitle" style="margin-top:14pt">Bonafide Certificate</div>
+
+  <p style="line-height:1.75">This is to certify that this Project Report &ndash; Phase I is the bonafide
+  work of <b>Sudharsan R (Reg. No &ndash; 43110923)</b> and <b>Sayan Bhowmick (Reg. No &ndash; 43110850)</b>
+  who carried out the project entitled <b>&ldquo;DevAssist AI: An LLM-Powered Intelligent Developer
+  Assistance Platform&rdquo;</b> under our supervision from December 2025 to August 2026.</p>
+
+  <div style="margin-top:34pt">
+    <p class="tight"><b>Internal Guide</b></p>
+    <p class="tight" style="margin-top:22pt">Dr. RM. GOMATHI, M.E., Ph.D.,</p>
+    <p class="tight">Associate Professor,</p>
+    <p class="tight">Department of Computer Science and Engineering</p>
+  </div>
+
+  <div style="margin-top:30pt">
+    <p class="tight"><b>Head of the Department</b></p>
+    <p class="tight" style="margin-top:26pt">&nbsp;</p>
+  </div>
+
+  <div style="margin-top:22pt">
+    <p class="tight">Submitted for Viva voce Examination held on __________________________</p>
+  </div>
+
+  <table style="width:100%;margin-top:44pt;font-size:12pt">
+    <tr>
+      <td style="text-align:left"><b>Internal Examiner</b></td>
+      <td style="text-align:right"><b>External Examiner</b></td>
+    </tr>
+  </table>
+
+  </div>
+  <div class="pno">ii</div>
+</section>
+
+<!-- ==================== PAGE iii — DECLARATION ==================== -->
+<section class="page"><div class="cbox">
+  <div class="ftitle">Declaration</div>
+
+  <p style="line-height:1.75">We, <b>Sudharsan R (Reg. No &ndash; 43110923)</b> and
+  <b>Sayan Bhowmick (Reg. No &ndash; 43110850)</b>, hereby declare that the Project Report &ndash; Phase I
+  entitled <b>&ldquo;DevAssist AI: An LLM-Powered Intelligent Developer Assistance Platform&rdquo;</b>
+  done by us under the guidance of <b>Dr. RM. Gomathi, M.E., Ph.D., Associate Professor,</b>
+  Department of Computer Science and Engineering, is submitted in partial fulfillment of the
+  requirements for the award of the Bachelor of Engineering degree in Computer Science and
+  Engineering.</p>
+
+  <p style="line-height:1.75">We further declare that the work reported in this report is original,
+  has been carried out by us, and that no part of it has been submitted earlier to any other
+  university or institution for the award of any degree or diploma. All external sources of
+  information, software libraries and third-party services used in the course of this work have
+  been duly acknowledged and cited in the references.</p>
+
+  <table style="width:100%;margin-top:60pt;font-size:12pt">
+    <tr><td style="text-align:left">DATE:</td><td></td></tr>
+    <tr><td style="text-align:left;padding-top:34pt">PLACE: Chennai</td>
+        <td style="text-align:right;padding-top:34pt">SIGNATURE OF THE CANDIDATES</td></tr>
+    <tr><td></td><td style="text-align:right;padding-top:26pt">Sudharsan R</td></tr>
+    <tr><td></td><td style="text-align:right;padding-top:6pt">Sayan Bhowmick</td></tr>
+  </table>
+
+  </div>
+  <div class="pno">iii</div>
+</section>
+
+<!-- ==================== PAGE iv — ACKNOWLEDGEMENT ==================== -->
+<section class="page"><div class="cbox">
+  <div class="ftitle">Acknowledgement</div>
+
+  <p>We are pleased to acknowledge our sincere thanks to the Board of Management of
+  <b>SATHYABAMA INSTITUTE OF SCIENCE AND TECHNOLOGY</b> for their kind encouragement in doing this
+  project and for completing it successfully. We are grateful to them.</p>
+
+  <p>We convey our thanks to <b>Dr. B. Bhuvaneswaran, M.E., Ph.D.,</b> Dean, School of Computing and
+  <b>Dr. L. Lakshmanan, M.E., Ph.D.,</b> Head of the Department, Department of Computer Science and
+  Engineering, for providing us the necessary support and details at the right time during the
+  progressive reviews.</p>
+
+  <p>We would like to express our sincere and deep sense of gratitude to our Project Guide
+  <b>Dr. RM. Gomathi, M.E., Ph.D., Associate Professor,</b> Department of Computer Science and
+  Engineering, for her valuable guidance, suggestions and constant encouragement, which paved the
+  way for the successful completion of this phase of the project work. Her insistence on measuring
+  the system rather than assuming its behaviour shaped the evaluation approach reported here.</p>
+
+  <p>We wish to express our thanks to all the teaching and non-teaching staff members of the
+  Department of Computer Science and Engineering who were helpful in many ways for the completion
+  of the project. We also thank the maintainers of the open-source libraries and the providers of
+  the free-tier cloud services on which this platform is built, without which a student project of
+  this scope could not have been deployed publicly at zero cost.</p>
+
+  <p>Finally, we thank our parents and friends for their unwavering encouragement and patience
+  throughout the course of this work.</p>
+
+  </div>
+  <div class="pno">iv</div>
+</section>
+
+<!-- ==================== PAGE v — ABSTRACT ==================== -->
+<section class="page"><div class="cbox">
+  <div class="ftitle">Abstract</div>
+
+  <p>Modern software development is fragmented across a large number of disconnected tools. A
+  student or an early-career developer typically moves between a conversational assistant for
+  general questions, a separate service to query private documents, another to review code, an
+  online compiler to run it, a competitive-programming judge to practise on, and yet another
+  generator to scaffold new projects. Each of these tools maintains its own account, its own
+  interface conventions and its own copy of the user's data, and none of them shares context with
+  the others. The cost of this fragmentation is paid in context switching, in duplicated effort,
+  and in a loss of privacy whenever private material is uploaded to an unrelated third-party
+  service.</p>
+
+  <p><b>DevAssist AI</b> is a unified, web-based developer assistance platform that consolidates
+  seven such capabilities behind a single authenticated account and a single design system. The
+  platform provides: <i>Global AI</i>, a general-purpose streaming chat assistant with persistent,
+  searchable history; <i>Secret AI</i>, a private document question-answering module in which
+  answers are grounded strictly in documents the user has uploaded; <i>Code Analyzer</i>, which
+  returns structured defect reports, an optimised rewrite and a time-complexity comparison;
+  <i>Online Compiler</i>, a zero-setup multi-language execution environment; <i>VoidMain</i>, a
+  competitive-programming judge with problem set, verdicts and leaderboard; <i>Ignite</i>, an AI
+  project builder that generates a complete multi-file frontend project from a single
+  natural-language prompt; and <i>Circuit</i>, which converts a question into a validated,
+  animatable step-by-step visual explanation.</p>
+
+  <p>The system is implemented as three independently deployed services: a framework-free
+  HTML/CSS/JavaScript frontend, a Spring Boot 3 backend written in Java following a layered clean
+  architecture, and a Python FastAPI inference engine. Persistence and authentication are provided
+  by a managed PostgreSQL instance, with every stored row keyed to the owning user's universally
+  unique identifier so that multi-tenant isolation is enforced uniformly across all seven modules.
+  Large-language-model access is routed through a provider-abstraction registry that allows the
+  active vendor and model to be changed by editing a single environment variable, with no code
+  change and no redeployment of application logic.</p>
+
+  <p>A distinguishing engineering constraint of this work is that the entire platform runs on
+  free-tier infrastructure. Meeting that constraint required a set of deliberate mitigations that
+  are documented and evaluated in this report: a scheduled keep-alive service that suppresses
+  cold starts, lazy importing of heavy machine-learning dependencies, per-user sliding-window rate
+  limiting, a daily token-accounting ledger, sequential generation with exponential backoff, and a
+  context-injection strategy for document grounding that avoids loading embedding models into a
+  memory-constrained container. Phase I delivers a fully functional deployed system covering all
+  seven modules; Phase II will address persistent vector storage, backend code generation and
+  formal quantitative benchmarking.</p>
+
+  <p style="margin-top:10pt"><b>Keywords:</b> Large Language Models, Retrieval-Augmented
+  Generation, Developer Tools, Microservices, Multi-Tenant Isolation, Cloud Computing, Automated
+  Code Analysis.</p>
+
+  </div>
+  <div class="pno">v</div>
+</section>
+
+<!-- ==================== PAGE vi — TABLE OF CONTENTS ==================== -->
+<section class="page"><div class="cbox">
+  <div class="ftitle">Table of Contents</div>
+
+  <table class="toc">
+    <tr class="ch"><td class="n">CHAPTER</td><td class="d">TITLE</td><td class="pg">PAGE</td></tr>
+    <tr><td class="n"></td><td class="d">ABSTRACT</td><td class="pg">v</td></tr>
+    <tr><td class="n"></td><td class="d">LIST OF FIGURES</td><td class="pg">vii</td></tr>
+    <tr><td class="n"></td><td class="d">LIST OF ABBREVIATIONS</td><td class="pg">vii</td></tr>
+
+    <tr class="ch"><td class="n">1</td><td class="d">INTRODUCTION</td><td class="pg">1</td></tr>
+    <tr><td class="n"></td><td class="d">1.1&nbsp;&nbsp;Overview</td><td class="pg">1</td></tr>
+    <tr><td class="n"></td><td class="d">1.2&nbsp;&nbsp;Motivation and Problem Statement</td><td class="pg">1</td></tr>
+    <tr><td class="n"></td><td class="d">1.3&nbsp;&nbsp;Objectives</td><td class="pg">2</td></tr>
+    <tr><td class="n"></td><td class="d">1.4&nbsp;&nbsp;Scope of the Project</td><td class="pg">2</td></tr>
+    <tr><td class="n"></td><td class="d">1.5&nbsp;&nbsp;Organization of the Report</td><td class="pg">3</td></tr>
+
+    <tr class="ch"><td class="n">2</td><td class="d">LITERATURE SURVEY</td><td class="pg">4</td></tr>
+    <tr><td class="n"></td><td class="d">2.1&nbsp;&nbsp;Introduction</td><td class="pg">4</td></tr>
+    <tr><td class="n"></td><td class="d">2.2&nbsp;&nbsp;Review of Existing Work</td><td class="pg">4</td></tr>
+    <tr><td class="n"></td><td class="d">2.3&nbsp;&nbsp;Comparative Analysis</td><td class="pg">6</td></tr>
+    <tr><td class="n"></td><td class="d">2.4&nbsp;&nbsp;Research Gap and Inference</td><td class="pg">6</td></tr>
+
+    <tr class="ch"><td class="n">3</td><td class="d">AIM AND SCOPE OF THE PRESENT INVESTIGATION</td><td class="pg">7</td></tr>
+    <tr><td class="n"></td><td class="d">3.1&nbsp;&nbsp;Aim of the Project</td><td class="pg">7</td></tr>
+    <tr><td class="n"></td><td class="d">3.2&nbsp;&nbsp;Existing System</td><td class="pg">7</td></tr>
+    <tr><td class="n"></td><td class="d">3.3&nbsp;&nbsp;Limitations of the Existing System</td><td class="pg">7</td></tr>
+    <tr><td class="n"></td><td class="d">3.4&nbsp;&nbsp;Proposed System</td><td class="pg">8</td></tr>
+    <tr><td class="n"></td><td class="d">3.5&nbsp;&nbsp;Feasibility Study</td><td class="pg">8</td></tr>
+    <tr><td class="n"></td><td class="d">3.6&nbsp;&nbsp;System Requirements</td><td class="pg">9</td></tr>
+
+    <tr class="ch"><td class="n">4</td><td class="d">SYSTEM DESIGN AND METHODOLOGY</td><td class="pg">10</td></tr>
+    <tr><td class="n"></td><td class="d">4.1&nbsp;&nbsp;System Architecture</td><td class="pg">10</td></tr>
+    <tr><td class="n"></td><td class="d">4.2&nbsp;&nbsp;Module Design</td><td class="pg">11</td></tr>
+    <tr><td class="n"></td><td class="d">4.3&nbsp;&nbsp;Document Grounding Pipeline</td><td class="pg">12</td></tr>
+    <tr><td class="n"></td><td class="d">4.4&nbsp;&nbsp;Provider Abstraction and Failover</td><td class="pg">12</td></tr>
+    <tr><td class="n"></td><td class="d">4.5&nbsp;&nbsp;Data Flow Diagrams</td><td class="pg">13</td></tr>
+    <tr><td class="n"></td><td class="d">4.6&nbsp;&nbsp;Use Case Model</td><td class="pg">14</td></tr>
+    <tr><td class="n"></td><td class="d">4.7&nbsp;&nbsp;Database Design and Isolation</td><td class="pg">14</td></tr>
+
+    <tr class="ch"><td class="n">5</td><td class="d">IMPLEMENTATION AND RESULTS</td><td class="pg">15</td></tr>
+    <tr><td class="n"></td><td class="d">5.1&nbsp;&nbsp;Development and Deployment Environment</td><td class="pg">15</td></tr>
+    <tr><td class="n"></td><td class="d">5.2&nbsp;&nbsp;Module Implementation</td><td class="pg">15</td></tr>
+    <tr><td class="n"></td><td class="d">5.3&nbsp;&nbsp;REST Interface Summary</td><td class="pg">16</td></tr>
+    <tr><td class="n"></td><td class="d">5.4&nbsp;&nbsp;Testing</td><td class="pg">16</td></tr>
+    <tr><td class="n"></td><td class="d">5.5&nbsp;&nbsp;Results and Discussion</td><td class="pg">17</td></tr>
+
+    <tr class="ch"><td class="n">6</td><td class="d">CONCLUSION AND FUTURE WORK</td><td class="pg">18</td></tr>
+    <tr class="ch"><td class="n"></td><td class="d">REFERENCES</td><td class="pg">19</td></tr>
+  </table>
+
+  </div>
+  <div class="pno">vi</div>
+</section>
+
+<!-- ==================== PAGE vii — LIST OF FIGURES / ABBREVIATIONS ==================== -->
+<section class="page"><div class="cbox">
+  <div class="ftitle">List of Figures</div>
+
+  <table class="toc" style="font-size:11.5pt">
+    <tr class="ch"><td class="n">FIG. NO</td><td class="d">FIGURE NAME</td><td class="pg">PAGE</td></tr>
+    <tr><td class="n">4.1</td><td class="d">Three-tier system architecture of DevAssist AI</td><td class="pg">10</td></tr>
+    <tr><td class="n">4.2</td><td class="d">Document grounding pipeline of the Secret AI module</td><td class="pg">12</td></tr>
+    <tr><td class="n">4.3</td><td class="d">Data flow diagram &ndash; Level 0 (context diagram)</td><td class="pg">13</td></tr>
+    <tr><td class="n">4.4</td><td class="d">Data flow diagram &ndash; Level 1</td><td class="pg">13</td></tr>
+    <tr><td class="n">4.5</td><td class="d">Use case diagram of the platform</td><td class="pg">14</td></tr>
+    <tr><td class="n">4.6</td><td class="d">Entity relationship diagram of the persistence layer</td><td class="pg">14</td></tr>
+    <tr><td class="n">5.1</td><td class="d">Global AI conversational interface</td><td class="pg">17</td></tr>
+    <tr><td class="n">5.2</td><td class="d">Secret AI document library and grounded answer</td><td class="pg">17</td></tr>
+    <tr><td class="n">5.3</td><td class="d">Code Analyzer structured output and complexity chart</td><td class="pg">17</td></tr>
+    <tr><td class="n">5.4</td><td class="d">Ignite project generation with live file tree</td><td class="pg">17</td></tr>
+  </table>
+
+  <div class="ftitle" style="margin-top:24pt">List of Abbreviations</div>
+
+  <table class="toc" style="font-size:11.5pt">
+    <tr class="ch"><td class="n" style="width:80pt">ABBR.</td><td class="d">EXPANSION</td></tr>
+    <tr><td class="n">API</td><td class="d">Application Programming Interface</td></tr>
+    <tr><td class="n">CORS</td><td class="d">Cross-Origin Resource Sharing</td></tr>
+    <tr><td class="n">DFD</td><td class="d">Data Flow Diagram</td></tr>
+    <tr><td class="n">DTO</td><td class="d">Data Transfer Object</td></tr>
+    <tr><td class="n">ER</td><td class="d">Entity Relationship</td></tr>
+    <tr><td class="n">JPA</td><td class="d">Java Persistence API</td></tr>
+    <tr><td class="n">JWT</td><td class="d">JSON Web Token</td></tr>
+    <tr><td class="n">LLM</td><td class="d">Large Language Model</td></tr>
+    <tr><td class="n">NIM</td><td class="d">NVIDIA Inference Microservice</td></tr>
+    <tr><td class="n">RAG</td><td class="d">Retrieval-Augmented Generation</td></tr>
+    <tr><td class="n">REST</td><td class="d">Representational State Transfer</td></tr>
+    <tr><td class="n">SPA</td><td class="d">Single Page Application</td></tr>
+    <tr><td class="n">TPM</td><td class="d">Tokens Per Minute</td></tr>
+    <tr><td class="n">UUID</td><td class="d">Universally Unique Identifier</td></tr>
+  </table>
+
+  </div>
+  <div class="pno">vii</div>
+</section>
+
+<!-- ==================== PAGE 1 ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter"><span class="cno">CHAPTER 1</span>INTRODUCTION</h1>
+
+  <h2>1.1&nbsp;&nbsp;Overview</h2>
+  <p>The practice of software development has been reshaped over the last few years by large
+  language models. Tasks that previously demanded either an experienced colleague or a long
+  search through documentation &mdash; explaining an unfamiliar error, reviewing a function for
+  correctness, summarising a specification, drafting a first version of a module &mdash; can now be
+  addressed conversationally. The benefit, however, has arrived in a fragmented form. Each capability
+  is delivered by a different vendor, behind a different account, with a different interface and a
+  different privacy policy.</p>
+
+  <p><b>DevAssist AI</b> is a unified web platform that consolidates seven distinct developer
+  assistance capabilities behind one authenticated account and one coherent interface. It is aimed
+  primarily at engineering students and early-career developers, for whom the cost of assembling and
+  paying for a toolchain is a real barrier. The platform is deployed publicly and operates entirely
+  on free-tier cloud infrastructure, which makes the engineering of the system, and not merely its
+  feature list, a substantive part of the contribution.</p>
+
+  <h2>1.2&nbsp;&nbsp;Motivation and Problem Statement</h2>
+  <p>Three specific problems motivated this work. The first is <b>tool fragmentation</b>. A student
+  debugging an assignment may consult a chat assistant, paste the same code into a separate analysis
+  service, run it on a third online compiler, and practise the underlying concept on a fourth
+  competitive-programming site. No context is carried between them, and the same information is
+  re-entered repeatedly.</p>
+
+  <p>The second is <b>privacy of private material</b>. Asking questions about a personal document
+  normally means uploading it to a general-purpose service whose retention behaviour is opaque, and
+  whose answers may be influenced by material entirely outside that document.</p>
+
+  <p>The third is <b>cost</b>. Commercial assistants, managed vector databases and hosted execution
+  sandboxes are individually inexpensive but collectively out of reach for a student. The problem
+  addressed by this project is therefore to design and build a single, secure, multi-tenant platform
+  that delivers these capabilities together, grounds private queries strictly in user-owned data, and
+  sustains acceptable behaviour under the hard resource limits of free-tier hosting.</p>
+
+  </div>
+  <div class="pno">1</div>
+</section>
+
+<!-- ==================== PAGE 2 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">1.3&nbsp;&nbsp;Objectives</h2>
+  <p>The objectives of Phase I of this project are stated below.</p>
+  <ol>
+    <li>To design a three-tier, service-oriented architecture in which the presentation, business
+    and inference concerns are independently deployable and independently replaceable.</li>
+    <li>To implement seven functional modules &mdash; Global AI, Secret AI, Code Analyzer, Online
+    Compiler, VoidMain, Ignite and Circuit &mdash; behind a single authenticated session.</li>
+    <li>To enforce strict multi-tenant data isolation, so that every persisted record is bound to the
+    universally unique identifier of its owner and no endpoint can return another user's data.</li>
+    <li>To ground private document question-answering exclusively in material the user has uploaded,
+    so that no external corpus contributes to the answer.</li>
+    <li>To abstract large-language-model access behind a provider registry, so that the active vendor
+    and model can be changed through configuration alone, without modifying application code.</li>
+    <li>To design and evaluate mitigations that allow the platform to operate acceptably within
+    free-tier constraints on memory, request duration, request rate and token quota.</li>
+    <li>To validate the behaviour of the inference and orchestration layers through an automated test
+    suite in which all external model providers are mocked.</li>
+  </ol>
+
+  <h2>1.4&nbsp;&nbsp;Scope of the Project</h2>
+  <p>The scope of Phase I covers the complete design, implementation and public deployment of the
+  seven modules listed above, together with authentication, per-user persistence, request
+  rate limiting and token accounting. Code execution is delegated to an external sandboxing service,
+  and model inference is delegated to external providers; the project does not train or fine-tune
+  any model of its own.</p>
+
+  <p>The following are explicitly outside the scope of this phase: generation of backend or
+  database code by the Ignite module, which currently produces frontend projects only; a persistent
+  vector store, since document context is presently held in process memory; real-time collaborative
+  editing; and native mobile applications. These are treated as Phase II objectives and are set out
+  in Chapter 6.</p>
+
+  </div>
+  <div class="pno">2</div>
+</section>
+
+<!-- ==================== PAGE 3 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">1.5&nbsp;&nbsp;Organization of the Report</h2>
+
+  <p>The remainder of this report is organised as follows.</p>
+
+  <p><b>Chapter 2 &mdash; Literature Survey</b> reviews the classes of system that inform this work:
+  conversational programming assistants, retrieval-augmented generation, automated code review,
+  remote code execution sandboxes, online judging systems and program synthesis from natural
+  language. Each is examined for the specific technique it contributes and for the limitation it
+  leaves unaddressed, and the chapter closes with a comparative analysis and a statement of the
+  research gap.</p>
+
+  <p><b>Chapter 3 &mdash; Aim and Scope of the Present Investigation</b> states the aim formally,
+  characterises the existing practice that the platform replaces, enumerates the limitations of that
+  practice, and describes the proposed system. It reports the technical, economic and operational
+  feasibility of the design and specifies the hardware, software, functional and non-functional
+  requirements.</p>
+
+  <p><b>Chapter 4 &mdash; System Design and Methodology</b> presents the architecture of the
+  platform. It describes the three deployed services and the contract between them, the
+  responsibilities of each functional module, the document grounding pipeline, the provider
+  abstraction that decouples the system from any single model vendor, the data flow diagrams at
+  context and decomposition level, the use case model and the database design that carries
+  multi-tenant isolation.</p>
+
+  <p><b>Chapter 5 &mdash; Implementation and Results</b> describes the development and deployment
+  environment, the implementation of each module, the public REST interface, the testing strategy
+  and its outcome, and the qualitative and quantitative results observed from the deployed system,
+  illustrated with screenshots of the working interface.</p>
+
+  <p><b>Chapter 6 &mdash; Conclusion and Future Work</b> summarises what Phase I established,
+  states the limitations that remain open, and defines the objectives of Phase II.</p>
+
+  <p>The report closes with the list of references cited throughout.</p>
+
+  </div>
+  <div class="pno">3</div>
+</section>
+
+<!-- ==================== PAGE 4 ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter"><span class="cno">CHAPTER 2</span>LITERATURE SURVEY</h1>
+
+  <h2>2.1&nbsp;&nbsp;Introduction</h2>
+  <p>DevAssist AI draws on six established lines of work: the transformer architecture and the
+  instruction-following models built upon it, retrieval-augmented generation, automated code
+  analysis and synthesis, sandboxed remote code execution, automated judging of competitive
+  programming submissions, and the architectural patterns used to compose these into a secure
+  multi-tenant service. This chapter reviews each line for the technique it contributes and for the
+  limitation it leaves open.</p>
+
+  <h2>2.2&nbsp;&nbsp;Review of Existing Work</h2>
+
+  <p><b>1. Transformer architecture.</b> Vaswani et al. [1] introduced the transformer, replacing
+  recurrence with self-attention and making it practical to train models on very large corpora.
+  Every model used by this platform descends from that architecture. The work is foundational
+  rather than applied: it establishes the capability but says nothing about how such a model should
+  be exposed to an end user, budgeted, or restricted to a private data set.</p>
+
+  <p><b>2. Few-shot instruction following.</b> Brown et al. [2] demonstrated that a sufficiently
+  large language model performs new tasks from a natural-language description and a handful of
+  examples, without gradient updates. This result is what allows a single deployed model in DevAssist
+  AI to serve seven functionally different modules through prompt construction alone. The limitation
+  is reliability: the same property that makes the model general also makes its output format
+  unstable, which the present work addresses by validating every structured response against a
+  schema before it reaches the user interface.</p>
+
+  <p><b>3. Code-trained models.</b> Chen et al. [3] evaluated models trained specifically on public
+  source code and reported both strong functional synthesis and a persistent rate of subtly incorrect
+  output. Their finding directly informs the design of the Code Analyzer module in this project,
+  which presents an optimised rewrite alongside the original in a difference view rather than
+  substituting it silently, leaving the developer as the final reviewer.</p>
+
+  </div>
+  <div class="pno">4</div>
+</section>
+
+<!-- ==================== PAGE 5 ==================== -->
+<section class="page"><div class="cbox">
+  <p style="margin-top:0"><b>4. Retrieval-augmented generation.</b> Lewis et al. [4] combined a
+  parametric generator with a non-parametric retriever, so that answers are conditioned on documents
+  fetched at inference time. This is the technique underlying the Secret AI module. Their
+  formulation assumes a retrieval index that can be held in memory; the present work departs from
+  this assumption because the deployment target cannot host an embedding model, and adopts a direct
+  context-injection strategy instead, as described in Section 4.3.</p>
+
+  <p><b>5. Sparse and dense retrieval.</b> Robertson and Zaragoza [21] formalised Okapi BM25, a
+  probabilistic term-weighting ranker that needs only term statistics and remains a strong baseline
+  for passage retrieval. Karpukhin et al. [5] later showed that dense retrieval with a dual encoder
+  outperforms sparse matching on open-domain questions, and Reimers and Gurevych [6] made such
+  encoders practical through comparable sentence embeddings. This project adopts the sparse method:
+  BM25 needs no resident model, which is decisive under a 512 MB ceiling.</p>
+
+  <p><b>6. Efficient similarity search.</b> Johnson et al. [7] presented FAISS, a library for
+  billion-scale approximate nearest-neighbour search. A FAISS-backed vector store is implemented in
+  this project and is used in local execution, but it is not active in the deployed configuration
+  because loading the accompanying embedding model exceeds the memory ceiling of the free-tier
+  container. This trade-off is reported honestly in Section 4.3 rather than concealed.</p>
+
+  <p><b>7. Program synthesis from natural language.</b> Austin et al. [8] studied the generation of
+  complete programs from natural-language descriptions and observed that success degrades sharply as
+  the required output grows. The Ignite module responds to this finding structurally: rather than
+  requesting an entire project in one call, it first obtains a file-level plan and then generates
+  each file in a separate call, so that a failure is isolated to one file and can be retried
+  independently.</p>
+
+  <p><b>8. Remote execution sandboxes and online judges.</b> Public compilation services such as
+  Wandbox [15] and open-source judging systems such as Judge0 [14] establish the accepted pattern
+  for executing untrusted user code: isolate it in a disposable container outside the application
+  process. Both the Online Compiler and the VoidMain judge in this project follow this pattern by
+  delegating execution to an external sandbox, so that no user-supplied code ever runs on the
+  application servers.</p>
+
+  <p><b>9. Architecture and authentication.</b> Fielding [13] defined the REST constraints that
+  govern the interfaces between the three services here; Martin [11] and Newman [12] set out the
+  layering and service-decomposition rules the backend follows; and RFC 7519 [9] and RFC 6749 [10]
+  define the token and delegated-authorisation mechanisms used to carry identity from the browser to
+  every protected endpoint.</p>
+
+  </div>
+  <div class="pno">5</div>
+</section>
+
+<!-- ==================== PAGE 6 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">2.3&nbsp;&nbsp;Comparative Analysis</h2>
+
+  <table class="t">
+    <tr>
+      <th style="width:22%">System / Work</th>
+      <th style="width:30%">Principal Contribution</th>
+      <th style="width:26%">Limitation for this Use Case</th>
+      <th style="width:22%">Adoption in DevAssist AI</th>
+    </tr>
+    <tr><td>Transformer [1]</td><td>Self-attention; scalable sequence modelling</td><td>Architecture only; no delivery or governance model</td><td>Underlies every model invoked</td></tr>
+    <tr><td>Few-shot LLMs [2]</td><td>Task generalisation from instructions</td><td>Output format is not guaranteed</td><td>Schema validation on every structured reply</td></tr>
+    <tr><td>Code-trained LLMs [3]</td><td>Functional code synthesis</td><td>Silent subtle defects</td><td>Difference view; developer retains final review</td></tr>
+    <tr><td>RAG [4]</td><td>Answers conditioned on retrieved documents</td><td>Assumes an in-memory retrieval index</td><td>Context injection with per-document cache</td></tr>
+    <tr><td>DPR / SBERT [5][6]</td><td>High-quality dense retrieval</td><td>Embedding model exceeds free-tier memory</td><td>Deferred; hybrid retrieval is later work</td></tr>
+    <tr><td>Okapi BM25 [21]</td><td>Strong sparse ranker from term statistics alone</td><td>Lexical only; misses paraphrase with no word overlap</td><td>Approved retrieval design for Secret AI</td></tr>
+    <tr><td>FAISS [7]</td><td>Efficient vector similarity search</td><td>Requires a resident index and model</td><td>Present in code; inactive in deployment</td></tr>
+    <tr><td>Program synthesis [8]</td><td>Whole-program generation</td><td>Quality falls with output length</td><td>Plan first, then one call per file</td></tr>
+    <tr><td>Judge0 / Wandbox [14][15]</td><td>Isolated execution of untrusted code</td><td>Availability of a public service is not guaranteed</td><td>External sandbox for compiler and judge</td></tr>
+    <tr><td>Commercial assistants</td><td>Mature conversational experience</td><td>Fragmented, paid, opaque data retention</td><td>Unified account; grounding restricted to user data</td></tr>
+  </table>
+  <div class="cap">Table 2.1 &ndash; Comparative analysis of reviewed work</div>
+
+  <h2>2.4&nbsp;&nbsp;Research Gap and Inference</h2>
+
+  <p>The review shows that each individual capability required by this project is well established
+  in isolation. Conversational assistance, grounded question answering, code analysis, sandboxed
+  execution, automated judging and program synthesis all have mature reference implementations. What
+  the literature does not address is their <b>integration under a single tenancy model</b>, and their
+  operation under <b>severe resource constraints</b>.</p>
+
+  <p>Two gaps follow. First, no reviewed system offers these capabilities together with a uniform
+  isolation guarantee binding a user's documents, conversations, submissions and generated projects
+  to one identity. Second, the reviewed retrieval techniques presuppose infrastructure &mdash;
+  resident embedding models, persistent indices, long-running processes &mdash; that free-tier
+  hosting does not provide, and the literature offers little guidance when that presupposition fails.</p>
+
+  <p>DevAssist AI addresses the first with a single identifier applied uniformly across every entity
+  in the schema, and the second with an explicit set of mitigations: keep-alive scheduling, lazy
+  importing, sliding-window rate limiting, daily token accounting and bounded context injection.</p>
+
+  </div>
+  <div class="pno">6</div>
+</section>
+
+<!-- ==================== PAGE 7 ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter"><span class="cno">CHAPTER 3</span>AIM AND SCOPE OF THE PRESENT INVESTIGATION</h1>
+
+  <h2>3.1&nbsp;&nbsp;Aim of the Project</h2>
+  <p>The aim of this project is to design, implement and publicly deploy a unified, secure,
+  multi-tenant developer assistance platform that delivers seven distinct AI-assisted capabilities
+  behind a single authenticated account, grounds all private document queries strictly in
+  user-owned material, decouples the system from any single model vendor through a configuration-level
+  provider abstraction, and sustains acceptable behaviour entirely within the resource limits of
+  free-tier cloud infrastructure.</p>
+
+  <h2>3.2&nbsp;&nbsp;Existing System</h2>
+  <p>The existing practice is not a single system but a habitual assembly of unrelated services: a
+  commercial assistant for general questions, a separate service for private documents, an editor
+  plugin or static analyser for code review, a public online compiler, a competitive-programming site
+  for practice, and a scaffolding generator for new projects.</p>
+
+  <p>Each authenticates the user separately, keeps its own copy of whatever is submitted, and imposes
+  its own conventions. Nothing is shared: a document uploaded to one is invisible to another, and a
+  conversation held in one cannot inform an analysis in the next.</p>
+
+  <h2>3.3&nbsp;&nbsp;Limitations of the Existing System</h2>
+  <ol>
+    <li><b>Context loss across tools.</b> Information is re-entered at every boundary, and reasoning
+    established in one tool is unavailable to the next.</li>
+    <li><b>Uncontrolled exposure of private material.</b> Documents go to services whose retention
+    policies are opaque, and answers may be shaped by material outside the document.</li>
+    <li><b>Cumulative cost.</b> Individually modest subscriptions become collectively prohibitive for
+    a student, and their free tiers are too restricted for sustained use.</li>
+    <li><b>Vendor lock-in.</b> Each service is bound to one provider, so an outage or price change
+    cannot be absorbed by the user.</li>
+    <li><b>No unified isolation guarantee.</b> With data scattered across providers there is no
+    single, auditable statement of who can access what.</li>
+    <li><b>Inconsistent interaction model.</b> Seven interfaces impose seven sets of conventions,
+    raising the learning cost.</li>
+  </ol>
+
+  </div>
+  <div class="pno">7</div>
+</section>
+
+<!-- ==================== PAGE 8 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">3.4&nbsp;&nbsp;Proposed System</h2>
+  <p>The proposed system is a single web platform, accessed through one authenticated session, that
+  exposes seven modules over a common design system and a common persistence layer. Its defining
+  properties are as follows.</p>
+  <ol>
+    <li><b>Unified tenancy.</b> Every persisted entity carries the universally unique identifier of
+    its owner and every read path filters on it, so isolation is a property of the schema rather than
+    of individual endpoint code.</li>
+    <li><b>Strict grounding for private data.</b> The model is supplied only with text extracted from
+    the document the user selected; no external corpus can contribute to the answer.</li>
+    <li><b>Provider independence.</b> Model access is resolved at request time through a registry
+    keyed by an environment variable. Changing vendor is a configuration change; adding one is a
+    single class and a single registry entry.</li>
+    <li><b>Delegated execution.</b> User-supplied code never runs on the application servers. It is
+    dispatched to an external sandbox and only its output is returned.</li>
+    <li><b>Explicit resource governance.</b> A per-user sliding-window rate limiter and a daily token
+    ledger bound consumption before any request reaches a quota-limited provider.</li>
+    <li><b>Free-tier operability.</b> A keep-alive scheduler suppresses cold starts, heavy libraries
+    are imported lazily, and generation is sequential with backoff so request duration stays within
+    platform timeouts.</li>
+  </ol>
+
+  <h2>3.5&nbsp;&nbsp;Feasibility Study</h2>
+  <p><b>Technical feasibility.</b> Every component rests on mature, documented technology: Spring
+  Boot for the service layer, FastAPI for inference orchestration, managed PostgreSQL for
+  persistence and vendor-hosted models over HTTP. No component required an unproven capability, and
+  the complete system has been deployed and exercised end to end.</p>
+
+  <p><b>Economic feasibility.</b> Recurring infrastructure cost is zero. Static hosting, both
+  application services, the database, authentication, storage and inference are all obtained on free
+  tiers, so the cost of the project is development effort alone.</p>
+
+  <p><b>Operational feasibility.</b> The interface follows conventions users already hold from
+  mainstream chat and editor applications, so adoption needs no training. Administration is limited
+  to environment configuration, and provider failure is recoverable by one variable change.</p>
+
+  </div>
+  <div class="pno">8</div>
+</section>
+
+<!-- ==================== PAGE 9 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">3.6&nbsp;&nbsp;System Requirements</h2>
+
+  <h3>3.6.1&nbsp;&nbsp;Hardware and Software Requirements</h3>
+  <table class="t">
+    <tr><th style="width:26%">Component</th><th style="width:37%">Development Environment</th><th style="width:37%">Deployment Environment</th></tr>
+    <tr><td>Processor / memory</td><td>x86-64, 4 cores, 8 GB RAM</td><td>Shared vCPU, 512 MB container memory</td></tr>
+    <tr><td>Operating system</td><td>Windows 11 / Linux</td><td>Linux container image</td></tr>
+    <tr><td>Backend runtime</td><td>Java 21, Apache Maven</td><td>Java 21 in a Docker image</td></tr>
+    <tr><td>Inference runtime</td><td>Python 3.11, virtual environment</td><td>Python 3.11 managed runtime</td></tr>
+    <tr><td>Frontend</td><td>HTML5, CSS3, ECMAScript 2020</td><td>Static hosting with global CDN</td></tr>
+    <tr><td>Database</td><td>PostgreSQL 15 (managed)</td><td>PostgreSQL 15 via transaction pooler</td></tr>
+    <tr><td>Browser</td><td colspan="2">Chromium 120+, Firefox 120+, or any evergreen browser with ES2020 support</td></tr>
+  </table>
+  <div class="cap">Table 3.1 &ndash; Hardware and software requirements</div>
+
+  <h3>3.6.2&nbsp;&nbsp;Functional Requirements</h3>
+  <table class="t">
+    <tr><th style="width:14%">ID</th><th style="width:86%">Requirement</th></tr>
+    <tr><td class="c">FR-1</td><td>Authenticate by password or federated sign-in and issue a signed token carried on every protected request.</td></tr>
+    <tr><td class="c">FR-2</td><td>Allow multiple named conversations, with pin, rename, search and delete.</td></tr>
+    <tr><td class="c">FR-3</td><td>Accept document uploads and answer using only the selected document as context.</td></tr>
+    <tr><td class="c">FR-4</td><td>Analyse source code and return defects, suggestions, an optimised rewrite and a complexity comparison.</td></tr>
+    <tr><td class="c">FR-5</td><td>Compile and execute submitted code in an isolated external sandbox and return its output.</td></tr>
+    <tr><td class="c">FR-6</td><td>Judge submissions against expected output, record a verdict and maintain a leaderboard.</td></tr>
+    <tr><td class="c">FR-7</td><td>Generate a multi-file frontend project from a prompt, streaming progress to the interface.</td></tr>
+    <tr><td class="c">FR-8</td><td>Return a schema-validated, step-wise visual explanation for a concept or algorithm.</td></tr>
+  </table>
+  <div class="cap">Table 3.2 &ndash; Functional requirements</div>
+
+  <h3>3.6.3&nbsp;&nbsp;Non-Functional Requirements</h3>
+  <p><b>Security:</b> every route except the public landing and health checks requires a valid token,
+  and all credentials come from environment variables. <b>Isolation:</b> no response may contain data
+  owned by another identity. <b>Availability:</b> the inference service is kept warm on a
+  fourteen-minute schedule. <b>Performance:</b> responses stream progressively, so first output
+  appears well before completion. <b>Maintainability:</b> strict layer boundaries are observed, and a
+  provider change requires no code modification.</p>
+
+  </div>
+  <div class="pno">9</div>
+</section>
+
+<!-- ==================== PAGE 10 ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter"><span class="cno">CHAPTER 4</span>SYSTEM DESIGN AND METHODOLOGY</h1>
+
+  <h2>4.1&nbsp;&nbsp;System Architecture</h2>
+  <p>DevAssist AI is organised as three independently deployed tiers. The <b>presentation tier</b> is
+  a set of static documents served from a content delivery network; it holds no secret and performs
+  no privileged operation. The <b>application tier</b> is a Spring Boot service that owns identity
+  verification, authorisation, persistence and rate limiting. The <b>inference tier</b> is a FastAPI
+  service that owns prompt construction, provider selection, response validation and token
+  accounting. Separating the last two matters: the Java service is stable and transactional, whereas
+  the Python service changes whenever a prompt or a model changes, and the two therefore have very
+  different release rhythms.</p>
+
+  <p>The browser never contacts the inference tier or any model vendor directly. Every request
+  carries a signed token, is verified by a servlet filter in the application tier, and is only then
+  proxied inward. This single ingress point is what makes the isolation guarantee auditable: there is
+  exactly one place where identity is established, and every downstream call inherits it.</p>
+
+  <div class="fig">
+  <svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" font-family="'Times New Roman',Times,serif">
+    <defs>
+      <marker id="ah" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 z" fill="#000"/>
+      </marker>
+    </defs>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <rect x="18" y="8" width="380" height="56" rx="3"/>
+      <rect x="430" y="8" width="172" height="56" rx="3" fill="#f2f2f2"/>
+      <rect x="18" y="112" width="380" height="72" rx="3"/>
+      <rect x="430" y="112" width="172" height="72" rx="3" fill="#f2f2f2"/>
+      <rect x="18" y="228" width="380" height="64" rx="3"/>
+      <rect x="430" y="228" width="172" height="64" rx="3" fill="#f2f2f2"/>
+    </g>
+    <g font-size="11.5" font-weight="bold" text-anchor="middle">
+      <text x="208" y="27">PRESENTATION TIER &mdash; Browser</text>
+      <text x="516" y="30">Supabase Auth</text>
+      <text x="208" y="132">APPLICATION TIER &mdash; Spring Boot 3 / Java 21</text>
+      <text x="516" y="136">Supabase PostgreSQL</text>
+      <text x="208" y="248">INFERENCE TIER &mdash; FastAPI / Python 3.11</text>
+      <text x="516" y="250">External Services</text>
+    </g>
+    <g font-size="9.5" text-anchor="middle" fill="#222">
+      <text x="208" y="42">Static hosting (CDN) &middot; HTML5, CSS3, vanilla JavaScript</text>
+      <text x="208" y="55">Monaco editor &middot; auth-guard.js attaches the bearer token</text>
+      <text x="516" y="44">JWT issuance,</text>
+      <text x="516" y="56">federated sign-in</text>
+
+      <text x="208" y="148">Docker container &middot; Controller &rarr; Service &rarr; Repository &rarr; Entity</text>
+      <text x="208" y="161">JwtFilter &middot; CorsConfig &middot; RateLimitService</text>
+      <text x="208" y="174">KeepAliveService &middot; 14-minute warm-up schedule</text>
+      <text x="516" y="150">Transaction pooler</text>
+      <text x="516" y="163">Object storage for</text>
+      <text x="516" y="176">uploaded documents</text>
+
+      <text x="208" y="264">safe_generate &middot; provider registry &middot; token ledger</text>
+      <text x="208" y="277">Thread-locked in-process caches &middot; schema validation</text>
+      <text x="516" y="266">Groq &middot; NVIDIA NIM</text>
+      <text x="516" y="279">Wandbox sandbox</text>
+    </g>
+    <g stroke="#000" stroke-width="1.1" marker-end="url(#ah)" fill="none">
+      <path d="M208,64 L208,110"/>
+      <path d="M208,184 L208,226"/>
+      <path d="M398,140 L428,140"/>
+      <path d="M398,256 L428,256"/>
+      <path d="M398,36 L428,36"/>
+    </g>
+    <g font-size="9" fill="#000">
+      <text x="214" y="82">HTTPS request + Bearer JWT</text>
+      <text x="214" y="98">(authFetch)</text>
+      <text x="214" y="205">Internal REST call</text>
+      <text x="214" y="219">(server to server only)</text>
+      <text x="345" y="30" text-anchor="end">verify</text>
+      <text x="396" y="134" text-anchor="end">JPA</text>
+      <text x="396" y="250" text-anchor="end">HTTPS</text>
+    </g>
+  </svg>
+  </div>
+  <div class="cap">Fig. 4.1 &ndash; Three-tier system architecture of DevAssist AI</div>
+
+  </div>
+  <div class="pno">10</div>
+</section>
+
+<!-- ==================== PAGE 11 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">4.2&nbsp;&nbsp;Module Design</h2>
+  <p>The platform is decomposed into seven functional modules. Each owns its own routes, its own
+  entities and its own prompt strategy, but all share the same authentication filter, the same
+  persistence layer and the same provider abstraction. Table 4.1 summarises the responsibility and
+  the principal design decision of each.</p>
+
+  <table class="t">
+    <tr>
+      <th style="width:16%">Module</th>
+      <th style="width:40%">Responsibility</th>
+      <th style="width:44%">Principal Design Decision</th>
+    </tr>
+    <tr><td><b>Global AI</b></td>
+        <td>General-purpose conversational assistance with persistent, searchable, pinnable threads.</td>
+        <td>Responses are streamed token by token so that first output appears early; history is stored relationally as threads and messages rather than as opaque blobs, which makes search and per-thread deletion straightforward.</td></tr>
+    <tr><td><b>Secret AI</b></td>
+        <td>Question answering restricted to documents the user has uploaded.</td>
+        <td>Extracted text is bounded and cached per document under a lock; the model receives only that text, so no external corpus can influence the answer. Chunk-level BM25 retrieval is the approved successor (Section 6.3).</td></tr>
+    <tr><td><b>Code Analyzer</b></td>
+        <td>Structured review of submitted source code.</td>
+        <td>A deterministic pattern pre-pass produces optimisation hints that are appended to the prompt, so the model is guided rather than trusted blindly; the rewrite is shown in a difference view, never applied silently.</td></tr>
+    <tr><td><b>Online Compiler</b></td>
+        <td>Multi-language edit, compile and execute with standard input support.</td>
+        <td>Execution is delegated to an external sandbox; no user code runs in the application process.</td></tr>
+    <tr><td><b>VoidMain</b></td>
+        <td>Competitive-programming judge with problem set, verdicts, history and leaderboard.</td>
+        <td>Submissions are executed through the same sandbox and compared against expected output; verdicts and rankings are persisted per identity.</td></tr>
+    <tr><td><b>Ignite</b></td>
+        <td>Generation of a complete multi-file frontend project from one prompt.</td>
+        <td>A planning call returns a file list, after which each file is generated in its own streamed call; failure is isolated to a single file and retried with backoff.</td></tr>
+    <tr><td><b>Circuit</b></td>
+        <td>Step-by-step animated visual explanation of a concept or algorithm.</td>
+        <td>The model returns strict JSON only, validated against a schema with one corrective retry; the interface, not the model, renders the animation.</td></tr>
+  </table>
+  <div class="cap">Table 4.1 &ndash; Module responsibilities and design decisions</div>
+
+  <p>Two cross-cutting services support all seven. <b>RateLimitService</b> maintains an in-memory
+  sliding window per identity and rejects requests that exceed the configured hourly allowance before
+  any provider is contacted. <b>KeepAliveService</b> issues a scheduled request to the inference tier
+  every fourteen minutes, which keeps the container resident and removes the multi-second cold start
+  that would otherwise precede the first request after a period of inactivity.</p>
+
+  </div>
+  <div class="pno">11</div>
+</section>
+
+<!-- ==================== PAGE 12 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">4.3&nbsp;&nbsp;Document Grounding Pipeline</h2>
+  <p>The Secret AI module answers questions about a document without consulting anything outside it.
+  The canonical retrieval-augmented design [4] would embed the document into chunks, index them, and
+  retrieve the nearest neighbours of the question. That design is implemented in this project, but it
+  is <i>not</i> the deployed configuration: loading a sentence-embedding model together with a vector
+  index exceeds the memory ceiling of the free-tier container, and the resulting cold start exceeded
+  the platform request timeout. The deployed pipeline therefore substitutes bounded context injection
+  for retrieval, as shown in Fig. 4.2.</p>
+
+  <p>Extracted text is truncated to a fixed budget of thirty thousand characters and held in a
+  per-document cache guarded by a lock, so that concurrent questions neither re-extract the document
+  nor corrupt the shared map. The successor design has been specified and approved: an Okapi BM25
+  index [21] over paragraph-aware chunks, returning the six highest-scoring chunks per question
+  reassembled in document order. BM25 was chosen over a return to embeddings precisely because it
+  adds no compiled dependency and no resident model, and so fits the memory ceiling that defeated
+  the vector pipeline. It is design, not Phase I result, and is set out in Section 6.3.</p>
+
+  <div class="fig">
+  <svg viewBox="0 0 620 152" xmlns="http://www.w3.org/2000/svg" font-family="'Times New Roman',Times,serif">
+    <defs>
+      <marker id="ah2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 z" fill="#000"/>
+      </marker>
+    </defs>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <rect x="2"   y="6"  width="132" height="46" rx="3"/>
+      <rect x="162" y="6"  width="132" height="46" rx="3"/>
+      <rect x="322" y="6"  width="132" height="46" rx="3"/>
+      <rect x="482" y="6"  width="132" height="46" rx="3" fill="#f2f2f2"/>
+      <rect x="2"   y="98" width="132" height="46" rx="3" fill="#f2f2f2"/>
+      <rect x="162" y="98" width="132" height="46" rx="3"/>
+      <rect x="322" y="98" width="132" height="46" rx="3"/>
+      <rect x="482" y="98" width="132" height="46" rx="3"/>
+    </g>
+    <g font-size="10" text-anchor="middle">
+      <text x="68"  y="24" font-weight="bold">1. Upload</text>
+      <text x="68"  y="38" font-size="9">PDF / DOCX / TXT</text>
+      <text x="228" y="24" font-weight="bold">2. Object storage</text>
+      <text x="228" y="38" font-size="9">scoped to the owner</text>
+      <text x="388" y="24" font-weight="bold">3. Text extraction</text>
+      <text x="388" y="38" font-size="9">document_loader</text>
+      <text x="548" y="24" font-weight="bold">4. Bounded context</text>
+      <text x="548" y="38" font-size="9">truncated to a fixed budget</text>
+
+      <text x="68"  y="116" font-weight="bold">5. Cached under lock</text>
+      <text x="68"  y="130" font-size="9">per document path</text>
+      <text x="228" y="116" font-weight="bold">6. Prompt assembly</text>
+      <text x="228" y="130" font-size="9">context + history + question</text>
+      <text x="388" y="116" font-weight="bold">7. safe_generate</text>
+      <text x="388" y="130" font-size="9">provider registry</text>
+      <text x="548" y="116" font-weight="bold">8. Grounded answer</text>
+      <text x="548" y="130" font-size="9">streamed to the browser</text>
+    </g>
+    <g stroke="#000" stroke-width="1.1" marker-end="url(#ah2)" fill="none">
+      <path d="M134,29 L160,29"/><path d="M294,29 L320,29"/><path d="M454,29 L480,29"/>
+      <path d="M134,121 L160,121"/><path d="M294,121 L320,121"/><path d="M454,121 L480,121"/>
+      <path d="M548,52 L548,72 L68,72 L68,96"/>
+    </g>
+  </svg>
+  </div>
+  <div class="cap">Fig. 4.2 &ndash; Document grounding pipeline of the Secret AI module</div>
+
+  <h2>4.4&nbsp;&nbsp;Provider Abstraction and Failover</h2>
+  <p>All model access passes through a registry of provider classes that satisfy a common
+  generation contract. The active provider is resolved per request from an environment variable, and
+  each provider reads its own model identifier from its own variable. Switching vendor is therefore a
+  configuration change with no code modification, and adding a vendor is one class plus one registry
+  entry. Every provider implements three retries with exponential backoff and distinguishes a
+  rate-limit condition, which is retryable, from a client error such as an invalid key, which is not.</p>
+
+  <p>This abstraction was validated in practice. When the primary provider's queue backed up and
+  requests began exceeding the read timeout, service was restored by changing a single variable to
+  the alternate provider, with no code change and no redeployment.</p>
+
+  </div>
+  <div class="pno">12</div>
+</section>
+
+<!-- ==================== PAGE 13 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">4.5&nbsp;&nbsp;Data Flow Diagrams</h2>
+  <p>The context diagram in Fig. 4.3 treats the platform as a single process and identifies the
+  external entities it exchanges data with: the authenticated user, the model provider, the execution
+  sandbox and the managed data store. Fig. 4.4 decomposes that process into the five sub-processes
+  that carry all seven modules, together with the persistent stores each one reads and writes.</p>
+
+  <div class="fig">
+  <svg viewBox="0 0 620 158" xmlns="http://www.w3.org/2000/svg" font-family="'Times New Roman',Times,serif">
+    <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 z" fill="#000"/></marker></defs>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <rect x="4" y="52" width="118" height="52"/>
+      <rect x="496" y="8" width="120" height="46"/>
+      <rect x="496" y="102" width="120" height="46"/>
+      <ellipse cx="308" cy="78" rx="112" ry="46" fill="#f2f2f2"/>
+    </g>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <path d="M224,140 L392,140"/><path d="M224,140 L224,158"/><path d="M392,140 L392,158"/>
+    </g>
+    <g font-size="10.5" text-anchor="middle">
+      <text x="63" y="74" font-weight="bold">Authenticated</text>
+      <text x="63" y="88" font-weight="bold">User</text>
+      <text x="308" y="72" font-weight="bold">0</text>
+      <text x="308" y="88" font-weight="bold">DevAssist AI Platform</text>
+      <text x="556" y="28" font-weight="bold">Model Provider</text>
+      <text x="556" y="42" font-size="9">Groq / NVIDIA NIM</text>
+      <text x="556" y="122" font-weight="bold">Execution Sandbox</text>
+      <text x="556" y="136" font-size="9">Wandbox</text>
+      <text x="308" y="153" font-size="9.5">D&nbsp;&nbsp;Managed PostgreSQL &mdash; all persisted entities</text>
+    </g>
+    <g stroke="#000" stroke-width="1.1" marker-end="url(#ah3)" fill="none">
+      <path d="M122,68 L194,68"/><path d="M194,90 L124,90"/>
+      <path d="M414,54 L494,34"/><path d="M494,44 L416,64"/>
+      <path d="M414,102 L494,122"/><path d="M494,132 L416,112"/>
+      <path d="M308,124 L308,138"/>
+    </g>
+    <g font-size="9">
+      <text x="128" y="62">prompt, code, document</text>
+      <text x="128" y="104">streamed answer, verdict</text>
+      <text x="424" y="46">request</text>
+      <text x="424" y="112">source</text>
+    </g>
+  </svg>
+  </div>
+  <div class="cap">Fig. 4.3 &ndash; Data flow diagram &ndash; Level 0 (context diagram)</div>
+
+  <div class="fig">
+  <svg viewBox="0 0 620 250" xmlns="http://www.w3.org/2000/svg" font-family="'Times New Roman',Times,serif">
+    <defs><marker id="ah4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 z" fill="#000"/></marker></defs>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <rect x="2" y="98" width="92" height="52"/>
+    </g>
+    <g stroke="#000" stroke-width="1.1" fill="#f2f2f2">
+      <ellipse cx="196" cy="34"  rx="76" ry="26"/>
+      <ellipse cx="196" cy="98"  rx="76" ry="26"/>
+      <ellipse cx="196" cy="162" rx="76" ry="26"/>
+      <ellipse cx="196" cy="222" rx="76" ry="24"/>
+      <ellipse cx="392" cy="128" rx="76" ry="26"/>
+    </g>
+    <g font-size="10" text-anchor="middle">
+      <text x="48" y="120" font-weight="bold">User</text>
+      <text x="48" y="134" font-size="9">(browser)</text>
+      <text x="196" y="31" font-weight="bold">1.0 Authenticate</text>
+      <text x="196" y="44" font-size="8.5">verify token, sync identity</text>
+      <text x="196" y="95" font-weight="bold">2.0 Converse</text>
+      <text x="196" y="108" font-size="8.5">Global AI &middot; Circuit</text>
+      <text x="196" y="159" font-weight="bold">3.0 Ground document</text>
+      <text x="196" y="172" font-size="8.5">Secret AI</text>
+      <text x="196" y="219" font-weight="bold">4.0 Analyse &amp; execute</text>
+      <text x="196" y="232" font-size="8.5">Analyzer &middot; Compiler &middot; VoidMain</text>
+      <text x="392" y="125" font-weight="bold">5.0 Generate project</text>
+      <text x="392" y="138" font-size="8.5">Ignite &mdash; plan, then per file</text>
+    </g>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <path d="M498,18 L618,18"/><path d="M498,18 L498,44"/><path d="M618,18 L618,44"/><path d="M498,44 L618,44"/>
+      <path d="M498,72 L618,72"/><path d="M498,72 L498,98"/><path d="M618,72 L618,98"/><path d="M498,98 L618,98"/>
+      <path d="M498,158 L618,158"/><path d="M498,158 L498,184"/><path d="M618,158 L618,184"/><path d="M498,184 L618,184"/>
+      <path d="M498,212 L618,212"/><path d="M498,212 L498,238"/><path d="M618,212 L618,238"/><path d="M498,238 L618,238"/>
+    </g>
+    <g font-size="9" text-anchor="middle">
+      <text x="558" y="35">D1&nbsp; Users</text>
+      <text x="558" y="89">D2&nbsp; Chats &amp; messages</text>
+      <text x="558" y="175">D3&nbsp; Documents</text>
+      <text x="558" y="229">D4&nbsp; Submissions, projects</text>
+    </g>
+    <g stroke="#000" stroke-width="1.1" marker-end="url(#ah4)" fill="none">
+      <path d="M94,110 L118,44"/><path d="M94,118 L118,104"/>
+      <path d="M94,128 L118,158"/><path d="M94,138 L118,212"/>
+      <path d="M272,34 L496,30"/>
+      <path d="M272,98 L496,84"/>
+      <path d="M272,162 L496,170"/>
+      <path d="M272,222 L496,226"/>
+      <path d="M264,110 L318,126"/>
+      <path d="M468,128 L520,110"/>
+    </g>
+  </svg>
+  </div>
+  <div class="cap">Fig. 4.4 &ndash; Data flow diagram &ndash; Level 1</div>
+
+  </div>
+  <div class="pno">13</div>
+</section>
+
+<!-- ==================== PAGE 14 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">4.6&nbsp;&nbsp;Use Case Model</h2>
+  <p>A single primary actor, the authenticated user, drives all eight use cases. Two supporting
+  actors are external systems that the platform invokes rather than serves.</p>
+
+  <div class="fig">
+  <svg viewBox="0 0 620 236" xmlns="http://www.w3.org/2000/svg" font-family="'Times New Roman',Times,serif">
+    <g stroke="#000" stroke-width="1.1" fill="none">
+      <circle cx="40" cy="86" r="11"/>
+      <path d="M40,97 L40,130 M22,108 L58,108 M40,130 L26,154 M40,130 L54,154"/>
+      <rect x="128" y="6" width="358" height="224" fill="none" stroke-dasharray="4 3"/>
+      <circle cx="576" cy="60" r="11"/>
+      <path d="M576,71 L576,100 M560,80 L592,80 M576,100 L564,120 M576,100 L588,120"/>
+      <circle cx="576" cy="160" r="11"/>
+      <path d="M576,171 L576,200 M560,180 L592,180 M576,200 L564,220 M576,200 L588,220"/>
+    </g>
+    <g stroke="#000" stroke-width="1.1" fill="#fff">
+      <ellipse cx="222" cy="34"  rx="80" ry="17"/>
+      <ellipse cx="222" cy="76"  rx="80" ry="17"/>
+      <ellipse cx="222" cy="118" rx="80" ry="17"/>
+      <ellipse cx="222" cy="160" rx="80" ry="17"/>
+      <ellipse cx="392" cy="55"  rx="80" ry="17"/>
+      <ellipse cx="392" cy="97"  rx="80" ry="17"/>
+      <ellipse cx="392" cy="139" rx="80" ry="17"/>
+      <ellipse cx="392" cy="181" rx="80" ry="17"/>
+    </g>
+    <g font-size="10" text-anchor="middle">
+      <text x="222" y="38">Authenticate</text>
+      <text x="222" y="80">Converse with assistant</text>
+      <text x="222" y="122">Query own document</text>
+      <text x="222" y="164">Analyse source code</text>
+      <text x="392" y="59">Execute code</text>
+      <text x="392" y="101">Solve judged problem</text>
+      <text x="392" y="143">Generate a project</text>
+      <text x="392" y="185">Visualise a concept</text>
+      <text x="307" y="222" font-size="10.5" font-weight="bold">DevAssist AI Platform</text>
+    </g>
+    <g font-size="9.5" text-anchor="middle">
+      <text x="40" y="172">User</text>
+      <text x="576" y="136">Model</text>
+      <text x="576" y="236">Sandbox</text>
+    </g>
+    <g stroke="#000" stroke-width="0.9" fill="none">
+      <path d="M56,110 L142,36"/><path d="M56,114 L142,78"/>
+      <path d="M56,118 L142,120"/><path d="M56,122 L142,160"/>
+      <path d="M472,55 L562,58"/><path d="M472,139 L562,64"/>
+      <path d="M472,97 L562,158"/><path d="M472,181 L562,166"/>
+      <path d="M302,76 L316,60"/><path d="M302,118 L318,140"/>
+    </g>
+  </svg>
+  </div>
+  <div class="cap">Fig. 4.5 &ndash; Use case diagram of the platform</div>
+
+  <h2>4.7&nbsp;&nbsp;Database Design and Isolation</h2>
+  <p>The schema is deliberately simple. A single <b>users</b> table carries the identity issued by
+  the authentication provider, and every other table stores that same universally unique identifier
+  as a foreign key. Because isolation is expressed once, in the shape of the data, no endpoint can
+  accidentally omit it without the omission being visible in the query itself.</p>
+
+  <div class="fig">
+  <svg viewBox="0 0 620 168" xmlns="http://www.w3.org/2000/svg" font-family="'Times New Roman',Times,serif">
+    <g stroke="#000" stroke-width="1.2" fill="#f2f2f2">
+      <rect x="238" y="62" width="144" height="44" rx="3"/>
+    </g>
+    <g stroke="#000" stroke-width="1" fill="#fff">
+      <rect x="6"   y="4"   width="150" height="38" rx="3"/>
+      <rect x="6"   y="126" width="150" height="38" rx="3"/>
+      <rect x="464" y="4"   width="150" height="38" rx="3"/>
+      <rect x="464" y="126" width="150" height="38" rx="3"/>
+      <rect x="238" y="4"   width="144" height="34" rx="3"/>
+      <rect x="238" y="130" width="144" height="34" rx="3"/>
+    </g>
+    <g font-size="10" text-anchor="middle">
+      <text x="310" y="80" font-weight="bold">USERS</text>
+      <text x="310" y="96" font-size="9">supabase_id (PK) &middot; email &middot; name</text>
+      <text x="81"  y="20" font-weight="bold">DOCUMENTS</text>
+      <text x="81"  y="34" font-size="9">file_path &middot; user_id</text>
+      <text x="81"  y="142" font-weight="bold">GLOBAL_CHAT_THREADS</text>
+      <text x="81"  y="156" font-size="9">title &middot; pinned &middot; user_id</text>
+      <text x="539" y="20" font-weight="bold">VM_SUBMISSIONS</text>
+      <text x="539" y="34" font-size="9">verdict &middot; user_id</text>
+      <text x="539" y="142" font-weight="bold">IGNITE_PROJECTS</text>
+      <text x="539" y="156" font-size="9">files &middot; user_id</text>
+      <text x="310" y="18" font-weight="bold">SECRET_MESSAGES</text>
+      <text x="310" y="31" font-size="9">role &middot; content &middot; chat_id</text>
+      <text x="310" y="144" font-weight="bold">GLOBAL_MESSAGES</text>
+      <text x="310" y="157" font-size="9">role &middot; content &middot; chat_id</text>
+    </g>
+    <g stroke="#000" stroke-width="1" fill="none">
+      <path d="M238,74 L156,42"/><path d="M238,96 L156,132"/>
+      <path d="M382,74 L464,42"/><path d="M382,96 L464,132"/>
+      <path d="M310,62 L310,38"/><path d="M310,106 L310,130"/>
+    </g>
+    <g font-size="8.5" fill="#000">
+      <text x="170" y="52">1..*</text><text x="170" y="124">1..*</text>
+      <text x="432" y="52">1..*</text><text x="432" y="124">1..*</text>
+      <text x="316" y="52">1..*</text><text x="316" y="124">1..*</text>
+    </g>
+  </svg>
+  </div>
+  <div class="cap">Fig. 4.6 &ndash; Entity relationship diagram of the persistence layer</div>
+
+  </div>
+  <div class="pno">14</div>
+</section>
+
+<!-- ==================== PAGE 15 ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter"><span class="cno">CHAPTER 5</span>IMPLEMENTATION AND RESULTS</h1>
+
+  <h2>5.1&nbsp;&nbsp;Development and Deployment Environment</h2>
+  <table class="t">
+    <tr><th style="width:24%">Layer</th><th style="width:38%">Technology</th><th style="width:38%">Deployment</th></tr>
+    <tr><td>Frontend</td><td>HTML5, CSS3, vanilla JavaScript, Monaco editor</td><td>Static hosting on a global CDN</td></tr>
+    <tr><td>Backend</td><td>Spring Boot 3, Java 21, Maven, Spring Data JPA</td><td>Docker image on a managed container host</td></tr>
+    <tr><td>Inference</td><td>FastAPI, Python 3.11, Uvicorn, Pydantic</td><td>Managed Python runtime</td></tr>
+    <tr><td>Persistence</td><td>PostgreSQL 15 behind a transaction pooler</td><td>Managed database service</td></tr>
+    <tr><td>Identity</td><td>Managed authentication with signed tokens</td><td>Managed authentication service</td></tr>
+    <tr><td>Inference vendor</td><td>Groq (primary), NVIDIA NIM (registered alternate)</td><td>Vendor-hosted HTTPS endpoints</td></tr>
+    <tr><td>Execution</td><td>External compilation and execution sandbox</td><td>Public sandbox service</td></tr>
+  </table>
+  <div class="cap">Table 5.1 &ndash; Development and deployment environment</div>
+
+  <h2>5.2&nbsp;&nbsp;Module Implementation</h2>
+  <p>The backend observes strict layer boundaries. Controllers validate input and return a response
+  entity; they hold no business logic and make no repository call. Services hold the business logic
+  and own transaction boundaries. Repositories are Spring Data interfaces, so no structured query
+  language appears in the service layer. Dependencies are supplied through constructors rather than
+  field injection, which keeps them explicit and makes every service testable with mocked
+  collaborators. Data transfer objects are Java records.</p>
+
+  <p>In the inference tier, all model access is funnelled through a single generation wrapper, so
+  that budget checking and usage recording apply uniformly and cannot be bypassed by a new route.
+  Shared in-process state &mdash; the document cache and the two conversation history maps &mdash; is
+  accessed only under its corresponding lock, because the server handles concurrent requests in a
+  thread pool. Heavy scientific libraries are imported inside the function that needs them rather
+  than at module scope, which keeps the cold-start time of the container within the platform's
+  request timeout.</p>
+
+  <p>Two implementation details are worth recording. First, the Ignite module never asks for an
+  entire project in one request: a planning call returns a strict file list, and each file is then
+  produced in its own streamed call, so a rate-limit rejection costs one file rather than the whole
+  project. Second, the Circuit module accepts only strict JSON from the model, validates it against a
+  schema, and permits exactly one corrective retry before returning a friendly error &mdash; the
+  browser, never the model, renders the resulting animation.</p>
+
+  </div>
+  <div class="pno">15</div>
+</section>
+
+<!-- ==================== PAGE 16 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">5.3&nbsp;&nbsp;REST Interface Summary</h2>
+  <table class="t">
+    <tr><th style="width:34%">Endpoint</th><th style="width:14%">Method</th><th style="width:52%">Purpose and isolation basis</th></tr>
+    <tr><td>/api/auth/sync</td><td class="c">POST</td><td>Register or refresh the local identity record from the verified token</td></tr>
+    <tr><td>/ai/upload/{userId}</td><td class="c">POST</td><td>Store a document against the owning identity</td></tr>
+    <tr><td>/ai/documents/{userId}</td><td class="c">GET</td><td>List only the documents owned by that identity</td></tr>
+    <tr><td>/ai/rag</td><td class="c">POST</td><td>Answer a question grounded in one owned document</td></tr>
+    <tr><td>/api/global-chat/all</td><td class="c">GET</td><td>List conversation threads filtered by owner</td></tr>
+    <tr><td>/api/global-chat/{chatId}/message</td><td class="c">POST</td><td>Append a message after verifying thread ownership</td></tr>
+    <tr><td>/ai/analyze</td><td class="c">POST</td><td>Return structured analysis of submitted source code</td></tr>
+    <tr><td>/vm/submit</td><td class="c">POST</td><td>Judge a submission and record the verdict per identity</td></tr>
+    <tr><td>/api/project-builder/plan</td><td class="c">POST</td><td>Return a file-level plan for a described project</td></tr>
+    <tr><td>/api/project-builder/generate-file</td><td class="c">POST</td><td>Stream the contents of one planned file</td></tr>
+    <tr><td>/api/circuit/ask</td><td class="c">POST</td><td>Return a schema-validated visual explanation</td></tr>
+    <tr><td>/api/usage</td><td class="c">GET</td><td>Report the caller's tokens against the daily budget</td></tr>
+  </table>
+  <div class="cap">Table 5.2 &ndash; Representative REST endpoints (all require a valid bearer token)</div>
+
+  <h2>5.4&nbsp;&nbsp;Testing</h2>
+  <p>Automated tests cover both application tiers. No test contacts a live model provider; every
+  provider is replaced by a stub, so the suite is deterministic and free of quota consumption.</p>
+  <table class="t">
+    <tr><th style="width:26%">Area</th><th style="width:22%">Framework</th><th style="width:52%">What is verified</th></tr>
+    <tr><td>Provider registry</td><td>pytest</td><td>Resolution by variable, retry and backoff, rate-limit versus client-error classification</td></tr>
+    <tr><td>Project builder</td><td>pytest</td><td>Plan parsing, fence stripping, path safety, context budgeting</td></tr>
+    <tr><td>Token ledger and quota</td><td>pytest</td><td>Usage recording, budget rejection, quota response shape</td></tr>
+    <tr><td>Circuit specification</td><td>pytest</td><td>Schema validation, corrective retry, malformed replies</td></tr>
+    <tr><td>Controllers</td><td>JUnit 5, MockMvc</td><td>Status codes, payload validation, token propagation, streaming</td></tr>
+    <tr><td>Services</td><td>JUnit 5, Mockito</td><td>Business rules and ownership checks with mocked repositories</td></tr>
+    <tr><td>Security</td><td>JUnit 5</td><td>Token parsing and rejection of unauthenticated requests</td></tr>
+    <tr><td>Rate limiting</td><td>JUnit 5</td><td>Sliding-window admission at the configured allowance</td></tr>
+  </table>
+  <div class="cap">Table 5.3 &ndash; Test coverage by area</div>
+
+  <p>The Python suite comprises six test modules with a shared fixture module; the Java suite
+  comprises sixteen test classes spanning controllers, services, security and configuration.</p>
+
+  </div>
+  <div class="pno">16</div>
+</section>
+
+<!-- ==================== PAGE 17 ==================== -->
+<section class="page"><div class="cbox">
+  <h2 style="margin-top:0">5.5&nbsp;&nbsp;Results and Discussion</h2>
+  <p>All seven modules are implemented and operate against the publicly deployed system. Fig. 5.1 to
+  Fig. 5.4 show the working interface of four representative modules.</p>
+
+  <table style="width:100%;border-collapse:separate;border-spacing:8pt 4pt">
+    <tr>
+      <td style="width:50%"><div class="shot" style="height:46mm">Fig. 5.1 &mdash; insert screenshot:<br>Global AI conversational interface<br>(streamed answer, thread list, code block)</div></td>
+      <td style="width:50%"><div class="shot" style="height:46mm">Fig. 5.2 &mdash; insert screenshot:<br>Secret AI document library<br>and a grounded answer</div></td>
+    </tr>
+    <tr>
+      <td><div class="capt">Fig. 5.1 &ndash; Global AI conversational interface</div></td>
+      <td><div class="capt">Fig. 5.2 &ndash; Secret AI document library and grounded answer</div></td>
+    </tr>
+    <tr>
+      <td><div class="shot" style="height:46mm">Fig. 5.3 &mdash; insert screenshot:<br>Code Analyzer panels with<br>difference view and complexity chart</div></td>
+      <td><div class="shot" style="height:46mm">Fig. 5.4 &mdash; insert screenshot:<br>Ignite generating a project with<br>live file tree and progress</div></td>
+    </tr>
+    <tr>
+      <td><div class="capt">Fig. 5.3 &ndash; Code Analyzer output and complexity chart</div></td>
+      <td><div class="capt">Fig. 5.4 &ndash; Ignite project generation with live file tree</div></td>
+    </tr>
+  </table>
+
+  <p style="margin-top:8pt">Three results are worth discussing. <b>Isolation held under test.</b>
+  With two accounts exercised in parallel, no listing endpoint returned a record belonging to the
+  other identity, which supports expressing isolation in the schema rather than in endpoint code.
+  <b>Provider abstraction proved its value in production.</b> When the primary vendor's queue backed
+  up and read timeouts appeared, service was restored by changing one environment variable; no code
+  was altered. <b>The free-tier mitigations are necessary, not decorative.</b> Without keep-alive
+  scheduling the first request after an idle period incurred a multi-second cold start; without lazy
+  importing the container exceeded its memory ceiling at startup; and without per-file generation, a
+  single rate-limit rejection failed the whole project.</p>
+
+  </div>
+  <div class="pno">17</div>
+</section>
+
+<!-- ==================== PAGE 18 ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter"><span class="cno">CHAPTER 6</span>CONCLUSION AND FUTURE WORK</h1>
+
+  <h2>6.1&nbsp;&nbsp;Conclusion</h2>
+  <p>Phase I has delivered a working, publicly deployed platform consolidating seven AI-assisted
+  developer capabilities behind a single authenticated account. The three-tier design separates a
+  static presentation layer, a transactional Java application layer and a Python inference layer, so
+  the component with the fastest rate of change &mdash; prompts and model selection &mdash; can be
+  revised without disturbing the components that hold user data.</p>
+
+  <p>Two decisions proved more valuable than anticipated. Expressing multi-tenant isolation in the
+  schema made the guarantee uniform across all seven modules and removed the possibility of an
+  endpoint quietly omitting it. Routing every model call through a provider registry allowed a real
+  vendor degradation to be absorbed by one configuration change. More broadly, the obstacles to
+  running a multi-service platform on free infrastructure proved addressable by design rather than
+  by expenditure.</p>
+
+  <h2>6.2&nbsp;&nbsp;Limitations</h2>
+  <p>Four limitations are acknowledged. <b>Secret AI performs no retrieval.</b> It truncates the
+  document at thirty thousand characters and sends that text whole, so content beyond roughly the
+  first twelve pages is invisible to the model, and every question spends prompt budget on largely
+  irrelevant text. Document context is also held in process memory and is lost when the inference
+  container restarts, which on a free tier is frequent. Ignite generates frontend projects only.
+  Finally, the results in Chapter 5 are observational; no controlled benchmark has yet been run.</p>
+
+  <h2>6.3&nbsp;&nbsp;Future Work</h2>
+  <p>The first item, already specified and approved, is <b>real chunk-level retrieval for Secret
+  AI</b>. The document will be split by a paragraph-aware splitter into chunks of about nine hundred
+  characters with a hundred and fifty of overlap, indexed with Okapi BM25 [21], and queried per
+  question for the six best chunks, which are reassembled in document order so the context reads
+  coherently. Short documents bypass retrieval entirely, and any retriever error falls back to the
+  present full-text mode, so the change cannot make the feature worse. BM25 is deliberate rather
+  than expedient: embeddings were tried first and removed after they exhausted the memory of the
+  free-tier container, whereas BM25 is pure Python over a dependency already installed. The measured
+  reduction in prompt tokens and the change in answer accuracy will be recorded.</p>
+
+  <p>Beyond that: hybrid lexical and semantic retrieval once paid infrastructure is available;
+  Ignite extended to server and schema code; quota exhaustion surfaced as an explicit message rather
+  than a silent failure; responsive layouts; a larger problem set with a contest mode; and a formal
+  evaluation of latency per provider, generation time against project size and tokens per module.</p>
+
+  </div>
+  <div class="pno">18</div>
+</section>
+
+<!-- ==================== PAGE 19 — REFERENCES ==================== -->
+<section class="page"><div class="cbox">
+  <h1 class="chapter">REFERENCES</h1>
+
+  <div class="refs">
+  <p class="tight">[1]&nbsp;&nbsp;A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser and I. Polosukhin, &ldquo;Attention Is All You Need,&rdquo; <i>Advances in Neural Information Processing Systems (NeurIPS)</i>, vol. 30, pp. 5998&ndash;6008, 2017.</p>
+  <p class="tight">[2]&nbsp;&nbsp;T. Brown et al., &ldquo;Language Models are Few-Shot Learners,&rdquo; <i>Advances in Neural Information Processing Systems (NeurIPS)</i>, vol. 33, pp. 1877&ndash;1901, 2020.</p>
+  <p class="tight">[3]&nbsp;&nbsp;M. Chen et al., &ldquo;Evaluating Large Language Models Trained on Code,&rdquo; <i>arXiv preprint</i> arXiv:2107.03374, 2021.</p>
+  <p class="tight">[4]&nbsp;&nbsp;P. Lewis et al., &ldquo;Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,&rdquo; <i>Advances in Neural Information Processing Systems (NeurIPS)</i>, vol. 33, pp. 9459&ndash;9474, 2020.</p>
+  <p class="tight">[5]&nbsp;&nbsp;V. Karpukhin et al., &ldquo;Dense Passage Retrieval for Open-Domain Question Answering,&rdquo; <i>Proc. Conf. on Empirical Methods in Natural Language Processing (EMNLP)</i>, pp. 6769&ndash;6781, 2020.</p>
+  <p class="tight">[6]&nbsp;&nbsp;N. Reimers and I. Gurevych, &ldquo;Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks,&rdquo; <i>Proc. EMNLP-IJCNLP</i>, pp. 3982&ndash;3992, 2019.</p>
+  <p class="tight">[7]&nbsp;&nbsp;J. Johnson, M. Douze and H. J&eacute;gou, &ldquo;Billion-Scale Similarity Search with GPUs,&rdquo; <i>IEEE Transactions on Big Data</i>, vol. 7, no. 3, pp. 535&ndash;547, 2021.</p>
+  <p class="tight">[8]&nbsp;&nbsp;J. Austin et al., &ldquo;Program Synthesis with Large Language Models,&rdquo; <i>arXiv preprint</i> arXiv:2108.07732, 2021.</p>
+  <p class="tight">[9]&nbsp;&nbsp;M. Jones, J. Bradley and N. Sakimura, &ldquo;JSON Web Token (JWT),&rdquo; <i>IETF RFC 7519</i>, May 2015.</p>
+  <p class="tight">[10]&nbsp;D. Hardt, &ldquo;The OAuth 2.0 Authorization Framework,&rdquo; <i>IETF RFC 6749</i>, October 2012.</p>
+  <p class="tight">[11]&nbsp;R. C. Martin, <i>Clean Architecture: A Craftsman's Guide to Software Structure and Design</i>, Prentice Hall, 2017.</p>
+  <p class="tight">[12]&nbsp;S. Newman, <i>Building Microservices: Designing Fine-Grained Systems</i>, 2nd ed., O'Reilly Media, 2021.</p>
+  <p class="tight">[13]&nbsp;R. T. Fielding, <i>Architectural Styles and the Design of Network-Based Software Architectures</i>, Ph.D. dissertation, University of California, Irvine, 2000.</p>
+  <p class="tight">[14]&nbsp;H. Do&scaron;ilovi&cacute; and I. Mekterovi&cacute;, &ldquo;Robust and Scalable Online Code Execution System,&rdquo; <i>Proc. 43rd Int. Convention on Information, Communication and Electronic Technology (MIPRO)</i>, pp. 1627&ndash;1632, 2020.</p>
+  <p class="tight">[15]&nbsp;Wandbox, &ldquo;Wandbox &mdash; Social Compilation Service,&rdquo; online documentation. [Accessed: July 2026].</p>
+  <p class="tight">[16]&nbsp;Spring Team, &ldquo;Spring Boot Reference Documentation, Version 3.x,&rdquo; VMware Tanzu, 2024.</p>
+  <p class="tight">[17]&nbsp;S. Ram&iacute;rez, &ldquo;FastAPI Documentation,&rdquo; online documentation. [Accessed: July 2026].</p>
+  <p class="tight">[18]&nbsp;Supabase, &ldquo;Supabase Documentation &mdash; Auth, Database and Storage,&rdquo; online documentation. [Accessed: July 2026].</p>
+  <p class="tight">[19]&nbsp;Groq, &ldquo;GroqCloud API Reference,&rdquo; online documentation. [Accessed: July 2026].</p>
+  <p class="tight">[20]&nbsp;NVIDIA, &ldquo;NVIDIA NIM for Large Language Models &mdash; API Reference,&rdquo; online documentation. [Accessed: July 2026].</p>
+  <p class="tight">[21]&nbsp;S. Robertson and H. Zaragoza, &ldquo;The Probabilistic Relevance Framework: BM25 and Beyond,&rdquo; <i>Foundations and Trends in Information Retrieval</i>, vol. 3, no. 4, pp. 333&ndash;389, 2009.</p>
+  </div>
+
+  </div>
+  <div class="pno">19</div>
+</section>
+
+</div><!-- /WordSection1 -->
+
+<!--[if gte mso 9]>
+<div style='mso-element:footer' id="f1">
+  <p style='text-align:center;font-family:"Times New Roman",serif;font-size:12.0pt'>
+    <span style='mso-field-code:PAGE'>1</span>
+  </p>
+</div>
+<![endif]-->
+
+<!-- screen-only build check; never printed -->
+<div id="ovf"></div>
+<script>
+(function () {
+  var pages = [].slice.call(document.querySelectorAll('.page'));
+  var bad = [];
+  pages.forEach(function (p, i) {
+    var box = p.querySelector('.cbox');
+    if (box && box.scrollHeight > box.clientHeight + 2) {
+      bad.push(i + 1);
+      p.style.outline = '3px solid #d00';
+      box.style.background = 'rgba(255,0,0,.06)';
+    }
+  });
+  var el = document.getElementById('ovf');
+  el.textContent = pages.length + ' pages' + (bad.length
+      ? '  —  CONTENT OVERFLOW on sheet ' + bad.join(', ')
+      : '  —  no overflow, ready to print');
+  el.style.cssText = 'position:fixed;top:10px;left:10px;z-index:999;background:'
+      + (bad.length ? '#c00000' : '#0a6b34')
+      + ';color:#fff;font:13px/1.4 Arial,sans-serif;padding:7px 11px;border-radius:4px;'
+      + 'box-shadow:0 2px 8px rgba(0,0,0,.4)';
+})();
+</script>
+<style>@media print { #ovf { display: none !important; } }</style>
+
+</body>
+</html>

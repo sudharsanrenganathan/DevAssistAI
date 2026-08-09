@@ -30,8 +30,22 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        boolean shouldSkip = path.startsWith("/ai/") || 
-               path.startsWith("/api/auth/") || 
+
+        // Token-consuming AI routes require authentication (SecurityConfig)
+        // and charge the user's daily token budget — the filter must run so
+        // the principal (email) is available to the controllers.
+        boolean isTokenConsumingAiPath =
+               path.equals("/api/global-chat/ask") ||
+               path.equals("/api/global-chat/local-ask") ||
+               path.equals("/ai/analyze") ||
+               path.startsWith("/ai/rag") ||
+               path.startsWith("/ai/ask/");
+        if (isTokenConsumingAiPath) {
+            return false;
+        }
+
+        boolean shouldSkip = path.startsWith("/ai/") ||
+               path.startsWith("/api/auth/") ||
                path.startsWith("/api/global-chat/") ||
                path.startsWith("/api/chat/") ||
                path.equals("/api/upload-doc") ||

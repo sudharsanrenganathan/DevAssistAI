@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="250" viewBox="0 0 620 250" font-family="'Times New Roman',Times,serif">
+  <rect width="620" height="250" fill="#fff"/>
+  <defs><marker id="ah4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+    <path d="M0,0 L8,3 L0,6 z" fill="#000"/></marker></defs>
+  <g stroke="#000" stroke-width="1.1" fill="#fff">
+    <rect x="2" y="98" width="92" height="52"/>
+  </g>
+  <g stroke="#000" stroke-width="1.1" fill="#f2f2f2">
+    <ellipse cx="196" cy="34"  rx="76" ry="26"/>
+    <ellipse cx="196" cy="98"  rx="76" ry="26"/>
+    <ellipse cx="196" cy="162" rx="76" ry="26"/>
+    <ellipse cx="196" cy="222" rx="76" ry="24"/>
+    <ellipse cx="392" cy="128" rx="76" ry="26"/>
+  </g>
+  <g font-size="10" text-anchor="middle">
+    <text x="48" y="120" font-weight="bold">User</text>
+    <text x="48" y="134" font-size="9">(browser)</text>
+    <text x="196" y="31" font-weight="bold">1.0 Authenticate</text>
+    <text x="196" y="44" font-size="8.5">verify token, sync identity</text>
+    <text x="196" y="95" font-weight="bold">2.0 Converse</text>
+    <text x="196" y="108" font-size="8.5">Global AI · Circuit</text>
+    <text x="196" y="159" font-weight="bold">3.0 Ground document</text>
+    <text x="196" y="172" font-size="8.5">Secret AI</text>
+    <text x="196" y="219" font-weight="bold">4.0 Analyse &amp; execute</text>
+    <text x="196" y="232" font-size="8.5">Analyzer · Compiler · VoidMain</text>
+    <text x="392" y="125" font-weight="bold">5.0 Generate project</text>
+    <text x="392" y="138" font-size="8.5">Ignite — plan, then per file</text>
+  </g>
+  <g stroke="#000" stroke-width="1.1" fill="#fff">
+    <path d="M498,18 L618,18"/><path d="M498,18 L498,44"/><path d="M618,18 L618,44"/><path d="M498,44 L618,44"/>
+    <path d="M498,72 L618,72"/><path d="M498,72 L498,98"/><path d="M618,72 L618,98"/><path d="M498,98 L618,98"/>
+    <path d="M498,158 L618,158"/><path d="M498,158 L498,184"/><path d="M618,158 L618,184"/><path d="M498,184 L618,184"/>
+    <path d="M498,212 L618,212"/><path d="M498,212 L498,238"/><path d="M618,212 L618,238"/><path d="M498,238 L618,238"/>
+  </g>
+  <g font-size="9" text-anchor="middle">
+    <text x="558" y="35">D1  Users</text>
+    <text x="558" y="89">D2  Chats &amp; messages</text>
+    <text x="558" y="175">D3  Documents</text>
+    <text x="558" y="229">D4  Submissions, projects</text>
+  </g>
+  <g stroke="#000" stroke-width="1.1" marker-end="url(#ah4)" fill="none">
+    <path d="M94,110 L118,44"/><path d="M94,118 L118,104"/>
+    <path d="M94,128 L118,158"/><path d="M94,138 L118,212"/>
+    <path d="M272,34 L496,30"/>
+    <path d="M272,98 L496,84"/>
+    <path d="M272,162 L496,170"/>
+    <path d="M272,222 L496,226"/>
+    <path d="M264,110 L318,126"/>
+    <path d="M468,128 L520,110"/>
+  </g>
+</svg>

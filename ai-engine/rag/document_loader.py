@@ -59,13 +59,3 @@ def load_pdf(file_path):
             print("OCR extraction failed:", e)
 
     return text
-
-
-if __name__ == "__main__":
-
-    file = "sample.pdf"  # test file
-
-    content = load_pdf(file)
-
-    print("\nExtracted Document Content:\n")
-    print(content[:1000])  # print first 1000 characters

@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ignite — DevAssist AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0a0a0a;
+  background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #fff;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.mono { font-family: 'JetBrains Mono', 'Consolas', monospace; }
+.grad-text { background: linear-gradient(135deg, #06f5cd, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.grad-btn { background: linear-gradient(135deg, #06f5cd, #7c3aed); color: #0a0a0a; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
+.grad-btn:disabled, .ghost-btn:disabled { opacity: .45; cursor: not-allowed; }
+.ghost-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 8px; cursor: pointer; }
+.glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+
+/* ---------- TOP BAR ---------- */
+.topbar { height: 56px; flex-shrink: 0; display: flex; align-items: center; padding: 0 20px; gap: 14px;
+  background: rgba(10,10,10,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo { font-weight: 800; font-size: 17px; cursor: pointer; }
+.crumb { color: #64748b; font-size: 13px; }
+.beta { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 20px;
+  background: rgba(124,58,237,0.25); color: #c084fc; border: 1px solid #7c3aed55; }
+.model-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; }
+.dot-green { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#06f5cd,#7c3aed);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#0a0a0a; overflow:hidden; }
+.avatar img { width:100%; height:100%; object-fit:cover; }
+
+.screen { display: none; flex: 1; min-height: 0; }
+body[data-state="start"] #startScreen { display: flex; }
+body[data-state="workspace"] #workspaceScreen { display: flex; }
+
+/* ---------- START SCREEN ---------- */
+#startScreen { flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; padding: 24px; }
+.hero-h1 { font-size: clamp(28px, 4.5vw, 44px); font-weight: 800; margin-bottom: 12px; text-align:center; }
+.hero-sub { color: #94a3b8; font-size: 16px; margin-bottom: 36px; text-align:center; }
+.prompt-box { width: min(760px, 94vw); background: rgba(255,255,255,0.04); border: 1px solid rgba(6,245,205,0.35);
+  border-radius: 16px; padding: 20px; box-shadow: 0 0 40px rgba(6,245,205,0.07); }
+.prompt-box textarea { display:block; width:100%; background:transparent; border:none; outline:none; resize:none;
+  color:#e2e8f0; font-size:15px; font-family:inherit; min-height:74px; line-height:1.5; }
+.prompt-box textarea::placeholder { color:#64748b; }
+.prompt-foot { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.chip { font-size: 12px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  padding: 6px 12px; border-radius: 20px; }
+.chip.disabled { opacity:.5; cursor:not-allowed; }
+.send-btn { margin-left: auto; padding: 10px 22px; font-size: 14px; }
+.prompt-hint { display:none; margin-top:10px; font-size:12.5px; color:#fbbf24; }
+.tpl-row { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+.tpl { width: 172px; padding: 16px; text-align: left; cursor: pointer; transition: border-color .2s, transform .2s; }
+.tpl:hover { border-color: rgba(6,245,205,0.4); transform: translateY(-2px); }
+.tpl .ic { font-size: 22px; margin-bottom: 8px; }
+.tpl .t { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.tpl .d { font-size: 11px; color: #64748b; line-height: 1.4; }
+.hero-note { margin-top: 30px; font-size: 12px; color: #475569; text-align:center; }
+
+/* ---------- WORKSPACE ---------- */
+#workspaceScreen { min-height: 0; }
+.ws { flex: 1; display: flex; gap: 12px; padding: 12px; min-height: 0; width: 100%; }
+.chat-col { width: 400px; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; }
+.chat-scroll { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; scrollbar-width: thin; }
+.msg-user { align-self: flex-end; max-width: 85%; background: rgba(124,58,237,0.2); border: 1px solid #7c3aed44;
+  border-radius: 12px 12px 2px 12px; padding: 12px 14px; font-size: 13px; color: #e2e8f0; line-height: 1.5; white-space: pre-wrap; }
+.msg-ai { align-self: flex-start; max-width: 92%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 12px 2px; padding: 12px 14px; font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+.steps { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #94a3b8; }
+.step.done { color: #4ade80; }
+.step.active { color: #06f5cd; }
+.step.todo { color: #475569; }
+.step.failed { color: #f87171; }
+.spin { width: 12px; height: 12px; border: 2px solid rgba(6,245,205,0.25); border-top-color: #06f5cd; border-radius: 50%;
+  display:inline-block; flex-shrink:0; animation: rot .8s linear infinite; }
+@keyframes rot { to { transform: rotate(360deg); } }
+.progress-wrap { margin-top: 12px; }
+.progress-bar { height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg,#06f5cd,#7c3aed); border-radius: 3px; transition: width .4s; }
+.progress-lbl { display:flex; justify-content:space-between; font-size: 11px; color: #64748b; margin-top: 6px; }
+.chat-input { margin: 12px; padding: 10px 12px; display: flex; align-items: flex-end; gap: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; }
+.chat-input textarea { flex:1; background:transparent; border:none; outline:none; resize:none; color:#e2e8f0;
+  font-size:13px; font-family:inherit; line-height:1.5; max-height:120px; }
+.chat-input textarea::placeholder { color:#475569; }
+.mini-send { width: 34px; height: 34px; flex-shrink:0; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size:15px; }
+.sugg-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sugg { font-size: 11.5px; color: #06f5cd; background: rgba(6,245,205,0.08); border: 1px solid rgba(6,245,205,0.3);
+  padding: 5px 11px; border-radius: 20px; cursor: pointer; }
+.sugg:hover { background: rgba(6,245,205,0.15); }
+.retry-btn { margin-top:10px; padding:7px 16px; font-size:12px; }
+
+.work-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.work-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; }
+.tab-group { display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 3px; }
+.wtab { padding: 6px 18px; font-size: 12.5px; border-radius: 6px; color: #64748b; cursor: pointer; border:none; background:transparent; font-family:inherit; }
+.wtab.on { background: rgba(6,245,205,0.15); color: #06f5cd; font-weight: 600; }
+.work-head .sp { flex: 1; }
+.hbtn { padding: 8px 14px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
+.work-body { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+/* file tree */
+.tree { width: 250px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.08); padding: 12px 8px; font-size: 12.5px; overflow-y: auto; scrollbar-width: thin; }
+.tree-h { font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; color: #475569; padding: 0 8px 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tnode { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 6px; color: #94a3b8; cursor: pointer; }
+.tnode:hover { background: rgba(255,255,255,0.04); }
+.tnode.folder { color: #cbd5e1; font-weight: 600; cursor: default; }
+.tnode.sel { background: rgba(6,245,205,0.12); color: #06f5cd; }
+.tnode.writing { color: #06f5cd; }
+.tnode.pending { color: #334155; cursor: default; }
+.tnode .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ind1 { padding-left: 24px; }
+.badge-new { font-size: 9px; background: rgba(74,222,128,0.15); color: #4ade80; padding: 1px 5px; border-radius: 4px; margin-left: auto; flex-shrink:0; }
+.badge-upd { font-size: 9px; background: rgba(251,191,36,0.15); color: #fbbf24; padding: 1px 5px; border-radius: 4px; margin-left: auto; flex-shrink:0; }
+
+/* editor */
+.editor { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.etabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.etab { padding: 9px 16px; font-size: 12px; color: #64748b; border-right: 1px solid rgba(255,255,255,0.06);
+  display:flex; gap:8px; align-items:center; cursor:pointer; white-space:nowrap; background:transparent; border-top:none; border-left:none; border-bottom:none; font-family:inherit; }
+.etab.on { color: #06f5cd; background: rgba(6,245,205,0.05); box-shadow: inset 0 -2px 0 #06f5cd; }
+.etab .x { color:#475569; font-size:13px; }
+.etab .x:hover { color:#f87171; }
+.code-wrap { flex: 1; display: flex; overflow: auto; padding: 14px 0; font-size: 12.5px; line-height: 1.75; }
+.line-nums { width: 52px; flex-shrink: 0; text-align: right; padding-right: 16px; color: #334155; white-space: pre; user-select: none;
+  font-family: 'JetBrains Mono', 'Consolas', monospace; }
+.code-pre { flex: 1; margin: 0; white-space: pre; color: #cbd5e1; font-family: 'JetBrains Mono', 'Consolas', monospace; padding-right: 20px; }
+.code-empty { flex:1; display:flex; align-items:center; justify-content:center; color:#475569; font-size:13px; padding:20px; text-align:center; }
+.tg { color: #f472b6; } .at { color: #fbbf24; } .st { color: #4ade80; } .cm { color: #475569; } .kw { color: #c084fc; } .nu { color: #fb923c; }
+.cursor { display: inline-block; width: 7px; height: 14px; background: #06f5cd; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.statusbar { height: 28px; flex-shrink: 0; display: flex; align-items: center; gap: 18px; padding: 0 14px; font-size: 11px; color: #64748b;
+  border-top: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); overflow: hidden; white-space: nowrap; }
+
+/* preview */
+.preview-wrap { flex: 1; padding: 16px; display: none; flex-direction: column; align-items: center; min-height: 0; }
+.browser { flex: 1; width: 100%; max-width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12);
+  display: flex; flex-direction: column; background: #fff; transition: max-width .3s; }
+.browser.tablet { max-width: 768px; }
+.browser.mobile { max-width: 390px; }
+.browser-bar { height: 40px; flex-shrink: 0; background: #16181d; display: flex; align-items: center; gap: 10px; padding: 0 14px; }
+.tl { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+.url { flex: 1; max-width: 480px; margin: 0 auto; background: rgba(255,255,255,0.07); border-radius: 6px; font-size: 11.5px;
+  color: #94a3b8; padding: 6px 14px; text-align: center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.reload { color:#64748b; font-size:13px; cursor:pointer; background:none; border:none; }
+.preview-frame { flex: 1; width: 100%; border: none; background: #fff; }
+.dev-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 3px; }
+.dev { padding: 4px 10px; font-size: 11px; color: #64748b; border-radius: 4px; cursor: pointer; background:transparent; border:none; font-family:inherit; }
+.dev.on { background: rgba(6,245,205,0.2); color: #06f5cd; }
+
+/* responsive */
+@media (max-width: 900px) {
+  .ws { flex-direction: column; }
+  .chat-col { width: 100%; max-height: 38vh; }
+  .tree { width: 180px; }
+}
+
+/* saved projects (start screen) */
+.proj-h { margin: 34px 0 2px; font-size: 12px; letter-spacing: 2px; color: #64748b; text-align: center; }
+.proj-card { position: relative; }
+.proj-del {
+  position: absolute; top: 8px; right: 8px; background: none; border: none;
+  color: #64748b; cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 4px;
+}
+.proj-del:hover { color: #f87171; }
+.proj-meta { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: #64748b; }
+.proj-chip.ok { color: #4ade80; }
+.proj-chip.part { color: #fbbf24; }
+</style>
+</head>
+<body data-state="start">
+
+<div class="topbar">
+  <div class="logo" onclick="window.location.href='dashboard.html'"><span class="grad-text">⚡ DevAssist AI</span></div>
+  <div class="crumb">/ &nbsp;<span data-feature-name></span></div>
+  <span class="beta">BETA</span>
+  <div class="model-badge"><span class="dot-green"></span> <span id="modelBadge"></span></div>
+  <div class="model-badge" id="tokenMeter" style="display:none;margin-left:0" title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
+  <div class="avatar" id="userAvatar">·</div>
+</div>
+
+<!-- ============ START ============ -->
+<div class="screen" id="startScreen">
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+    <div class="hero-h1">What do you want to <span class="grad-text">build</span>?</div>
+    <div class="hero-sub">Describe your project in detail — I'll generate the complete frontend, file by file.</div>
+    <div class="prompt-box">
+      <textarea id="promptInput" rows="3" placeholder="Build a modern portfolio website for a photographer named Arjun. Dark theme, gallery grid with hover zoom, about section, contact form, smooth scroll animations..."></textarea>
+      <div class="prompt-hint" id="promptHint"></div>
+      <div class="prompt-foot">
+        <span class="chip disabled" title="Coming soon">✚ Attach reference</span>
+        <span class="chip">◐ Theme: Auto</span>
+        <span class="chip">HTML · CSS · JS</span>
+        <button class="grad-btn send-btn" id="generateBtn">Generate Project ⚡</button>
+      </div>
+    </div>
+    <div class="tpl-row" id="templateRow"></div>
+    <div id="myProjectsWrap" style="display:none;width:100%">
+      <div class="proj-h">MY PROJECTS</div>
+      <div class="tpl-row" id="projectRow"></div>
+    </div>
+    <div class="hero-note" id="heroNote"></div>
+  </div>
+</div>
+
+<!-- ============ WORKSPACE ============ -->
+<div class="screen" id="workspaceScreen">
+  <div class="ws">
+    <div class="chat-col glass">
+      <div class="chat-scroll" id="chatScroll"></div>
+      <div class="chat-input">
+        <textarea id="chatInput" rows="1" placeholder="Generation in progress — please wait…" disabled></textarea>
+        <button class="mini-send grad-btn" id="chatSendBtn" disabled>➤</button>
+      </div>
+    </div>
+    <div class="work-col glass">
+      <div class="work-head">
+        <div class="tab-group">
+          <button class="wtab on" id="codeTabBtn">&lt;/&gt; Code</button>
+          <button class="wtab" id="previewTabBtn" disabled>◉ Preview</button>
+        </div>
+        <span class="sp"></span>
+        <div class="dev-toggle" id="devToggle" style="display:none">
+          <button class="dev on" data-dev="desktop">▭ Desktop</button>
+          <button class="dev" data-dev="tablet">▯ Tablet</button>
+          <button class="dev" data-dev="mobile">▯ Mobile</button>
+        </div>
+        <button class="hbtn ghost-btn" id="copyFileBtn" disabled>❐ Copy file</button>
+        <button class="hbtn ghost-btn" id="openTabBtn" style="display:none">↗ Open in new tab</button>
+        <button class="hbtn grad-btn" id="downloadZipBtn" disabled>↓ Download ZIP</button>
+      </div>
+      <div class="work-body">
+        <div class="tree" id="fileTree" style="display:block">
+          <div class="tree-h" id="treeHeader">EXPLORER</div>
+          <div id="treeNodes"></div>
+        </div>
+        <div class="editor" id="editorPane">
+          <div class="etabs" id="editorTabs"></div>
+          <div class="code-wrap" id="codeWrap" style="display:none">
+            <div class="line-nums" id="lineNums"></div>
+            <pre class="code-pre" id="codePre"></pre>
+          </div>
+          <div class="code-empty" id="codeEmpty">Files will appear here as they are generated.</div>
+        </div>
+        <div class="preview-wrap" id="previewWrap">
+          <div class="browser" id="previewBrowser">
+            <div class="browser-bar">
+              <span class="tl" style="background:#f87171"></span><span class="tl" style="background:#facc15"></span><span class="tl" style="background:#4ade80"></span>
+              <div class="url" id="previewUrl">preview</div>
+              <button class="reload" id="previewReload" title="Reload preview">↻</button>
+            </div>
+            <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts" title="Live preview"></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="statusbar" id="statusBar"><span>Ready</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-guard.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+'use strict';
+
+/* ================= FEATURE CONFIG =================
+   The display name lives ONLY here (SPEC rule: renameable in one place). */
+const FEATURE = {
+  NAME: 'Ignite',
+  MODEL_BADGE: 'GPT-OSS-120B · Groq',
+  NOTE: '⚡ Frontend projects only — HTML, CSS & JavaScript · Powered by GPT-OSS-120B via Groq',
+};
+
+const TEMPLATES = [
+  { ic: '▣', t: 'Portfolio', d: 'Personal site with gallery & contact form',
+    p: 'Build a modern portfolio website for a photographer. Dark theme, sticky navbar, hero section with a bold headline, gallery grid with hover zoom effects, an about section with a short bio, a contact form with validation, and smooth scroll animations between sections.' },
+  { ic: '➤', t: 'Landing Page', d: 'Product page with hero, pricing, FAQ',
+    p: 'Build a product landing page for a note-taking app called Notely. Clean light theme, hero section with app screenshot placeholder, features grid with icons, three-tier pricing table with a highlighted middle plan, FAQ accordion, and a footer with links.' },
+  { ic: '▦', t: 'Dashboard', d: 'Admin panel with charts & tables',
+    p: 'Build an admin dashboard page with a dark sidebar navigation, top stats cards showing key metrics, a line chart and a bar chart drawn on canvas with sample data, a recent-orders table with status badges, and a responsive layout.' },
+  { ic: '◉', t: 'Mini Game', d: 'Browser game with canvas & scores',
+    p: 'Build a browser mini game: a snake game on an HTML canvas with arrow-key controls, score counter, increasing speed, game-over screen with restart button, and a local high-score saved in localStorage. Neon retro visual style.' },
+];
+
+const MIN_PROMPT_CHARS = 25;
+const FILE_RETRIES = 2;                // client-side retries per file (server retries too)
+const CONTEXT_BUDGET = 30000;          // chars of already-built files sent as context
+const EDIT_CONTEXT_BUDGET = 50000;
+
+/* ================= STATE ================= */
+const state = {
+  projectId: null,                     // DB id of the saved project (null until first auto-save)
+  prompt: '',
+  plan: null,                          // {project:{name,slug,summary}, files:[{path,description}]}
+  files: new Map(),                    // path -> {content, status: pending|writing|done|failed, updated:bool}
+  generating: false,
+  startedAt: 0,
+  fileDurations: [],
+  openTabs: [],
+  activeTab: null,
+  previewUrls: [],
+  downloaded: false,
+  editing: false,
+};
+
+const $ = (id) => document.getElementById(id);
+
+/* ================= BOOT ================= */
+document.addEventListener('DOMContentLoaded', async () => {
+  const session = await requireAuth();
+  if (!session) return;
+
+  document.title = `${FEATURE.NAME} — DevAssist AI`;
+  document.querySelectorAll('[data-feature-name]').forEach(el => el.textContent = FEATURE.NAME);
+  $('modelBadge').textContent = FEATURE.MODEL_BADGE;
+  $('heroNote').textContent = FEATURE.NOTE;
+
+  const user = session.user;
+  const avatarUrl = getUserAvatar(user);
+  $('userAvatar').innerHTML = avatarUrl
+    ? `<img src="${avatarUrl}" alt="avatar">`
+    : getUserDisplayName(user).charAt(0).toUpperCase();
+
+  const row = $('templateRow');
+  TEMPLATES.forEach(tpl => {
+    const card = document.createElement('div');
+    card.className = 'tpl glass';
+    card.innerHTML = `<div class="ic">${tpl.ic}</div><div class="t">${tpl.t}</div><div class="d">${tpl.d}</div>`;
+    card.addEventListener('click', () => {
+      $('promptInput').value = tpl.p;
+      $('promptInput').focus();
+    });
+    row.appendChild(card);
+  });
+
+  $('generateBtn').addEventListener('click', startGeneration);
+  $('promptInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); startGeneration(); }
+  });
+  $('chatSendBtn').addEventListener('click', sendFollowUp);
+  $('chatInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendFollowUp(); }
+  });
+  $('codeTabBtn').addEventListener('click', () => switchView('code'));
+  $('previewTabBtn').addEventListener('click', () => switchView('preview'));
+  $('copyFileBtn').addEventListener('click', copyActiveFile);
+  $('downloadZipBtn').addEventListener('click', downloadZip);
+  $('openTabBtn').addEventListener('click', openPreviewInNewTab);
+  $('previewReload').addEventListener('click', buildPreview);
+  document.querySelectorAll('#devToggle .dev').forEach(btn =>
+    btn.addEventListener('click', () => setDeviceSize(btn.dataset.dev)));
+
+  window.addEventListener('beforeunload', (e) => {
+    // Auto-saved projects survive a reload — only warn when work is unsaved.
+    if (state.files.size > 0 && !state.downloaded && !state.projectId) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  refreshUsage();
+  loadProjects();
+});
+
+/* ================= TOKEN USAGE METER ================= */
+async function refreshUsage() {
+  try {
+    const res = await authFetch('/api/usage');
+    if (!res.ok) return;
+    const u = await res.json();
+    if (typeof u.user_tokens !== 'number' || typeof u.user_limit !== 'number') return;
+    const meter = $('tokenMeter');
+    meter.textContent = `🔋 ${u.user_tokens.toLocaleString()} / ${u.user_limit.toLocaleString()} tokens today`;
+    meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
+      : (u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '');
+    meter.style.display = 'flex';
+  } catch { /* the meter is cosmetic — never let it break the builder */ }
+}
+
+/* ================= SAVED PROJECTS (per-user DB persistence) =================
+   Every plan / finished file / edit is auto-saved to the backend, so a user
+   whose daily token quota runs out mid-build can log in tomorrow, reopen the
+   project from "MY PROJECTS", and resume generating the missing files. */
+
+let saveQueue = Promise.resolve();
+
+function queueSaveProject(fields) {
+  // Serialized: the create (POST) always lands before follow-up updates (PUT).
+  saveQueue = saveQueue.then(() => saveProject(fields)).catch(() => {});
+  return saveQueue;
+}
+
+async function saveProject(fields = {}) {
+  if (!state.plan) return;
+  try {
+    const payload = {
+      name: state.plan.project.name,
+      slug: state.plan.project.slug,
+      summary: state.plan.project.summary,
+      prompt: state.prompt,
+      plan: state.plan,
+      files: doneFilesObject(),
+      status: allFilesDone() ? 'complete' : 'generating',
+      ...fields,
+    };
+    const url = state.projectId
+      ? `/api/project-builder/projects/${state.projectId}`
+      : '/api/project-builder/projects';
+    const res = await authFetch(url, {
+      method: state.projectId ? 'PUT' : 'POST',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.id) state.projectId = data.id;
+  } catch { /* auto-save is best-effort — never let it break the builder */ }
+}
+
+function doneFilesObject() {
+  const out = {};
+  state.files.forEach((f, path) => {
+    if (f.status === 'done' && f.content) out[path] = f.content;
+  });
+  return out;
+}
+
+function allFilesDone() {
+  return !!state.plan
+    && state.plan.files.every(f => (state.files.get(f.path) || {}).status === 'done');
+}
+
+async function loadProjects() {
+  try {
+    const res = await authFetch('/api/project-builder/projects');
+    if (!res.ok) return;
+    renderProjects(await res.json());
+  } catch { /* the list is cosmetic on the start screen */ }
+}
+
+function renderProjects(projects) {
+  const wrap = $('myProjectsWrap');
+  const row = $('projectRow');
+  row.innerHTML = '';
+  if (!Array.isArray(projects) || projects.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  projects.forEach(p => {
+    const complete = p.status === 'complete';
+    const card = document.createElement('div');
+    card.className = 'tpl glass proj-card';
+    card.innerHTML =
+      `<button class="proj-del" title="Delete project">✕</button>
+       <div class="t">${esc(p.name)}</div>
+       <div class="d">${esc(p.summary || '')}</div>
+       <div class="proj-meta">
+         <span class="proj-chip ${complete ? 'ok' : 'part'}">${complete ? '✔ Complete' : '⋯ In progress'}</span>
+         <span>${p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : ''}</span>
+       </div>`;
+    card.addEventListener('click', () => openProject(p.id));
+    card.querySelector('.proj-del').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+      try { await authFetch(`/api/project-builder/projects/${p.id}`, { method: 'DELETE' }); } catch {}
+      loadProjects();
+    });
+    row.appendChild(card);
+  });
+}
+
+async function openProject(id) {
+  let data;
+  try {
+    const res = await authFetch(`/api/project-builder/projects/${id}`);
+    if (!res.ok) throw new Error();
+    data = await res.json();
+  } catch {
+    showToast('Could not load that project. Please try again.', 'error');
+    return;
+  }
+  if (!data.plan || !Array.isArray(data.plan.files)) {
+    showToast('This project has no restorable plan.', 'error');
+    return;
+  }
+
+  state.projectId = data.id;
+  state.prompt = data.prompt || '';
+  state.plan = data.plan;
+  state.files = new Map();
+  state.openTabs = [];
+  state.activeTab = null;
+  state.fileDurations = [];
+  state.downloaded = false;
+  state.generating = false;
+
+  const saved = data.files || {};
+  state.plan.files.forEach(f => state.files.set(f.path, {
+    content: saved[f.path] || '',
+    status: saved[f.path] ? 'done' : 'pending',
+    updated: false,
+  }));
+  // Files added later by follow-up edits live in `files` but not in the plan.
+  Object.keys(saved).forEach(path => {
+    if (!state.files.has(path)) {
+      state.files.set(path, { content: saved[path], status: 'done', updated: false });
+      state.plan.files.push({ path, description: 'added by follow-up edit' });
+    }
+  });
+
+  $('chatScroll').innerHTML = '';
+  $('treeNodes').innerHTML = '';
+  $('editorTabs').innerHTML = '';
+  $('codeWrap').style.display = 'none';
+  $('codeEmpty').style.display = 'flex';
+  $('codeEmpty').textContent = 'Click a file in the explorer to view its code.';
+  document.body.dataset.state = 'workspace';
+  $('treeHeader').textContent = `EXPLORER · ${(state.plan.project.slug || 'project').toUpperCase()}`;
+  renderTree();
+  switchView('code');
+  addUserMessage(state.prompt || `(reopened project: ${state.plan.project.name})`);
+
+  const pending = state.plan.files.filter(f => state.files.get(f.path).status !== 'done');
+  if (pending.length === 0) {
+    addAiMessage(
+      `<b style="color:#4ade80">✔ Project restored.</b>
+       All <b>${state.plan.files.length} files</b> are ready — inspect the code,
+       open Live Preview, or ask for changes below.`);
+    setActionButtons(true);
+    setChatInputMode('edit');
+    setStatus(`✔ Restored ${state.plan.files.length} files`);
+  } else {
+    setActionButtons(false);
+    setChatInputMode('locked');
+    const msg = addAiMessage(
+      `<b style="color:#fbbf24">⋯ Project restored — ${pending.length} of ${state.plan.files.length} files still missing.</b><br>
+       Generation was interrupted (for example by the daily token limit).
+       <br><button class="grad-btn retry-btn" style="margin-top:8px">⚡ Resume generation</button>`);
+    msg.querySelector('.retry-btn').addEventListener('click', () => {
+      msg.remove();
+      resumeGeneration();
+    });
+    setStatus(`⋯ ${pending.length} files pending — resume when ready`);
+  }
+  refreshUsage();
+}
+
+async function resumeGeneration() {
+  if (state.generating) return;
+  state.generating = true;
+  state.startedAt = Date.now();
+  setChatInputMode('locked');
+
+  // Old progress blocks would duplicate the step ids — drop them first.
+  document.querySelectorAll('#stepList').forEach(el => {
+    const host = el.closest('.msg-ai');
+    if (host) host.remove();
+  });
+
+  addAiMessage(
+    `<b style="color:#06f5cd">⚡ Resuming your project…</b>
+     <div class="steps" id="stepList"></div>
+     <div class="progress-wrap" id="progressWrap">
+       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+       <div class="progress-lbl"><span id="progressCount"></span><span id="progressEta"></span></div>
+     </div>`);
+  buildStepList(state.plan.files);
+  state.plan.files.forEach((f, i) => {
+    if (state.files.get(f.path).status === 'done') {
+      const step = $(`step-${i}`);
+      step.className = 'step done';
+      step.innerHTML = `✔ &nbsp;Created <span class="mono">${esc(f.path)}</span>`;
+    }
+  });
+  updateProgress();
+  setStatus(`⚡ Resuming — generating the missing files…`);
+  await generateAllFilesFrom(0);
+}
+
+/* ================= CHAT HELPERS ================= */
+function addUserMessage(text) {
+  const el = document.createElement('div');
+  el.className = 'msg-user';
+  el.textContent = text;
+  $('chatScroll').appendChild(el);
+  scrollChat();
+  return el;
+}
+
+function addAiMessage(html) {
+  const el = document.createElement('div');
+  el.className = 'msg-ai';
+  el.innerHTML = html;
+  $('chatScroll').appendChild(el);
+  scrollChat();
+  return el;
+}
+
+function scrollChat() {
+  const box = $('chatScroll');
+  box.scrollTop = box.scrollHeight;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ================= PLAN + GENERATE ================= */
+async function startGeneration() {
+  if (state.generating) return;
+  const prompt = $('promptInput').value.trim();
+  const hint = $('promptHint');
+  if (prompt.length < MIN_PROMPT_CHARS) {
+    hint.style.display = 'block';
+    hint.textContent = 'Please add a bit more detail — what is the site for, what sections should it have, any style preferences?';
+    $('promptInput').focus();
+    return;
+  }
+  hint.style.display = 'none';
+
+  state.projectId = null;              // a fresh prompt is a new saved project
+  state.prompt = prompt;
+  state.generating = true;
+  state.files = new Map();
+  state.openTabs = [];
+  state.activeTab = null;
+  state.fileDurations = [];
+  state.downloaded = false;
+  $('chatScroll').innerHTML = '';
+  $('treeNodes').innerHTML = '';
+  $('editorTabs').innerHTML = '';
+  $('codeWrap').style.display = 'none';
+  $('codeEmpty').style.display = 'flex';
+  $('codeEmpty').textContent = 'Files will appear here as they are generated.';
+  setActionButtons(false);
+  switchView('code');
+  document.body.dataset.state = 'workspace';
+  setChatInputMode('locked');
+
+  addUserMessage(prompt);
+  const buildMsg = addAiMessage(
+    `<b style="color:#06f5cd">⚡ Building your project…</b>
+     <div class="steps" id="stepList">
+       <div class="step active" id="stepPlan"><span class="spin"></span>&nbsp;Analyzing prompt &amp; planning architecture</div>
+     </div>
+     <div class="progress-wrap" style="display:none" id="progressWrap">
+       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+       <div class="progress-lbl"><span id="progressCount"></span><span id="progressEta"></span></div>
+     </div>`);
+
+  setStatus(`⚡ ${FEATURE.NAME} is planning your project…`);
+
+  let planResponse;
+  try {
+    planResponse = await requestPlan(prompt);
+  } catch (err) {
+    failPlanStep(buildMsg, err.message, () => { document.body.dataset.state = 'start'; state.generating = false; });
+    return;
+  }
+
+  if (planResponse.status === 'needs_detail') {
+    state.generating = false;
+    $('stepPlan').remove();
+    addAiMessage(`🤔 ${esc(planResponse.message)}`);
+    setStatus('Waiting for more detail');
+    setTimeout(() => {
+      document.body.dataset.state = 'start';
+      $('promptInput').focus();
+    }, 2600);
+    return;
+  }
+
+  state.plan = planResponse;
+  state.startedAt = Date.now();
+  const stepPlan = $('stepPlan');
+  stepPlan.className = 'step done';
+  stepPlan.innerHTML = '✔ &nbsp;Analyzed prompt &amp; planned architecture';
+  $('treeHeader').textContent = `EXPLORER · ${planResponse.project.slug.toUpperCase()}`;
+
+  planResponse.files.forEach(f => state.files.set(f.path, { content: '', status: 'pending', updated: false }));
+  renderTree();
+  buildStepList(planResponse.files);
+  $('progressWrap').style.display = 'block';
+  updateProgress();
+  refreshUsage();
+  queueSaveProject();                  // create the DB record as soon as a plan exists
+
+  await generateAllFilesFrom(0);
+}
+
+async function requestPlan(prompt) {
+  let res;
+  try {
+    res = await authFetch('/api/project-builder/plan', {
+      method: 'POST',
+      body: JSON.stringify({ prompt }),
+    });
+  } catch (err) {
+    throw new Error('Could not reach the server. Please check your connection and try again.');
+  }
+  let data = null;
+  try { data = await res.json(); } catch { /* non-JSON body, e.g. security errors */ }
+  if (res.status === 401 || res.status === 403) {
+    throw new Error(`Your session was rejected (HTTP ${res.status}). Please log out and log back in.`);
+  }
+  if (res.status === 429) throw new Error((data && data.message) || 'The project builder is busy. Please try again in a minute.');
+  if (!res.ok) throw new Error((data && data.message) || `Planning failed (HTTP ${res.status}). Please try again.`);
+  if (!data) throw new Error('The server sent an unexpected response. Please try again.');
+  return data;
+}
+
+function buildStepList(files) {
+  const list = $('stepList');
+  files.forEach((f, i) => {
+    const step = document.createElement('div');
+    step.className = 'step todo';
+    step.id = `step-${i}`;
+    step.innerHTML = `○ &nbsp;<span class="mono">${esc(f.path)}</span>`;
+    list.appendChild(step);
+  });
+  scrollChat();
+}
+
+async function generateAllFilesFrom(startIndex) {
+  const files = state.plan.files;
+  for (let i = startIndex; i < files.length; i++) {
+    const f = files[i];
+    if (state.files.get(f.path).status === 'done') continue;
+    const step = $(`step-${i}`);
+    step.className = 'step active';
+    step.innerHTML = `<span class="spin"></span>&nbsp;Writing <span class="mono">${esc(f.path)}</span>…`;
+    setFileStatus(f.path, 'writing');
+    openFileTab(f.path);
+    setStatus(`⚡ Generating ${f.path} — streaming from ${FEATURE.MODEL_BADGE}`);
+
+    const started = Date.now();
+    let ok = false;
+    let lastError = '';
+    for (let attempt = 0; attempt <= FILE_RETRIES && !ok; attempt++) {
+      if (attempt > 0) {
+        setStatus(`↻ Retrying ${f.path} (attempt ${attempt + 1})…`);
+        await sleep(2000 * attempt);
+        const entry = state.files.get(f.path);
+        entry.content = '';
+        renderEditor();
+      }
+      try {
+        await streamFile(f);
+        ok = true;
+      } catch (err) {
+        lastError = err.message;
+        if (err.quota) break; // a daily token budget is spent — retries can't help
+      }
+    }
+
+    if (!ok) {
+      refreshUsage();
+      setFileStatus(f.path, 'failed');
+      step.className = 'step failed';
+      step.innerHTML = `✕ &nbsp;<span class="mono">${esc(f.path)}</span> failed`;
+      state.generating = false;
+      const msg = addAiMessage(
+        `😕 I couldn't generate <span class="mono">${esc(f.path)}</span>. ${esc(lastError)}
+         <br><button class="grad-btn retry-btn">↻ Retry &amp; continue</button>`);
+      msg.querySelector('.retry-btn').addEventListener('click', () => {
+        msg.remove();
+        state.generating = true;
+        generateAllFilesFrom(i);
+      });
+      setStatus('Generation paused — a file failed');
+      return;
+    }
+
+    state.fileDurations.push(Date.now() - started);
+    setFileStatus(f.path, 'done');
+    step.className = 'step done';
+    step.innerHTML = `✔ &nbsp;Created <span class="mono">${esc(f.path)}</span>`;
+    updateProgress();
+    refreshUsage();
+    queueSaveProject();                // persist after every finished file —
+                                       // a quota stop mid-build loses nothing
+  }
+  finishGeneration();
+}
+
+async function streamFile(f) {
+  let res;
+  try {
+    res = await authFetch('/api/project-builder/generate-file', {
+      method: 'POST',
+      body: JSON.stringify({
+        prompt: state.prompt,
+        planSummary: state.plan.project.summary,
+        filePath: f.path,
+        fileDescription: f.description,
+        filesList: state.plan.files.map(x => x.path),
+        existingFiles: contextFiles(CONTEXT_BUDGET),
+      }),
+    });
+  } catch {
+    throw new Error('Could not reach the server.');
+  }
+  if (res.status === 429) {
+    let msg = 'The project builder is busy. Please try again in a minute.';
+    try { msg = (await res.json()).message || msg; } catch { /* keep default */ }
+    throw new Error(msg);
+  }
+  if (res.status === 401 || res.status === 403) {
+    throw new Error(`Your session was rejected (HTTP ${res.status}). Please log out and log back in.`);
+  }
+  if (!res.ok) throw new Error(`The server rejected this file request (HTTP ${res.status}).`);
+
+  const entry = state.files.get(f.path);
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let received = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += decoder.decode(value, { stream: true });
+    if (received.startsWith('ERROR:')) continue; // keep collecting the full error text
+    entry.content = received;
+    if (state.activeTab === f.path) renderStreamingEditor(received);
+  }
+  received += decoder.decode();
+  if (received.startsWith('ERROR:')) {
+    entry.content = '';
+    // "[quota:user]" / "[quota:global]" marks a spent daily token budget —
+    // the tag is stripped for display and tells the retry loop not to bother.
+    const text = received.replace(/^ERROR:\s*/, '');
+    const quota = text.match(/^\[quota:(user|global)\]\s*/);
+    const err = new Error(quota ? text.slice(quota[0].length) : text);
+    if (quota) err.quota = quota[1];
+    throw err;
+  }
+  if (!received.trim()) throw new Error('The model returned an empty file.');
+  entry.content = received;
+  if (state.activeTab === f.path) renderEditor();
+}
+
+function contextFiles(budget) {
+  const out = {};
+  let remaining = budget;
+  const done = [...state.files.entries()]
+    .filter(([, f]) => f.status === 'done')
+    .sort(([a], [b]) => (a === 'index.html' ? -1 : 0) - (b === 'index.html' ? -1 : 0));
+  for (const [path, f] of done) {
+    if (remaining <= 0) break;
+    const slice = f.content.slice(0, remaining);
+    out[path] = slice;
+    remaining -= slice.length;
+  }
+  return out;
+}
+
+function finishGeneration() {
+  state.generating = false;
+  const total = state.plan.files.length;
+  const seconds = Math.round((Date.now() - state.startedAt) / 1000);
+  const mins = Math.floor(seconds / 60);
+  const timeText = mins > 0 ? `${mins}m ${seconds % 60}s` : `${seconds}s`;
+  updateProgress();
+
+  const doneMsg = addAiMessage(
+    `<b style="color:#4ade80">✔ Project completed!</b><br>
+     Generated <b>${total} files</b> in ${timeText} — ${esc(state.plan.project.summary || state.plan.project.name)}.
+     Click any file to inspect the code, or open Live Preview.
+     <div class="sugg-row">
+       <span class="sugg">＋ Add a blog section</span>
+       <span class="sugg">✦ Try a light theme</span>
+       <span class="sugg">▯ Improve mobile layout</span>
+     </div>`);
+  doneMsg.querySelectorAll('.sugg').forEach(chip => chip.addEventListener('click', () => {
+    $('chatInput').value = chip.textContent.replace(/^[＋✦▯]\s*/, '');
+    $('chatInput').focus();
+  }));
+
+  setActionButtons(true);
+  setChatInputMode('edit');
+  const kb = Math.round(totalBytes() / 102.4) / 10;
+  setStatus(`✔ ${total} files · ${kb} KB total`);
+  if (state.activeTab) renderEditor();
+  queueSaveProject({ status: 'complete' });
+  loadProjects();
+  showToast(`${FEATURE.NAME} finished your project 🎉`, 'success');
+}
+
+function failPlanStep(buildMsg, message, onBack) {
+  state.generating = false;
+  const stepPlan = $('stepPlan');
+  if (stepPlan) { stepPlan.className = 'step failed'; stepPlan.innerHTML = '✕ &nbsp;Planning failed'; }
+  const msg = addAiMessage(
+    `😕 ${esc(message)}<br><button class="grad-btn retry-btn">↻ Back to prompt</button>`);
+  msg.querySelector('.retry-btn').addEventListener('click', () => { msg.remove(); onBack(); });
+  setStatus('Planning failed');
+}
+
+/* ================= PROGRESS ================= */
+function updateProgress() {
+  if (!state.plan) return;
+  const total = state.plan.files.length;
+  const done = [...state.files.values()].filter(f => f.status === 'done').length;
+  const pct = Math.round((done / total) * 100);
+  $('progressFill').style.width = pct + '%';
+  $('progressCount').textContent = `${done} of ${total} files`;
+  let eta = '';
+  if (done > 0 && done < total) {
+    const avg = state.fileDurations.reduce((a, b) => a + b, 0) / state.fileDurations.length;
+    eta = ` · ~${Math.max(1, Math.round(avg * (total - done) / 1000))}s left`;
+  }
+  $('progressEta').textContent = `${pct}%${eta}`;
+}
+
+function setStatus(text) {
+  $('statusBar').innerHTML = `<span>${esc(text)}</span>`;
+}
+
+function setActionButtons(enabled) {
+  $('downloadZipBtn').disabled = !enabled;
+  $('previewTabBtn').disabled = !enabled;
+  $('copyFileBtn').disabled = !enabled && !state.activeTab;
+}
+
+function setChatInputMode(mode) {
+  const input = $('chatInput');
+  const btn = $('chatSendBtn');
+  if (mode === 'locked') {
+    input.disabled = true; btn.disabled = true;
+    input.placeholder = 'Generation in progress — please wait…';
+  } else {
+    input.disabled = false; btn.disabled = false;
+    input.placeholder = 'Ask for changes… e.g. "make the hero full-screen"';
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function totalBytes() {
+  let n = 0;
+  state.files.forEach(f => { n += f.content.length; });
+  return n;
+}
+
+/* ================= FILE TREE ================= */
+function setFileStatus(path, status) {
+  const entry = state.files.get(path);
+  if (entry) entry.status = status;
+  renderTree();
+}
+
+function fileIcon(path) {
+  if (path.endsWith('.html')) return '◆';
+  if (path.endsWith('.css')) return '✦';
+  if (path.endsWith('.js')) return 'ƒ';
+  if (path.endsWith('.md')) return '¶';
+  if (path.endsWith('.svg')) return '▣';
+  return '·';
+}
+
+function renderTree() {
+  const container = $('treeNodes');
+  container.innerHTML = '';
+  const paths = [...state.files.keys()];
+  const folders = new Map(); // folder -> paths
+  const loose = [];
+  paths.forEach(p => {
+    const slash = p.indexOf('/');
+    if (slash > 0) {
+      const folder = p.slice(0, slash);
+      if (!folders.has(folder)) folders.set(folder, []);
+      folders.get(folder).push(p);
+    } else {
+      loose.push(p);
+    }
+  });
+
+  const addNode = (path, indented) => {
+    const f = state.files.get(path);
+    const node = document.createElement('div');
+    node.className = 'tnode' + (indented ? ' ind1' : '');
+    if (f.status === 'pending') node.classList.add('pending');
+    if (f.status === 'writing') node.classList.add('writing');
+    if (state.activeTab === path) node.classList.add('sel');
+    const name = path.slice(path.indexOf('/') + 1);
+    if (f.status === 'writing') {
+      node.innerHTML = `<span class="spin"></span><span class="nm">${esc(name)}</span>`;
+    } else if (f.status === 'pending') {
+      node.innerHTML = `○ <span class="nm">${esc(name)}</span>`;
+    } else if (f.status === 'failed') {
+      node.innerHTML = `✕ <span class="nm" style="color:#f87171">${esc(name)}</span>`;
+    } else {
+      const badge = f.updated ? '<span class="badge-upd">UPDATED</span>'
+        : (state.generating ? '<span class="badge-new">NEW</span>' : '');
+      node.innerHTML = `${fileIcon(path)} <span class="nm">${esc(name)}</span>${badge}`;
+    }
+    if (f.status === 'done' || f.status === 'writing') {
+      node.addEventListener('click', () => openFileTab(path));
+    }
+    container.appendChild(node);
+  };
+
+  [...folders.keys()].sort().forEach(folder => {
+    const anyVisible = folders.get(folder).some(p => state.files.get(p).status !== 'pending');
+    const fnode = document.createElement('div');
+    fnode.className = 'tnode folder' + (anyVisible ? '' : ' pending');
+    fnode.innerHTML = `${anyVisible ? '▾' : '○ ▸'} ${esc(folder)}`;
+    container.appendChild(fnode);
+    folders.get(folder).sort().forEach(p => addNode(p, true));
+  });
+  loose.sort((a, b) => (a === 'index.html' ? -1 : a > b ? 1 : -1)).forEach(p => addNode(p, false));
+}
+
+/* ================= EDITOR ================= */
+function openFileTab(path) {
+  if (!state.openTabs.includes(path)) state.openTabs.push(path);
+  state.activeTab = path;
+  $('copyFileBtn').disabled = false;
+  renderTabs();
+  renderTree();
+  renderEditor();
+  switchView('code');
+}
+
+function closeFileTab(path, event) {
+  event.stopPropagation();
+  state.openTabs = state.openTabs.filter(p => p !== path);
+  if (state.activeTab === path) {
+    state.activeTab = state.openTabs[state.openTabs.length - 1] || null;
+  }
+  renderTabs();
+  renderTree();
+  renderEditor();
+}
+
+function renderTabs() {
+  const tabs = $('editorTabs');
+  tabs.innerHTML = '';
+  state.openTabs.forEach(path => {
+    const f = state.files.get(path);
+    const tab = document.createElement('button');
+    tab.className = 'etab' + (state.activeTab === path ? ' on' : '');
+    tab.innerHTML = `${esc(path.split('/').pop())}${f && f.updated ? ' ●' : ''} <span class="x">×</span>`;
+    tab.addEventListener('click', () => { state.activeTab = path; renderTabs(); renderTree(); renderEditor(); });
+    tab.querySelector('.x').addEventListener('click', (e) => closeFileTab(path, e));
+    tabs.appendChild(tab);
+  });
+}
+
+function renderEditor() {
+  const path = state.activeTab;
+  if (!path || !state.files.has(path)) {
+    $('codeWrap').style.display = 'none';
+    $('codeEmpty').style.display = 'flex';
+    return;
+  }
+  const f = state.files.get(path);
+  $('codeEmpty').style.display = 'none';
+  $('codeWrap').style.display = 'flex';
+  if (f.status === 'writing') {
+    renderStreamingEditor(f.content);
+    return;
+  }
+  const lines = f.content.split('\n').length;
+  $('lineNums').textContent = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+  $('codePre').innerHTML = highlight(f.content, path.split('.').pop());
+  if (!state.generating) {
+    setStatus(`${path} · ${lines} lines · ${path.split('.').pop().toUpperCase()}`);
+  }
+}
+
+function renderStreamingEditor(content) {
+  const lines = content.split('\n').length;
+  $('codeEmpty').style.display = 'none';
+  $('codeWrap').style.display = 'flex';
+  $('lineNums').textContent = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+  const pre = $('codePre');
+  pre.textContent = content;
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  pre.appendChild(cursor);
+  const wrap = $('codeWrap');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+/* ---------- syntax highlighting (best-effort, single pass) ---------- */
+function highlightTokens(code, rules) {
+  const combined = new RegExp(rules.map(r => '(' + r[0].source + ')').join('|'), 'gm');
+  let out = '';
+  let last = 0;
+  let m;
+  while ((m = combined.exec(code)) !== null) {
+    out += esc(code.slice(last, m.index));
+    for (let i = 0; i < rules.length; i++) {
+      if (m[i + 1] !== undefined) {
+        out += `<span class="${rules[i][1]}">${esc(m[0])}</span>`;
+        break;
+      }
+    }
+    last = m.index + m[0].length;
+    if (m[0].length === 0) combined.lastIndex++;
+  }
+  return out + esc(code.slice(last));
+}
+
+const HIGHLIGHT_RULES = {
+  html: [
+    [/<!--[\s\S]*?-->/, 'cm'],
+    [/<\/?[\w-]+|\/?>/, 'tg'],
+    [/"[^"\n]*"/, 'st'],
+    [/\b[\w-]+(?==)/, 'at'],
+  ],
+  css: [
+    [/\/\*[\s\S]*?\*\//, 'cm'],
+    [/"[^"\n]*"|'[^'\n]*'/, 'st'],
+    [/#[0-9a-fA-F]{3,8}\b/, 'nu'],
+    [/\b\d+(?:\.\d+)?(?:px|em|rem|vh|vw|%|s|ms|deg|fr)?\b/, 'nu'],
+    [/[\w-]+(?=\s*:)/, 'at'],
+  ],
+  js: [
+    [/\/\/[^\n]*|\/\*[\s\S]*?\*\//, 'cm'],
+    [/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\[\s\S])*`/, 'st'],
+    [/\b(?:const|let|var|function|return|if|else|for|while|of|in|class|new|import|export|from|async|await|try|catch|finally|switch|case|break|continue|typeof|instanceof|this|null|undefined|true|false|do|throw|delete|void|yield|static|get|set|extends|super)\b/, 'kw'],
+    [/\b\d+(?:\.\d+)?\b/, 'nu'],
+  ],
+  json: [
+    [/"[^"\n]*"(?=\s*:)/, 'at'],
+    [/"[^"\n]*"/, 'st'],
+    [/\b(?:true|false|null)\b/, 'kw'],
+    [/-?\b\d+(?:\.\d+)?\b/, 'nu'],
+  ],
+};
+HIGHLIGHT_RULES.svg = HIGHLIGHT_RULES.html;
+
+function highlight(code, ext) {
+  const rules = HIGHLIGHT_RULES[ext];
+  if (!rules) return esc(code);
+  try { return highlightTokens(code, rules); }
+  catch { return esc(code); }
+}
+
+/* ================= COPY / ZIP ================= */
+async function copyActiveFile() {
+  if (!state.activeTab) return;
+  const f = state.files.get(state.activeTab);
+  if (!f) return;
+  try {
+    await navigator.clipboard.writeText(f.content);
+    showToast(`Copied ${state.activeTab} to clipboard`, 'success');
+  } catch {
+    showToast('Could not copy — your browser blocked clipboard access', 'error');
+  }
+}
+
+async function downloadZip() {
+  if (!state.plan) return;
+  const zip = new JSZip();
+  state.files.forEach((f, path) => {
+    if (f.status === 'done') zip.file(path, f.content);
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${state.plan.project.slug}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  state.downloaded = true;
+  const kb = Math.round(blob.size / 102.4) / 10;
+  showToast(`${state.plan.project.slug}.zip ready — ${kb} KB`, 'success');
+}
+
+/* ================= LIVE PREVIEW ================= */
+function switchView(view) {
+  const showPreview = view === 'preview';
+  if (showPreview && $('previewTabBtn').disabled) return;
+  $('codeTabBtn').classList.toggle('on', !showPreview);
+  $('previewTabBtn').classList.toggle('on', showPreview);
+  $('fileTree').style.display = showPreview ? 'none' : 'block';
+  $('editorPane').style.display = showPreview ? 'none' : 'flex';
+  $('previewWrap').style.display = showPreview ? 'flex' : 'none';
+  $('devToggle').style.display = showPreview ? 'flex' : 'none';
+  $('openTabBtn').style.display = showPreview ? 'flex' : 'none';
+  $('copyFileBtn').style.display = showPreview ? 'none' : 'flex';
+  if (showPreview) buildPreview();
+}
+
+const MIME_BY_EXT = {
+  html: 'text/html', css: 'text/css', js: 'text/javascript',
+  svg: 'image/svg+xml', json: 'application/json', md: 'text/plain', txt: 'text/plain',
+};
+
+function buildPreview() {
+  state.previewUrls.forEach(u => URL.revokeObjectURL(u));
+  state.previewUrls = [];
+
+  const done = {};
+  state.files.forEach((f, path) => { if (f.status === 'done') done[path] = f.content; });
+  if (!done['index.html']) {
+    showToast('No index.html yet — generate the project first', 'error');
+    return;
+  }
+
+  // The iframe sandbox (no allow-same-origin — generated code must never reach
+  // this app's DOM or storage) gives the preview an opaque origin, which is
+  // forbidden from fetching our blob: URLs. So the project is folded into ONE
+  // document: css/js inlined into the html, remaining assets as data: URLs.
+  const dataUrlFor = {};
+  Object.keys(done).filter(p => !/\.(html|css|js)$/.test(p)).forEach(p => {
+    const ext = p.split('.').pop();
+    const mime = MIME_BY_EXT[ext] || 'text/plain';
+    dataUrlFor[p] = `data:${mime};base64,${btoa(unescape(encodeURIComponent(done[p])))}`;
+  });
+
+  const rewriteAssets = (content) => {
+    let out = content;
+    Object.keys(dataUrlFor).forEach(path => {
+      out = out.split(`"${path}"`).join(`"${dataUrlFor[path]}"`)
+               .split(`'${path}'`).join(`'${dataUrlFor[path]}'`)
+               .split(`"./${path}"`).join(`"${dataUrlFor[path]}"`)
+               .split(`'./${path}'`).join(`'${dataUrlFor[path]}'`)
+               .split(`(${path})`).join(`(${dataUrlFor[path]})`);
+    });
+    return out;
+  };
+
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let html = rewriteAssets(done['index.html']);
+
+  Object.keys(done).filter(p => p.endsWith('.css')).forEach(p => {
+    const linkTag = new RegExp(`<link[^>]*href=["'](?:\\./)?${escapeRe(p)}["'][^>]*>`, 'gi');
+    const css = rewriteAssets(done[p]);
+    html = html.replace(linkTag, () => `<style>\n${css}\n<\/style>`);
+  });
+
+  Object.keys(done).filter(p => p.endsWith('.js')).forEach(p => {
+    const scriptTag = new RegExp(`<script[^>]*src=["'](?:\\./)?${escapeRe(p)}["'][^>]*>\\s*<\\/script>`, 'gi');
+    const js = rewriteAssets(done[p]).replace(/<\/script/gi, '<\\/script');
+    html = html.replace(scriptTag, () => `<script>\n${js}\n<\/script>`);
+  });
+
+  const htmlUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  state.previewUrls.push(htmlUrl);
+
+  $('previewFrame').src = htmlUrl;
+  $('previewUrl').textContent = `preview.devassist.ai/${state.plan ? state.plan.project.slug : 'project'}`;
+  state.lastPreviewUrl = htmlUrl;
+}
+
+function openPreviewInNewTab() {
+  if (!state.lastPreviewUrl) buildPreview();
+  if (state.lastPreviewUrl) window.open(state.lastPreviewUrl, '_blank');
+}
+
+function setDeviceSize(size) {
+  document.querySelectorAll('#devToggle .dev').forEach(b => b.classList.toggle('on', b.dataset.dev === size));
+  const browser = $('previewBrowser');
+  browser.classList.toggle('tablet', size === 'tablet');
+  browser.classList.toggle('mobile', size === 'mobile');
+}
+
+/* ================= FOLLOW-UP EDITS ================= */
+async function sendFollowUp() {
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if (!text || state.generating || state.editing) return;
+  input.value = '';
+  state.editing = true;
+  setChatInputMode('locked');
+  input.placeholder = 'Applying your changes…';
+
+  addUserMessage(text);
+  const working = addAiMessage(`<span class="spin"></span>&nbsp; Applying your changes…`);
+  setStatus('⚡ Applying changes…');
+
+  try {
+    const res = await authFetch('/api/project-builder/edit', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: text, files: contextFiles(EDIT_CONTEXT_BUDGET) }),
+    });
+    let data;
+    try { data = await res.json(); }
+    catch { throw new Error('The server sent an unexpected response.'); }
+    if (res.status === 429) throw new Error(data.message || 'The project builder is busy. Please try again in a minute.');
+    if (!res.ok) throw new Error(data.message || 'The edit failed. Please try again.');
+
+    const changed = Object.keys(data.changed_files || {});
+    if (changed.length === 0) throw new Error(data.message || 'No files were changed. Try describing the change differently.');
+
+    changed.forEach(path => {
+      const existing = state.files.get(path);
+      if (existing) {
+        existing.content = data.changed_files[path];
+        existing.status = 'done';
+        existing.updated = true;
+      } else {
+        state.files.set(path, { content: data.changed_files[path], status: 'done', updated: true });
+        state.plan.files.push({ path, description: 'added by follow-up edit' });
+      }
+    });
+
+    working.innerHTML =
+      `<b style="color:#4ade80">✔ Done!</b> ${esc(data.message || 'Changes applied.')}<br>
+       Updated: ${changed.map(p => `<span class="mono">${esc(p)}</span>`).join(', ')}`;
+    renderTree();
+    renderTabs();
+    if (state.activeTab && changed.includes(state.activeTab)) renderEditor();
+    if ($('previewWrap').style.display === 'flex') buildPreview();
+    setStatus(`✔ Updated ${changed.length} file${changed.length > 1 ? 's' : ''}`);
+    queueSaveProject();
+    scrollChat();
+  } catch (err) {
+    working.innerHTML = `😕 ${esc(err.message)}`;
+    setStatus('Edit failed');
+  } finally {
+    state.editing = false;
+    setChatInputMode('edit');
+    refreshUsage();
+  }
+}
+</script>
+</body>
+</html>

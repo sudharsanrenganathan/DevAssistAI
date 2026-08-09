@@ -36,3 +36,37 @@ services:
         sync: false # Set this manually in Render dashboard
       - key: DATABASE_URL
         sync: false # Set this manually in Render dashboard
+      # ---- Ignite project builder ----
+      # Providers are registered in core/llm_providers.py PROVIDER_REGISTRY;
+      # each one reads its own PROJECT_BUILDER_MODEL_<PROVIDER> variable.
+      - key: NVIDIA_NIM_API_KEY
+        sync: false # Set this manually in Render dashboard
+      - key: PROJECT_BUILDER_PROVIDER
+        value: groq # switch to "nvidia" to go back to NVIDIA NIM
+      - key: PROJECT_BUILDER_MODEL_GROQ
+        value: openai/gpt-oss-120b
+      - key: PROJECT_BUILDER_MODEL_NVIDIA
+        value: deepseek-ai/deepseek-v4-pro
+      # Shared global token pool with per-user hard quota — ALL LLM features.
+      # Usable pool = provider limit − emergency reserve (the reserve is never
+      # spent; it absorbs in-flight overshoot). Ledgers: user_daily_usage +
+      # global_daily_usage, one row per UTC day (daily reset is automatic).
+      - key: AI_PROVIDER_DAILY_TOKENS
+        value: "200000"
+      - key: AI_EMERGENCY_RESERVE_TOKENS
+        value: "20000"
+      - key: AI_USER_DAILY_TOKENS
+        value: "90000"
+      # ---- Secret AI RAG (pgvector semantic retrieval) ----
+      # Embeddings via the Supabase gte-small edge function (supabase/functions/embed);
+      # no ML libraries run here. Set RAG_MODE=fulltext to disable retrieval.
+      - key: RAG_MODE
+        value: pgvector
+      - key: RAG_TOP_K
+        value: "6"
+      - key: RAG_CONTEXT_CHARS
+        value: "8000"
+      - key: EMBEDDING_EDGE_URL
+        sync: false # https://<project>.supabase.co/functions/v1/embed
+      - key: EMBEDDING_EDGE_KEY
+        sync: false # Supabase anon key (or service role) for the edge function

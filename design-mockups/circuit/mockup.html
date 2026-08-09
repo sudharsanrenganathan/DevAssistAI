@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit — DevAssist AI (interactive mockup)</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --teal:#06f5cd; --purple:#7c3aed; --bg:#0a0a0a;
+  --txt:#e2e8f0; --mut:#94a3b8; --dim:#64748b; --faint:#475569;
+  --line:rgba(255,255,255,0.08); --glass:rgba(255,255,255,0.03);
+}
+body{
+  font-family:'Inter',system-ui,sans-serif; background:var(--bg);
+  background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size:20px 20px; color:#fff; height:100vh; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.mono{ font-family:'JetBrains Mono','Consolas',monospace; }
+.grad-text{ background:linear-gradient(135deg,var(--teal),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.grad-btn{ background:linear-gradient(135deg,var(--teal),var(--purple)); color:#0a0a0a; font-weight:700; border:none; border-radius:8px; cursor:pointer; }
+.grad-btn:hover{ filter:brightness(1.1); }
+.ghost-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; border-radius:8px; cursor:pointer; }
+.ghost-btn:hover{ background:rgba(255,255,255,0.1); }
+.glass{ background:var(--glass); border:1px solid var(--line); border-radius:12px; }
+
+/* ---------- TOP BAR ---------- */
+.topbar{ height:56px; flex-shrink:0; display:flex; align-items:center; padding:0 20px; gap:14px;
+  background:rgba(10,10,10,0.9); border-bottom:1px solid var(--line); }
+.logo{ font-weight:800; font-size:17px; }
+.crumb{ color:var(--dim); font-size:13px; }
+.beta{ font-size:10px; font-weight:700; letter-spacing:1px; padding:3px 8px; border-radius:20px;
+  background:rgba(124,58,237,0.25); color:#c084fc; border:1px solid #7c3aed55; }
+.meter{ margin-left:auto; font-size:12px; color:var(--mut); background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:20px; display:flex; gap:8px; align-items:center;}
+.model-badge{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--mut);
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:20px; }
+.dot-green{ width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80; }
+.avatar{ width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--purple));
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#0a0a0a; }
+
+/* ---------- START SCREEN ---------- */
+#start{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+.hero-h1{ font-size:46px; font-weight:800; margin-bottom:12px; text-align:center; }
+.hero-sub{ color:var(--mut); font-size:16px; margin-bottom:34px; text-align:center; max-width:640px; line-height:1.5;}
+.prompt-box{ width:min(760px,92vw); background:rgba(255,255,255,0.04); border:1px solid rgba(6,245,205,0.35);
+  border-radius:16px; padding:18px; box-shadow:0 0 40px rgba(6,245,205,0.07); }
+.prompt-box textarea{ width:100%; background:transparent; border:none; outline:none; resize:none; color:var(--txt);
+  font-family:inherit; font-size:15px; min-height:64px; line-height:1.5;}
+.prompt-box textarea::placeholder{ color:var(--faint); }
+.prompt-foot{ display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
+.chip{ font-size:12px; color:var(--mut); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+  padding:6px 12px; border-radius:20px; }
+.send-btn{ margin-left:auto; padding:10px 24px; font-size:14px; }
+.tpl-row{ display:flex; gap:12px; margin-top:26px; flex-wrap:wrap; justify-content:center;}
+.tpl{ width:180px; padding:16px; text-align:left; cursor:pointer; transition:border-color .15s, transform .15s; border-radius:12px;}
+.tpl:hover{ border-color:rgba(6,245,205,0.5); transform:translateY(-2px); }
+.tpl .ic{ font-size:22px; margin-bottom:8px; }
+.tpl .t{ font-size:13px; font-weight:600; margin-bottom:4px; }
+.tpl .d{ font-size:11px; color:var(--dim); line-height:1.4; }
+.hero-note{ margin-top:28px; font-size:12px; color:var(--faint); }
+
+/* ---------- WORKSPACE ---------- */
+#ws{ flex:1; display:none; gap:12px; padding:12px; overflow:hidden; }
+.chat-col{ width:380px; min-width:300px; display:flex; flex-direction:column; overflow:hidden;}
+.chat-scroll{ flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; overflow-y:auto; }
+.chat-scroll::-webkit-scrollbar{ width:6px; } .chat-scroll::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.1); border-radius:3px;}
+.msg-user{ align-self:flex-end; max-width:85%; background:rgba(124,58,237,0.2); border:1px solid #7c3aed44;
+  border-radius:12px 12px 2px 12px; padding:12px 14px; font-size:13px; color:var(--txt); line-height:1.5; }
+.msg-ai{ align-self:flex-start; max-width:94%; background:rgba(255,255,255,0.04); border:1px solid var(--line);
+  border-radius:12px 12px 12px 2px; padding:12px 14px; font-size:13px; color:#cbd5e1; line-height:1.55; }
+.steps{ display:flex; flex-direction:column; gap:4px; margin-top:10px; }
+.step{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--mut); padding:6px 8px;
+  border-radius:8px; cursor:pointer; border:1px solid transparent; transition:all .15s;}
+.step:hover{ background:rgba(255,255,255,0.05); }
+.step .n{ width:18px; height:18px; flex-shrink:0; border-radius:50%; border:1px solid var(--faint); font-size:10px;
+  display:flex; align-items:center; justify-content:center; color:var(--faint); margin-top:1px;}
+.step.done{ color:#4ade80; } .step.done .n{ border-color:#4ade80; color:#4ade80; }
+.step.active{ color:var(--teal); background:rgba(6,245,205,0.08); border-color:rgba(6,245,205,0.3);}
+.step.active .n{ border-color:var(--teal); color:var(--teal); }
+.sugg-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.sugg{ font-size:11.5px; color:var(--teal); background:rgba(6,245,205,0.08); border:1px solid rgba(6,245,205,0.3);
+  padding:5px 11px; border-radius:20px; cursor:pointer; }
+.sugg:hover{ background:rgba(6,245,205,0.18); }
+.chat-input{ margin:12px; padding:10px 12px; display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:12px; }
+.chat-input input{ flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:inherit;}
+.chat-input input::placeholder{ color:var(--faint); }
+.mini-send{ width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+
+/* canvas column */
+.canvas-col{ flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.canvas-head{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+.viz-title{ font-size:14px; font-weight:700; }
+.tag{ font-size:10px; font-weight:700; letter-spacing:0.8px; padding:3px 8px; border-radius:20px;
+  background:rgba(6,245,205,0.12); color:var(--teal); border:1px solid rgba(6,245,205,0.35); }
+.canvas-head .sp{ flex:1; }
+.hbtn{ padding:8px 14px; font-size:12.5px; display:flex; align-items:center; gap:6px; }
+.canvas-body{ flex:1; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; position:relative;}
+.canvas-body::-webkit-scrollbar{ width:6px;} .canvas-body::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.1); border-radius:3px;}
+
+/* caption */
+.caption{ margin:0 14px; padding:12px 16px; font-size:13.5px; color:var(--txt); line-height:1.5; text-align:center;
+  background:rgba(6,245,205,0.05); border:1px solid rgba(6,245,205,0.2); border-radius:10px; min-height:46px;}
+.caption .mono{ color:var(--teal); }
+
+/* ---------- PLAYER BAR ---------- */
+.player{ margin:12px 14px 14px; padding:10px 16px; display:flex; align-items:center; gap:14px; }
+.pbtn{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:15px; flex-shrink:0; }
+.pbtn.main{ width:46px; height:46px; font-size:18px; }
+.scrub-wrap{ flex:1; display:flex; flex-direction:column; gap:5px; }
+.scrub{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:3px;
+  background:rgba(255,255,255,0.1); outline:none; cursor:pointer;}
+.scrub::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--purple)); cursor:pointer; box-shadow:0 0 8px rgba(6,245,205,0.6);}
+.scrub-lbl{ display:flex; justify-content:space-between; font-size:11px; color:var(--dim); }
+.speed{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1;
+  border-radius:8px; padding:7px 10px; font-size:12px; cursor:pointer; outline:none;}
+.speed option{ background:#16181d; }
+
+/* ---------- BINARY SEARCH / SORT VIZ ---------- */
+.bs-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; width:100%;}
+.bs-play{ display:flex; align-items:center; gap:8px; margin-bottom:18px; font-size:12.5px; color:var(--mut); flex-wrap:wrap; justify-content:center;}
+.bs-play input{ width:64px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px; color:var(--teal); font-family:'JetBrains Mono',monospace; font-size:13px; padding:6px 8px; outline:none; text-align:center;}
+.bs-play button{ padding:7px 14px; font-size:12px; }
+.cells{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center;}
+.cellbox{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+.cell{ width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#cbd5e1;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); transition:all .35s; }
+.cell.dead{ opacity:0.18; transform:scale(0.9); }
+.cell.mid{ background:rgba(251,191,36,0.15); border-color:#fbbf24; color:#fbbf24; box-shadow:0 0 14px rgba(251,191,36,0.3); transform:translateY(-6px);}
+.cell.found{ background:rgba(74,222,128,0.18); border-color:#4ade80; color:#4ade80;
+  box-shadow:0 0 18px rgba(74,222,128,0.5); animation:pulse 0.9s ease infinite; transform:translateY(-6px);}
+@keyframes pulse{ 0%,100%{transform:translateY(-6px) scale(1);} 50%{transform:translateY(-6px) scale(1.1);} }
+.idx{ font-size:10px; color:var(--faint); font-family:'JetBrains Mono',monospace;}
+.ptr{ font-size:9.5px; font-weight:700; letter-spacing:0.5px; height:14px; }
+.ptr.lo{ color:var(--teal);} .ptr.hi{ color:#c084fc;} .ptr.md{ color:#fbbf24;}
+.legend{ display:flex; gap:16px; margin-top:22px; font-size:11.5px; color:var(--dim); flex-wrap:wrap; justify-content:center;}
+.legend b{ font-weight:600; }
+.lg{ display:flex; align-items:center; gap:6px;}
+.sw{ width:12px; height:12px; border-radius:4px; }
+
+/* bubble sort bars */
+.bars{ display:flex; align-items:flex-end; gap:8px; height:220px; }
+.barbox{ display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
+.bar{ width:44px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,rgba(6,245,205,0.35),rgba(124,58,237,0.35));
+  border:1px solid rgba(255,255,255,0.15); transition:all .3s; display:flex; align-items:flex-start; justify-content:center;
+  padding-top:6px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#e2e8f0;}
+.bar.cmp{ background:linear-gradient(180deg,rgba(251,191,36,0.5),rgba(251,191,36,0.2)); border-color:#fbbf24; }
+.bar.swp{ background:linear-gradient(180deg,rgba(244,114,182,0.55),rgba(244,114,182,0.2)); border-color:#f472b6; }
+.bar.srt{ background:linear-gradient(180deg,rgba(74,222,128,0.5),rgba(74,222,128,0.15)); border-color:#4ade80; }
+
+/* ---------- ROADMAP VIZ ---------- */
+.road{ display:flex; flex-direction:column; align-items:center; width:min(680px,100%); }
+.rnode{ width:100%; display:flex; align-items:center; gap:16px; opacity:0.12; transition:opacity .4s, transform .4s; transform:translateY(6px);}
+.rnode.on{ opacity:1; transform:none; }
+.rnode.current .rcard{ border-color:var(--teal); box-shadow:0 0 24px rgba(6,245,205,0.15); }
+.rnum{ width:44px; height:44px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:15px; color:#0a0a0a; background:linear-gradient(135deg,var(--teal),var(--purple)); }
+.rline{ width:2px; height:26px; margin-left:21px; background:linear-gradient(180deg,var(--teal),var(--purple)); opacity:0.5; flex-shrink:0;}
+.rlinerow{ display:flex; width:100%; opacity:0.12; transition:opacity .4s;} .rlinerow.on{ opacity:1;}
+.rcard{ flex:1; padding:13px 16px; border-radius:12px; cursor:pointer; }
+.rcard .rt{ font-size:14px; font-weight:700; margin-bottom:3px;}
+.rcard .rd{ font-size:12px; color:var(--mut); margin-bottom:8px;}
+.rtags{ display:flex; flex-wrap:wrap; gap:6px;}
+.rtag{ font-size:10.5px; color:#cbd5e1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  padding:3px 9px; border-radius:20px; font-family:'JetBrains Mono',monospace;}
+.rdur{ font-size:10.5px; color:var(--teal); margin-left:auto; white-space:nowrap; font-weight:600;}
+.rhead{ display:flex; align-items:baseline; gap:8px;}
+
+/* toast */
+#toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(80px); transition:transform .3s;
+  background:#16181d; border:1px solid rgba(6,245,205,0.4); color:var(--txt); font-size:13px; padding:12px 20px;
+  border-radius:12px; z-index:50; box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+#toast.show{ transform:translateX(-50%) translateY(0); }
+
+@media (max-width:860px){ .chat-col{ display:none; } }
+</style>
+</head>
+<body>
+
+<!-- ================= TOP BAR ================= -->
+<div class="topbar">
+  <div class="logo">⚡ DevAssist</div>
+  <div class="crumb">/</div>
+  <div class="logo grad-text" style="font-size:15px;">Circuit</div>
+  <div class="beta">BETA</div>
+  <div class="meter">🔋 <span>1,240 / 25,000 tokens today</span></div>
+  <div class="model-badge"><span class="dot-green"></span> GPT-OSS-120B · Groq</div>
+  <div class="avatar">S</div>
+</div>
+
+<!-- ================= START SCREEN ================= -->
+<div id="start">
+  <div class="hero-h1">See it. <span class="grad-text">Don't just read it.</span></div>
+  <div class="hero-sub">Ask Circuit anything — an algorithm, a concept, a career roadmap — and get a living diagram
+    you can step through, replay, and play with. Learning, animated.</div>
+  <div class="prompt-box">
+    <textarea id="promptTa" rows="2" placeholder="Try: “explain binary search visually”  ·  “roadmap to become a frontend developer”  ·  “how does bubble sort work?”"></textarea>
+    <div class="prompt-foot">
+      <div class="chip">🎞 Step-by-step</div>
+      <div class="chip">🕹 Interactive</div>
+      <div class="chip">⬇ Export SVG</div>
+      <button class="grad-btn send-btn" onclick="submitPrompt()">Visualize ⚡</button>
+    </div>
+  </div>
+  <div class="tpl-row">
+    <div class="tpl glass" onclick="runDemo('bsearch')">
+      <div class="ic">🔍</div><div class="t">Binary Search</div>
+      <div class="d">Watch the search space shrink, step by step. Change the target &amp; replay.</div>
+    </div>
+    <div class="tpl glass" onclick="runDemo('roadmap')">
+      <div class="ic">🗺️</div><div class="t">Frontend Roadmap</div>
+      <div class="d">The path from zero to frontend developer as an animated journey map.</div>
+    </div>
+    <div class="tpl glass" onclick="runDemo('bubble')">
+      <div class="ic">🫧</div><div class="t">Bubble Sort</div>
+      <div class="d">Compare, swap, repeat — see the biggest values bubble to the top.</div>
+    </div>
+    <div class="tpl glass" onclick="toast('This demo mockup ships 3 visualizations — the real Circuit generates any diagram from the LLM ✨')">
+      <div class="ic">✨</div><div class="t">Anything else…</div>
+      <div class="d">Recursion, HTTP, OAuth, system design — Circuit diagrams it all.</div>
+    </div>
+  </div>
+  <div class="hero-note">Interactive mockup · keyboard: Space = play/pause, ←/→ = step</div>
+</div>
+
+<!-- ================= WORKSPACE ================= -->
+<div id="ws">
+  <div class="chat-col glass">
+    <div class="chat-scroll" id="chatScroll"></div>
+    <div class="chat-input">
+      <input id="followTa" placeholder="Ask a follow-up… e.g. target = 7" onkeydown="if(event.key==='Enter')sendFollow()">
+      <button class="grad-btn mini-send" onclick="sendFollow()">➤</button>
+    </div>
+  </div>
+
+  <div class="canvas-col glass">
+    <div class="canvas-head">
+      <div class="viz-title" id="vizTitle">Binary Search</div>
+      <div class="tag" id="vizTag">INTERACTIVE</div>
+      <div class="sp"></div>
+      <button class="ghost-btn hbtn" onclick="toast('Exported circuit.svg ⬇ (mock)')">⬇ Export SVG</button>
+      <button class="ghost-btn hbtn" onclick="copySteps()">📋 Copy steps</button>
+      <button class="grad-btn hbtn" onclick="goHome()">✦ New question</button>
+    </div>
+    <div class="canvas-body" id="canvasBody"></div>
+    <div class="caption" id="caption"></div>
+    <div class="player glass">
+      <button class="ghost-btn pbtn" onclick="seek(0)" title="Restart">⏮</button>
+      <button class="ghost-btn pbtn" onclick="stepBy(-1)" title="Previous step">◀</button>
+      <button class="grad-btn pbtn main" id="playBtn" onclick="togglePlay()" title="Play / pause">▶</button>
+      <button class="ghost-btn pbtn" onclick="stepBy(1)" title="Next step">▶▶</button>
+      <div class="scrub-wrap">
+        <input type="range" class="scrub" id="scrub" min="0" max="1" value="0" oninput="seek(+this.value)">
+        <div class="scrub-lbl"><span id="stepLbl">Step 1 / 1</span><span id="phaseLbl"></span></div>
+      </div>
+      <select class="speed" id="speedSel" onchange="setSpeed()">
+        <option value="2600">0.5×</option>
+        <option value="1500" selected>1×</option>
+        <option value="800">2×</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   CIRCUIT — interactive mockup. All "AI responses" are canned;
+   the real feature streams a diagram spec from the AI engine.
+   ============================================================ */
+var state = { demo:null, steps:[], i:0, playing:false, timer:null, interval:1500 };
+
+/* ---------------- generic helpers ---------------- */
+function $(id){ return document.getElementById(id); }
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},2600); }
+function goHome(){ stop(); $('ws').style.display='none'; $('start').style.display='flex'; $('chatScroll').innerHTML=''; }
+function addMsg(cls, html){ var d=document.createElement('div'); d.className=cls; d.innerHTML=html;
+  $('chatScroll').appendChild(d); $('chatScroll').scrollTop=1e9; return d; }
+
+/* ---------------- player ---------------- */
+function render(){
+  var s=state.steps[state.i];
+  state.demo.draw(s, state.i);
+  $('caption').innerHTML=s.note;
+  $('scrub').max=state.steps.length-1; $('scrub').value=state.i;
+  $('stepLbl').textContent='Step '+(state.i+1)+' / '+state.steps.length;
+  $('phaseLbl').textContent=s.phase||'';
+  var rows=document.querySelectorAll('.step');
+  rows.forEach(function(r,k){ r.className='step'+(k<state.i?' done':k===state.i?' active':'');
+    if(k===state.i) r.scrollIntoView({block:'nearest'}); });
+}
+function seek(i){ state.i=Math.max(0,Math.min(state.steps.length-1,i)); render(); }
+function stepBy(d){ pause(); seek(state.i+d); }
+function togglePlay(){ state.playing?pause():play(); }
+function play(){
+  if(state.i>=state.steps.length-1) state.i=0;
+  state.playing=true; $('playBtn').textContent='⏸'; tick();
+}
+function tick(){
+  state.timer=setTimeout(function(){
+    if(!state.playing) return;
+    if(state.i<state.steps.length-1){ state.i++; render(); tick(); }
+    else pause();
+  }, state.interval);
+  render();
+}
+function pause(){ state.playing=false; $('playBtn').textContent='▶'; clearTimeout(state.timer); }
+function stop(){ pause(); state.i=0; }
+function setSpeed(){ state.interval=+$('speedSel').value; }
+document.addEventListener('keydown',function(e){
+  if($('ws').style.display!=='flex') return;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
+  if(e.key==='ArrowRight') stepBy(1);
+  if(e.key==='ArrowLeft') stepBy(-1);
+});
+
+/* ---------------- launching a demo ---------------- */
+function openWs(demo, userText){
+  $('start').style.display='none'; $('ws').style.display='flex';
+  $('chatScroll').innerHTML='';
+  addMsg('msg-user', esc(userText));
+  var ai=addMsg('msg-ai', demo.intro+'<div class="steps" id="stepList"></div>'+
+    '<div class="sugg-row">'+demo.suggs.map(function(s,k){
+      return '<div class="sugg" onclick="sugg('+k+')">'+s.label+'</div>';}).join('')+'</div>');
+  state.demo=demo; state.steps=demo.steps(); state.i=0;
+  $('vizTitle').textContent=demo.title; $('vizTag').textContent=demo.tag;
+  demo.mount($('canvasBody'));
+  var list=$('stepList');
+  state.steps.forEach(function(s,k){
+    var r=document.createElement('div'); r.className='step';
+    r.innerHTML='<span class="n">'+(k+1)+'</span><span>'+s.short+'</span>';
+    r.onclick=function(){ pause(); seek(k); };
+    list.appendChild(r);
+  });
+  render();
+  setTimeout(play, 600);
+}
+function runDemo(name){ var d=DEMOS[name]; openWs(d, d.prompt); }
+function sugg(k){ state.demo.suggs[k].run(); }
+function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function copySteps(){
+  var txt=state.steps.map(function(s,k){ return (k+1)+'. '+s.note.replace(/<[^>]+>/g,''); }).join('\n');
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(
+    function(){toast('Steps copied to clipboard 📋');},
+    function(){toast('Copy not available in this context');});
+}
+
+/* prompt routing (mock of the LLM classifying the request) */
+function submitPrompt(){
+  var p=$('promptTa').value.trim(); if(!p){ toast('Type a question first ✍️'); return; }
+  route(p, true);
+}
+function route(p, fromStart){
+  var q=p.toLowerCase();
+  if(q.indexOf('binary')>-1||q.indexOf('search')>-1) openWs(DEMOS.bsearch,p);
+  else if(q.indexOf('roadmap')>-1||q.indexOf('frontend')>-1||q.indexOf('career')>-1) openWs(DEMOS.roadmap,p);
+  else if(q.indexOf('bubble')>-1||q.indexOf('sort')>-1) openWs(DEMOS.bubble,p);
+  else if(fromStart){ openWs(DEMOS.bsearch,p);
+    setTimeout(function(){toast('Mockup has 3 canned demos — showing Binary Search. Real Circuit answers anything ✨');},800); }
+  else toast('Mockup understands: binary search · roadmap · bubble sort · target = N');
+}
+function sendFollow(){
+  var v=$('followTa').value.trim(); if(!v) return;
+  $('followTa').value='';
+  addMsg('msg-user', esc(v));
+  var m=v.toLowerCase().match(/target\s*=?\s*(\d+)/);
+  if(m && state.demo && state.demo.setTarget){ state.demo.setTarget(+m[1]); return; }
+  route(v,false);
+}
+
+/* ============================================================
+   DEMO 1 — BINARY SEARCH
+   ============================================================ */
+var BS={ arr:[2,5,8,12,16,23,38,42,56,61,72,88,91,95,99], target:23 };
+function bsSteps(){
+  var a=BS.arr, t=BS.target, st=[], lo=0, hi=a.length-1, n=0;
+  st.push({lo:lo,hi:hi,mid:-1,phase:'setup',short:'Start: search space = whole array',
+    note:'The array is <b>sorted</b> — that\'s what makes binary search possible. Search space: indexes <span class="mono">'+lo+'–'+hi+'</span>. Target = <span class="mono">'+t+'</span>.'});
+  while(lo<=hi){
+    var mid=(lo+hi)>>1; n++;
+    if(a[mid]===t){
+      st.push({lo:lo,hi:hi,mid:mid,found:true,phase:'found',short:'arr['+mid+'] = '+a[mid]+' → FOUND 🎯',
+        note:'<span class="mono">mid = ⌊('+lo+'+'+hi+')/2⌋ = '+mid+'</span>. arr['+mid+'] = <b>'+a[mid]+'</b> equals the target — <b>found in '+n+' comparison'+(n>1?'s':'')+'</b> (linear search could need up to '+a.length+') 🎯'});
+      return st;
+    }
+    if(a[mid]<t){
+      st.push({lo:lo,hi:hi,mid:mid,phase:'compare #'+n,short:'arr['+mid+'] = '+a[mid]+' < '+t+' → go right',
+        note:'<span class="mono">mid = '+mid+'</span>, arr['+mid+'] = <b>'+a[mid]+'</b> &lt; '+t+' → the target can only be <b>right</b> of mid. Discard the left half.'});
+      lo=mid+1;
+    } else {
+      st.push({lo:lo,hi:hi,mid:mid,phase:'compare #'+n,short:'arr['+mid+'] = '+a[mid]+' > '+t+' → go left',
+        note:'<span class="mono">mid = '+mid+'</span>, arr['+mid+'] = <b>'+a[mid]+'</b> &gt; '+t+' → the target can only be <b>left</b> of mid. Discard the right half.'});
+      hi=mid-1;
+    }
+  }
+  st.push({lo:lo,hi:hi,mid:-1,empty:true,phase:'not found',short:'Search space empty → not present',
+    note:'low &gt; high — the search space is <b>empty</b>. <span class="mono">'+t+'</span> is not in the array. Total comparisons: '+n+' (O(log n)).'});
+  return st;
+}
+var DEMO_BSEARCH={
+  title:'Binary Search', tag:'PLAY WITH IT',
+  prompt:'Explain binary search visually',
+  intro:'<b>Binary search</b> finds a value in a <b>sorted</b> array by halving the search space each step — <span class="mono">O(log n)</span> instead of <span class="mono">O(n)</span>. Step through it below, or change the target and watch a different path unfold:',
+  suggs:[
+    {label:'🎯 target = 7 (miss)', run:function(){ DEMO_BSEARCH.setTarget(7); }},
+    {label:'😈 worst case: 99',    run:function(){ DEMO_BSEARCH.setTarget(99); }},
+    {label:'⚡ best case: 42',     run:function(){ DEMO_BSEARCH.setTarget(42); }},
+    {label:'🫧 show bubble sort',  run:function(){ openWs(DEMOS.bubble,'How does bubble sort work?'); }}
+  ],
+  steps:bsSteps,
+  setTarget:function(t){
+    BS.target=t;
+    addMsg('msg-ai','Re-running with target = <b>'+t+'</b> — watch how the path changes 👇');
+    openWsSameChat(this);
+  },
+  mount:function(el){
+    el.innerHTML='<div class="bs-wrap">'+
+      '<div class="bs-play">🕹 <b>Play with it:</b> target '+
+      '<input id="bsTarget" class="mono" type="number" value="'+BS.target+'">'+
+      '<button class="grad-btn" onclick="DEMO_BSEARCH.setTarget(+document.getElementById(\'bsTarget\').value)">Run ⚡</button>'+
+      '<span style="color:var(--faint)">array is fixed &amp; sorted</span></div>'+
+      '<div class="cells" id="bsCells"></div>'+
+      '<div class="legend">'+
+      '<span class="lg"><span class="sw" style="background:rgba(251,191,36,0.4);border:1px solid #fbbf24"></span><b>mid</b> — being compared</span>'+
+      '<span class="lg"><span class="sw" style="background:rgba(74,222,128,0.4);border:1px solid #4ade80"></span><b>found</b></span>'+
+      '<span class="lg"><span class="sw" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.3)"></span>in search space</span>'+
+      '<span class="lg"><span class="sw" style="background:rgba(255,255,255,0.03);opacity:0.3;border:1px solid rgba(255,255,255,0.2)"></span>discarded</span>'+
+      '</div></div>';
+  },
+  draw:function(s){
+    var html='';
+    BS.arr.forEach(function(v,k){
+      var cls='cell', ptr='';
+      if(k<s.lo||k>s.hi||s.empty) cls+=' dead';
+      if(k===s.mid) cls+=(s.found?' found':' mid');
+      if(!s.empty){
+        if(k===s.lo&&k===s.hi) ptr='<span class="ptr lo">LO·HI</span>';
+        else if(k===s.lo) ptr='<span class="ptr lo">LOW</span>';
+        else if(k===s.hi) ptr='<span class="ptr hi">HIGH</span>';
+        else if(k===s.mid) ptr='<span class="ptr md">MID</span>';
+        else ptr='<span class="ptr"></span>';
+      } else ptr='<span class="ptr"></span>';
+      html+='<div class="cellbox"><span class="idx">'+k+'</span><div class="'+cls+'">'+v+'</div>'+ptr+'</div>';
+    });
+    $('bsCells').innerHTML=html;
+  }
+};
+/* re-open same demo without duplicating the whole chat */
+function openWsSameChat(demo){
+  state.demo=demo; state.steps=demo.steps(); state.i=0;
+  demo.mount($('canvasBody'));
+  var old=document.getElementById('stepList'); if(old) old.removeAttribute('id');
+  var ai=addMsg('msg-ai','<div class="steps" id="stepList"></div>');
+  state.steps.forEach(function(s,k){
+    var r=document.createElement('div'); r.className='step';
+    r.innerHTML='<span class="n">'+(k+1)+'</span><span>'+s.short+'</span>';
+    r.onclick=function(){ pause(); seek(k); };
+    $('stepList').appendChild(r);
+  });
+  render(); setTimeout(play,400);
+}
+
+/* ============================================================
+   DEMO 2 — FRONTEND ROADMAP
+   ============================================================ */
+var ROAD=[
+ {t:'Internet & HTML',   d:'How the web works, then structure pages with semantic HTML.', dur:'~3 weeks',  tags:['HTTP basics','tags & forms','semantic HTML','accessibility']},
+ {t:'CSS',               d:'Make it beautiful — layout is the boss battle.',              dur:'~4 weeks',  tags:['selectors','Flexbox','Grid','responsive','animations']},
+ {t:'JavaScript',        d:'Make it alive. The single most important stage.',             dur:'~8 weeks',  tags:['ES6+','DOM','events','fetch & async','JSON']},
+ {t:'Git & GitHub',      d:'Version control — non-negotiable for any job.',               dur:'~1 week',   tags:['commit','branch','merge','pull requests']},
+ {t:'Pick ONE framework',d:'Don\'t learn three. React has the most jobs.',                dur:'~6 weeks',  tags:['React ⭐','Vue','Svelte','components','state']},
+ {t:'Build & Deploy',    d:'Tooling + shipping real projects to real URLs.',              dur:'~2 weeks',  tags:['npm','Vite','Vercel/Netlify','env vars']},
+ {t:'Level up & apply',  d:'Polish, portfolio, interviews. You\'re employable here.',     dur:'ongoing',   tags:['TypeScript','testing','performance','3 portfolio projects']}
+];
+var DEMO_ROADMAP={
+  title:'Frontend Developer Roadmap', tag:'JOURNEY MAP',
+  prompt:'Roadmap to become a frontend developer',
+  intro:'Here\'s the <b>shortest sane path</b> to frontend developer — 7 stages, in order. Roughly <b>6 months</b> at consistent part-time effort. Press play to walk the journey; click any stage to jump to it:',
+  suggs:[
+    {label:'⏱ total time?', run:function(){ addMsg('msg-ai','Adding the stages: ~<b>24 weeks ≈ 6 months</b> part-time (2–3 h/day). Full-time bootcamp pace ≈ 3 months. The JavaScript stage is where most people stall — budget extra there. 💪'); }},
+    {label:'⚛️ why React first?', run:function(){ addMsg('msg-ai','Not first — React comes <b>after</b> vanilla JS is solid (stage 5). It\'s recommended because it has the largest job market and ecosystem, but Vue is easier to start. The key rule: <b>pick one and go deep</b>.'); }},
+    {label:'🔍 show binary search', run:function(){ openWs(DEMOS.bsearch,'Explain binary search visually'); }}
+  ],
+  steps:function(){
+    var st=[{k:-1,phase:'overview',short:'The journey at a glance',
+      note:'7 stages from zero → hired. Each builds on the previous one — <b>order matters</b>. Press ▶ or click a stage.'}];
+    ROAD.forEach(function(r,k){
+      st.push({k:k,phase:'stage '+(k+1)+'/7',short:r.t,
+        note:'<b>Stage '+(k+1)+': '+r.t+'</b> ('+r.dur+') — '+r.d});
+    });
+    st.push({k:ROAD.length,phase:'complete',short:'You\'re job-ready 🚀',
+      note:'<b>That\'s the whole map.</b> Ship 3 portfolio projects along the way and start applying before you feel "ready" — everyone does. 🚀'});
+    return st;
+  },
+  mount:function(el){
+    var html='<div class="road">';
+    ROAD.forEach(function(r,k){
+      if(k>0) html+='<div class="rlinerow" id="rl'+k+'"><div class="rline"></div></div>';
+      html+='<div class="rnode" id="rn'+k+'" onclick="pause();seek('+(k+1)+')">'+
+        '<div class="rnum">'+(k+1)+'</div><div class="rcard glass">'+
+        '<div class="rhead"><div class="rt">'+r.t+'</div><div class="rdur">'+r.dur+'</div></div>'+
+        '<div class="rd">'+r.d+'</div><div class="rtags">'+
+        r.tags.map(function(t){return '<span class="rtag">'+t+'</span>';}).join('')+
+        '</div></div></div>';
+    });
+    html+='</div>';
+    el.innerHTML=html; el.scrollTop=0;
+  },
+  draw:function(s){
+    ROAD.forEach(function(r,k){
+      var n=$('rn'+k), l=$('rl'+k);
+      var on = s.k>=ROAD.length ? true : k<=s.k;
+      n.className='rnode'+(on?' on':'')+(k===s.k?' current':'');
+      if(l) l.className='rlinerow'+(on?' on':'');
+    });
+    var cur=$('rn'+Math.max(0,Math.min(ROAD.length-1,s.k)));
+    if(s.k>=0&&s.k<ROAD.length) cur.scrollIntoView({block:'center',behavior:'smooth'});
+    else $('canvasBody').scrollTop=0;
+  }
+};
+
+/* ============================================================
+   DEMO 3 — BUBBLE SORT
+   ============================================================ */
+var BUB={ init:[42,17,89,5,61,33,74,26] };
+function bubSteps(){
+  var a=BUB.init.slice(), st=[], n=a.length;
+  st.push({a:a.slice(),cmp:[],srt:n,phase:'setup',short:'Unsorted array — let\'s bubble!',
+    note:'Bubble sort repeatedly walks the array, <b>swapping neighbours that are out of order</b>. After each pass the largest remaining value has "bubbled" to the end.'});
+  for(var pass=0; pass<n-1; pass++){
+    var swapped=false;
+    for(var j=0;j<n-1-pass;j++){
+      if(a[j]>a[j+1]){
+        var tmp=a[j]; a[j]=a[j+1]; a[j+1]=tmp; swapped=true;
+        st.push({a:a.slice(),cmp:[j,j+1],swap:true,srt:n-pass,phase:'pass '+(pass+1),
+          short:'swap '+a[j+1]+' ↔ '+a[j],
+          note:'<span class="mono">'+a[j+1]+' &gt; '+a[j]+'</span> → out of order → <b>swap</b>. Bigger values drift right like bubbles rising. (pass '+(pass+1)+')'});
+      }
+    }
+    st.push({a:a.slice(),cmp:[],srt:n-pass-1,phase:'pass '+(pass+1)+' done',
+      short:'Pass '+(pass+1)+' done — '+a[n-1-pass]+' locked in',
+      note:'End of pass '+(pass+1)+': <b>'+a[n-1-pass]+'</b> is in its final position (green). '+(swapped?'':'No swaps happened — the array is already sorted, so we can stop early. ')+''});
+    if(!swapped) break;
+  }
+  st.push({a:a.slice(),cmp:[],srt:0,phase:'sorted',short:'Fully sorted ✅',
+    note:'<b>Sorted!</b> Bubble sort is <span class="mono">O(n²)</span> — lovely to watch, painful at scale. Great for learning, never for production. ✅'});
+  return st;
+}
+var DEMO_BUBBLE={
+  title:'Bubble Sort', tag:'ANIMATED',
+  prompt:'How does bubble sort work?',
+  intro:'<b>Bubble sort</b> — the "hello world" of sorting. Watch neighbours get compared (amber), swapped (pink), and locked into place (green):',
+  suggs:[
+    {label:'🐢 why is it slow?', run:function(){ addMsg('msg-ai','Every pass can require comparing ~n neighbours, and you may need ~n passes → <span class="mono">O(n²)</span>. For 1,000,000 items that\'s ~10¹² operations. Merge sort / quicksort do it in <span class="mono">O(n log n)</span> ≈ 2×10⁷. That\'s the difference between <b>hours and milliseconds</b>.'); }},
+    {label:'🔍 binary search next', run:function(){ openWs(DEMOS.bsearch,'Explain binary search visually'); }},
+    {label:'🗺 frontend roadmap', run:function(){ openWs(DEMOS.roadmap,'Roadmap to become a frontend developer'); }}
+  ],
+  steps:bubSteps,
+  mount:function(el){ el.innerHTML='<div class="bs-wrap"><div class="bars" id="bubBars"></div>'+
+    '<div class="legend">'+
+    '<span class="lg"><span class="sw" style="background:rgba(251,191,36,0.4);border:1px solid #fbbf24"></span><b>comparing</b></span>'+
+    '<span class="lg"><span class="sw" style="background:rgba(244,114,182,0.4);border:1px solid #f472b6"></span><b>swapped</b></span>'+
+    '<span class="lg"><span class="sw" style="background:rgba(74,222,128,0.4);border:1px solid #4ade80"></span><b>sorted — locked in</b></span>'+
+    '</div></div>'; },
+  draw:function(s){
+    var max=Math.max.apply(null,BUB.init), html='';
+    s.a.forEach(function(v,k){
+      var cls='bar';
+      if(k>=s.srt) cls+=' srt';
+      else if(s.cmp.indexOf(k)>-1) cls+=(s.swap?' swp':' cmp');
+      html+='<div class="barbox"><div class="'+cls+'" style="height:'+(28+(v/max)*160)+'px;width:44px;">'+v+'</div><span class="idx">'+k+'</span></div>';
+    });
+    $('bubBars').innerHTML=html;
+  }
+};
+
+var DEMOS={ bsearch:DEMO_BSEARCH, roadmap:DEMO_ROADMAP, bubble:DEMO_BUBBLE };
+
+/* Enter submits from the hero textarea */
+$('promptTa').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); submitPrompt(); }
+});
+</script>
+</body>
+</html>

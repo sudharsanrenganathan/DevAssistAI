@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from threading import Lock
 import os
 # Prevent PyTorch from spawning many threads and causing out of memory on Render Free Tier
@@ -38,6 +38,13 @@ app.add_middleware(
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# ========================= RAG (Secret AI) CONFIG =========================
+# pgvector semantic retrieval with a full-text fallback. Set RAG_MODE=fulltext
+# to disable retrieval entirely (instant rollback, no redeploy logic change).
+RAG_MODE = os.getenv("RAG_MODE", "pgvector").lower()
+RAG_TOP_K = int(os.getenv("RAG_TOP_K", "6"))
+RAG_CONTEXT_CHARS = int(os.getenv("RAG_CONTEXT_CHARS", "8000"))
+
 @app.get("/")
 async def root():
     return {"status": "online", "service": "DevAssist AI Engine v2"}
@@ -50,56 +57,41 @@ async def health():
 from pydantic import BaseModel
 from typing import Optional, Union
 
+# Lightweight import (os/datetime only) — every LLM route needs the quota types.
+from services.token_ledger import QuotaExceededError
+
+
+def quota_response(e: QuotaExceededError) -> JSONResponse:
+    # Same 429 wire format as "busy", but status "quota" + scope so clients can
+    # tell "your daily tokens are used" from "the app hit its daily capacity".
+    return JSONResponse(status_code=429, content={
+        "status": "quota", "scope": e.scope, "message": str(e)})
+
 class AIRequest(BaseModel):
     question: str
     file_text: Optional[str] = None
     has_file: Optional[bool] = False
     model: Optional[str] = None
     session_id: Optional[str] = None
+    user_email: Optional[str] = ""
 
 class RagRequest(BaseModel):
     question: str
     file_path: str
     model: Optional[str] = None
     session_id: Optional[Union[str, int]] = None
+    user_email: Optional[str] = ""
 
 class CodeRequest(BaseModel):
     code: str
     language: str
     model: Optional[str] = None
+    user_email: Optional[str] = ""
 
 # ========================= DB HELPERS =========================
 def get_db():
     import psycopg2
     return psycopg2.connect(os.getenv("DATABASE_URL"))
-
-def get_chat_history(session_id):
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT role, content FROM global_messages
-            WHERE chat_id = %s
-            ORDER BY id DESC LIMIT 20
-        """, (session_id,))
-        rows = list(reversed(cur.fetchall()))
-        cur.close()
-        conn.close()
-
-        history = []
-        i = 0
-        while i < len(rows) - 1:
-            role1, content1 = rows[i]
-            role2, content2 = rows[i + 1]
-            if role1 == "user" and role2 == "ai":
-                history.append({"question": content1, "answer": content2})
-                i += 2
-            else:
-                i += 1
-        return history
-    except Exception as e:
-        print(f"⚠ get_chat_history error: {e}")
-        return []
 
 def save_chat(session_id, question, answer):
     try:
@@ -198,7 +190,8 @@ User: {request.question}"""
             full_prompt,
             request.file_text,
             request.has_file,
-            request.model
+            request.model,
+            user_email=request.user_email or ""
         )
 
         # Save to in-memory history (thread-safe)
@@ -214,7 +207,9 @@ User: {request.question}"""
             print(f"⚠ DB save failed (non-critical): {e}")
 
         return {"answer": answer}
-    
+
+    except QuotaExceededError as e:
+        return quota_response(e)
     except Exception as e:
         error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
         print(f"❌ global_ai ERROR: {error_msg}")
@@ -247,8 +242,12 @@ async def local_ai(request: AIRequest):
             print(f"❌ Local AI Error: {e} - Falling back to Cloud AI")
             try:
                 from services.global_ai import global_chat
-                fallback_ans = global_chat(request.question, request.file_text, request.has_file, "llama-3.1-70b-versatile")
+                fallback_ans = global_chat(request.question, request.file_text, request.has_file,
+                                           "llama-3.1-70b-versatile",
+                                           user_email=request.user_email or "")
                 yield f"[Fallback to Cloud] {fallback_ans}"
+            except QuotaExceededError as quota_e:
+                yield f"ERROR: [quota:{quota_e.scope}] {quota_e}"
             except Exception as fallback_e:
                 yield f"❌ Local execution failed and Cloud API fallback error: {str(fallback_e)}"
 
@@ -298,9 +297,44 @@ async def upload_doc(file: UploadFile = File(...)):
         return {"message": "Failed to process document", "error": str(e)}
 
 # ========================= RAG ASK (SECRET AI) =========================
+def _pgvector_context(document_key, local_path, question):
+    """Lazy-index a document into pgvector (once) and return the top-k retrieved
+    chunks assembled into a context string, ordered by document position.
+
+    Returns None when there is nothing to retrieve, so the caller can fall back
+    to full-text mode. Any exception propagates for the same fail-open reason.
+    """
+    from rag.pgvector_store import is_indexed, index_document, retrieve
+    from core.embeddings import embed_texts, embed_query
+
+    if not is_indexed(document_key):
+        from rag.document_loader import load_pdf
+        from rag.text_splitter import split_text
+        text = load_pdf(local_path)
+        chunks = split_text(text) if text else []
+        if not chunks:
+            return None
+        print(f"🧩 Indexing {len(chunks)} chunks into pgvector for {document_key}")
+        embeddings = embed_texts(chunks, input_type="passage")
+        index_document(document_key, chunks, embeddings)
+        gc.collect()
+
+    qvec = embed_query(question)
+    top_chunks = retrieve(document_key, qvec, k=RAG_TOP_K)
+    if not top_chunks:
+        return None
+
+    context = ""
+    for chunk in top_chunks:
+        if context and len(context) + len(chunk) + 2 > RAG_CONTEXT_CHARS:
+            break
+        context += ("\n\n" if context else "") + chunk
+    print(f"🔎 Retrieved {len(top_chunks)} chunks → context {len(context)} chars")
+    return context.strip() or None
+
+
 @app.post("/rag-ask")
 async def rag_ask(request: RagRequest):
-    from rag.question_answering import ask_question_stream
     import base64
     import urllib.parse
     try:
@@ -383,21 +417,32 @@ async def rag_ask(request: RagRequest):
                     status_code=400
                 )
 
-        # Cache check (thread-safe) - Bybass FAISS/RAG to avoid Render timeouts + OOM
-        # Instead of heavy PyTorch embeddings, we extract text and send it directly to the LLM
-        with rag_cache_lock:
-            if file_path in rag_cache:
-                print("⚡ Using previously loaded document text")
-                doc_text = rag_cache[file_path]
-            else:
-                print("⏳ Extracting document text")
-                from rag.document_loader import load_pdf
-                doc_text = load_pdf(file_path)
-                # Keep text within token limits to avoid LLM context overflow
-                doc_text = doc_text[:30000] 
-                rag_cache[file_path] = doc_text
-                # Free memory immediately
-                gc.collect()
+        # ---- Retrieval: pgvector semantic RAG, fail-open to full-text ----
+        # document_key is the STABLE original path/URL. The local temp file gets
+        # a fresh random name every request, which is why the old cache (keyed by
+        # the temp path) never hit — we key everything by document_key now.
+        document_key = request.file_path
+        doc_text = None
+
+        if RAG_MODE == "pgvector":
+            try:
+                doc_text = _pgvector_context(document_key, file_path, request.question)
+            except Exception as rag_err:
+                print(f"⚠ pgvector RAG failed → full-text fallback: {rag_err}")
+                doc_text = None
+
+        if doc_text is None:
+            # Full-text fallback (original behaviour): extract + truncate, cached by key.
+            with rag_cache_lock:
+                if document_key in rag_cache:
+                    print("⚡ Using previously loaded document text")
+                    doc_text = rag_cache[document_key]
+                else:
+                    print("⏳ Extracting document text (full-text mode)")
+                    from rag.document_loader import load_pdf
+                    doc_text = load_pdf(file_path)[:30000]
+                    rag_cache[document_key] = doc_text
+                    gc.collect()
 
         # Chat history keyed by session_id (per-chat memory, thread-safe)
         session_key = str(request.session_id) if request.session_id else file_path
@@ -460,16 +505,21 @@ User: {request.question}"""
                     question_with_history,  # Question with history
                     doc_text,               # Pass the document text
                     True,                   # has_file=True to trigger document-only mode
-                    request.model
+                    request.model,
+                    user_email=request.user_email or ""
                 )
-                
+
                 yield full_answer
 
                 # Append to the shared list reference (thread-safe)
                 with doc_history_lock:
                     history.append({"q": request.question, "a": full_answer})
                 print(f"✅ Saved to history. New length: {len(history)}")
-                
+
+            except QuotaExceededError as e:
+                # In-band error, same convention as the Ignite streams — the
+                # frontend surfaces the engine's message and stops retrying.
+                yield f"ERROR: [quota:{e.scope}] {e}"
             except Exception as e:
                 error_msg = f"ERROR: {type(e).__name__}: {str(e)}"
                 print(f"❌ generate ERROR: {error_msg}")
@@ -536,7 +586,8 @@ CODE:
 {code}"""
 
         from core.llm import safe_generate
-        raw_output = safe_generate(prompt, request.model, system=system_prompt)
+        raw_output = safe_generate(prompt, request.model, system=system_prompt,
+                                   user_email=request.user_email or "")
 
         if not raw_output:
             raise Exception("No response from AI")
@@ -583,6 +634,8 @@ CODE:
             "explanation": parsed.get("explanation", "")
         }
 
+    except QuotaExceededError as e:
+        return quota_response(e)
     except Exception as e:
         print("❌ code_analyze ERROR:", str(e))
         return {
@@ -590,3 +643,136 @@ CODE:
             "time_complexity": "", "space_complexity": "",
             "before_time": "", "before_space": "", "explanation": ""
         }
+
+# ========================= PROJECT BUILDER (IGNITE) =========================
+BUSY_MESSAGE = "The project builder is busy right now. Please try again in a minute."
+
+class ProjectPlanRequest(BaseModel):
+    prompt: str
+    user_email: Optional[str] = ""
+
+class ProjectFileRequest(BaseModel):
+    prompt: str
+    file_path: str
+    plan_summary: Optional[str] = ""
+    file_description: Optional[str] = ""
+    files_list: Optional[list] = None
+    existing_files: Optional[dict] = None
+    user_email: Optional[str] = ""
+
+class ProjectEditRequest(BaseModel):
+    prompt: str
+    files: Optional[dict] = None
+    user_email: Optional[str] = ""
+
+@app.post("/project-builder/plan")
+async def project_builder_plan(request: ProjectPlanRequest):
+    from fastapi.concurrency import run_in_threadpool
+    from core.llm_providers import ProviderBusyError, ProviderError
+    from services.project_builder import create_plan
+    try:
+        return await run_in_threadpool(create_plan, request.prompt,
+                                       request.user_email or "")
+    except QuotaExceededError as e:
+        return quota_response(e)
+    except ProviderBusyError:
+        return JSONResponse(status_code=429,
+                            content={"status": "busy", "message": BUSY_MESSAGE})
+    except ProviderError as e:
+        print(f"❌ project_builder_plan ERROR: {e}")
+        return JSONResponse(status_code=502, content={
+            "status": "error",
+            "message": "I couldn't create a plan for that project. Please try again."
+        })
+
+@app.post("/project-builder/generate-file")
+async def project_builder_generate_file(request: ProjectFileRequest):
+    from fastapi.concurrency import run_in_threadpool
+    from core.llm_providers import ProviderBusyError, ProviderError
+    from services.project_builder import generate_file_stream
+    try:
+        # Priming happens inside generate_file_stream, so provider errors arrive
+        # here (with a proper status code) instead of mid-stream.
+        stream = await run_in_threadpool(
+            generate_file_stream,
+            request.prompt,
+            request.plan_summary or "",
+            request.file_path,
+            request.file_description or "",
+            request.files_list or [],
+            request.existing_files or {},
+            request.user_email or "",
+        )
+        return StreamingResponse(stream, media_type="text/plain")
+    except ValueError as e:
+        return JSONResponse(status_code=400,
+                            content={"status": "error", "message": str(e)})
+    except QuotaExceededError as e:
+        return quota_response(e)
+    except ProviderBusyError:
+        return JSONResponse(status_code=429,
+                            content={"status": "busy", "message": BUSY_MESSAGE})
+    except ProviderError as e:
+        print(f"❌ project_builder_generate_file ERROR: {e}")
+        return JSONResponse(status_code=502, content={
+            "status": "error",
+            "message": "File generation failed. Please retry this file."
+        })
+
+@app.post("/project-builder/edit")
+async def project_builder_edit(request: ProjectEditRequest):
+    from fastapi.concurrency import run_in_threadpool
+    from core.llm_providers import ProviderBusyError, ProviderError
+    from services.project_builder import apply_edit
+    try:
+        return await run_in_threadpool(apply_edit, request.prompt, request.files or {},
+                                       request.user_email or "")
+    except ValueError as e:
+        return JSONResponse(status_code=400,
+                            content={"status": "error", "message": str(e)})
+    except QuotaExceededError as e:
+        return quota_response(e)
+    except ProviderBusyError:
+        return JSONResponse(status_code=429,
+                            content={"status": "busy", "message": BUSY_MESSAGE})
+    except ProviderError as e:
+        print(f"❌ project_builder_edit ERROR: {e}")
+        return JSONResponse(status_code=502, content={
+            "status": "error",
+            "message": "I couldn't apply that change. Please try rephrasing it."
+        })
+
+@app.get("/project-builder/usage")
+async def project_builder_usage(user_email: str = ""):
+    from fastapi.concurrency import run_in_threadpool
+    from services.token_ledger import get_usage
+    try:
+        return await run_in_threadpool(get_usage, user_email)
+    except Exception as e:
+        print(f"❌ project_builder_usage ERROR: {e}")
+        return JSONResponse(status_code=502, content={
+            "status": "error", "message": "Could not read token usage right now."
+        })
+
+# ========================= CIRCUIT =========================
+class CircuitAskRequest(BaseModel):
+    prompt: str
+    context: Optional[str] = ""
+    user_email: Optional[str] = ""
+
+@app.post("/circuit/ask")
+async def circuit_ask(request: CircuitAskRequest):
+    from fastapi.concurrency import run_in_threadpool
+    from services.circuit import CircuitError, create_circuit
+    try:
+        return await run_in_threadpool(create_circuit, request.prompt,
+                                       request.user_email or "",
+                                       request.context or "")
+    except QuotaExceededError as e:
+        return quota_response(e)
+    except CircuitError as e:
+        print(f"❌ circuit_ask ERROR: {e}")
+        return JSONResponse(status_code=502, content={
+            "status": "error",
+            "message": "I couldn't draw that circuit. Please try rephrasing your question."
+        })

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="152" viewBox="0 0 620 152" font-family="'Times New Roman',Times,serif">
+  <rect width="620" height="152" fill="#fff"/>
+  <defs>
+    <marker id="ah2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 z" fill="#000"/>
+    </marker>
+  </defs>
+  <g stroke="#000" stroke-width="1.1" fill="#fff">
+    <rect x="2"   y="6"  width="132" height="46" rx="3"/>
+    <rect x="162" y="6"  width="132" height="46" rx="3"/>
+    <rect x="322" y="6"  width="132" height="46" rx="3"/>
+    <rect x="482" y="6"  width="132" height="46" rx="3" fill="#f2f2f2"/>
+    <rect x="2"   y="98" width="132" height="46" rx="3" fill="#f2f2f2"/>
+    <rect x="162" y="98" width="132" height="46" rx="3"/>
+    <rect x="322" y="98" width="132" height="46" rx="3"/>
+    <rect x="482" y="98" width="132" height="46" rx="3"/>
+  </g>
+  <g font-size="10" text-anchor="middle">
+    <text x="68"  y="24" font-weight="bold">1. Upload</text>
+    <text x="68"  y="38" font-size="9">PDF / DOCX / TXT</text>
+    <text x="228" y="24" font-weight="bold">2. Object storage</text>
+    <text x="228" y="38" font-size="9">scoped to the owner</text>
+    <text x="388" y="24" font-weight="bold">3. Text extraction</text>
+    <text x="388" y="38" font-size="9">document_loader</text>
+    <text x="548" y="24" font-weight="bold">4. Bounded context</text>
+    <text x="548" y="38" font-size="9">truncated to a fixed budget</text>
+    <text x="68"  y="116" font-weight="bold">5. Cached under lock</text>
+    <text x="68"  y="130" font-size="9">per document path</text>
+    <text x="228" y="116" font-weight="bold">6. Prompt assembly</text>
+    <text x="228" y="130" font-size="9">context + history + question</text>
+    <text x="388" y="116" font-weight="bold">7. safe_generate</text>
+    <text x="388" y="130" font-size="9">provider registry</text>
+    <text x="548" y="116" font-weight="bold">8. Grounded answer</text>
+    <text x="548" y="130" font-size="9">streamed to the browser</text>
+  </g>
+  <g stroke="#000" stroke-width="1.1" marker-end="url(#ah2)" fill="none">
+    <path d="M134,29 L160,29"/><path d="M294,29 L320,29"/><path d="M454,29 L480,29"/>
+    <path d="M134,121 L160,121"/><path d="M294,121 L320,121"/><path d="M454,121 L480,121"/>
+    <path d="M548,52 L548,72 L68,72 L68,96"/>
+  </g>
+</svg>

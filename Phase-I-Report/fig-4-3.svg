@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="158" viewBox="0 0 620 158" font-family="'Times New Roman',Times,serif">
+  <rect width="620" height="158" fill="#fff"/>
+  <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+    <path d="M0,0 L8,3 L0,6 z" fill="#000"/></marker></defs>
+  <g stroke="#000" stroke-width="1.1" fill="#fff">
+    <rect x="4" y="52" width="118" height="52"/>
+    <rect x="496" y="8" width="120" height="46"/>
+    <rect x="496" y="102" width="120" height="46"/>
+    <ellipse cx="308" cy="78" rx="112" ry="46" fill="#f2f2f2"/>
+  </g>
+  <g stroke="#000" stroke-width="1.1" fill="#fff">
+    <path d="M224,140 L392,140"/><path d="M224,140 L224,158"/><path d="M392,140 L392,158"/>
+  </g>
+  <g font-size="10.5" text-anchor="middle">
+    <text x="63" y="74" font-weight="bold">Authenticated</text>
+    <text x="63" y="88" font-weight="bold">User</text>
+    <text x="308" y="72" font-weight="bold">0</text>
+    <text x="308" y="88" font-weight="bold">DevAssist AI Platform</text>
+    <text x="556" y="28" font-weight="bold">Model Provider</text>
+    <text x="556" y="42" font-size="9">Groq / NVIDIA NIM</text>
+    <text x="556" y="122" font-weight="bold">Execution Sandbox</text>
+    <text x="556" y="136" font-size="9">Wandbox</text>
+    <text x="308" y="153" font-size="9.5">D  Managed PostgreSQL — all persisted entities</text>
+  </g>
+  <g stroke="#000" stroke-width="1.1" marker-end="url(#ah3)" fill="none">
+    <path d="M122,68 L194,68"/><path d="M194,90 L124,90"/>
+    <path d="M414,54 L494,34"/><path d="M494,44 L416,64"/>
+    <path d="M414,102 L494,122"/><path d="M494,132 L416,112"/>
+    <path d="M308,124 L308,138"/>
+  </g>
+  <g font-size="9">
+    <text x="128" y="62">prompt, code, document</text>
+    <text x="128" y="104">streamed answer, verdict</text>
+    <text x="424" y="46">request</text>
+    <text x="424" y="112">source</text>
+  </g>
+</svg>

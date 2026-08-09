@@ -142,6 +142,7 @@ button { cursor:pointer; }
   </div>
 
   <div class="nav-buttons">
+    <div id="tokenMeter" style="display:none;align-items:center;margin-right:12px;padding:4px 12px;border-radius:999px;background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.15);font-size:12px;color:#94a3b8;white-space:nowrap" title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
     <select id="languageSelect" onchange="changeLanguage()" style="background:#1e293b;color:white;border:none;padding:8px;border-radius:6px;">
       <option value="java">Java</option>
       <option value="python">Python</option>
@@ -363,7 +364,25 @@ async function analyzeCode() {
             method: "POST",
             body: JSON.stringify({ code: code, language: language, session_id: currentChatId || 1, model: selectedModel })
         });
+
+        if (res.status === 429) {
+            // Daily token quota — show the engine's message and stop.
+            let quotaMsg = "Daily AI token limit reached. It resets at midnight UTC.";
+            try {
+                const qd = await res.json();
+                quotaMsg = qd.message || qd.error || quotaMsg;
+            } catch {}
+            refreshUsage();
+            document.querySelector(".middle").innerHTML = `<div style='color:#fbbf24; padding:20px; border:1px solid rgba(251,191,36,0.2); border-radius:12px; background:rgba(251,191,36,0.05)'>
+                <h3>🔋 Token limit</h3>
+                <p style="font-size:13px; margin-top:8px;">${quotaMsg}</p>
+            </div>`;
+            btn.innerHTML = "▶ Analyze"; btn.disabled = false;
+            return;
+        }
+
         const data = await res.json();
+        refreshUsage();
         function formatList(text) {
             if (!text) return "<li>No data</li>";
             return text.split('\n').filter(line => line.trim() !== "").map(line => `<li>${line.replace(/^[-*]\s*/, "")}</li>`).join('');
@@ -399,6 +418,22 @@ async function analyzeCode() {
     }
     btn.innerHTML = "▶ Analyze"; btn.disabled = false;
 }
+
+/* ================= TOKEN USAGE METER ================= */
+async function refreshUsage() {
+    try {
+        const res = await authFetch('/api/usage');
+        if (!res.ok) return;
+        const u = await res.json();
+        if (typeof u.user_tokens !== 'number' || typeof u.user_limit !== 'number') return;
+        const meter = document.getElementById('tokenMeter');
+        meter.textContent = `🔋 ${u.user_tokens.toLocaleString()} / ${u.user_limit.toLocaleString()} tokens today`;
+        meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
+            : (u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '#94a3b8');
+        meter.style.display = 'flex';
+    } catch { /* meter is cosmetic — never let it break the analyzer */ }
+}
+refreshUsage();
 
 function parseComplexity(val) {
     if (!val) return 0;

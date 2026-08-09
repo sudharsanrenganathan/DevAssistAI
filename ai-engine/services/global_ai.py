@@ -1,6 +1,6 @@
 from core.llm import safe_generate
 
-def global_chat(question, file_text=None, has_file=False, model=None):
+def global_chat(question, file_text=None, has_file=False, model=None, user_email=""):
 
     if has_file and file_text:
         system_prompt = """You are an intelligent research assistant with deep, thorough knowledge of the documents provided to you. Your sole purpose is to help users understand, explore, and extract insights from their uploaded documents. You are curious, thoughtful, and genuinely engaged with the material — not a passive search engine, but an active intellectual companion.
@@ -202,4 +202,4 @@ FORMAT:
 
         prompt = question
 
-    return safe_generate(prompt, model, system=system_prompt)
+    return safe_generate(prompt, model, system=system_prompt, user_email=user_email)

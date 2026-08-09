@@ -177,57 +177,67 @@ public class GlobalChatController {
     private org.springframework.web.client.RestTemplate restTemplate;
 
     @PostMapping("/ask")
-    public ResponseEntity<?> askGlobalAI(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> askGlobalAI(@RequestBody Map<String, String> body,
+                                         org.springframework.security.core.Authentication authentication) {
         try {
             String question = body.get("question");
             String sessionId = body.get("session_id");
             String model = body.get("model");
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-            
+
             java.util.HashMap<String, Object> requestBody = new java.util.HashMap<>();
             requestBody.put("question", question);
             requestBody.put("has_file", false);
+            requestBody.put("user_email", authentication.getName());
             if (sessionId != null) requestBody.put("session_id", sessionId);
             if (model != null) requestBody.put("model", model);
-            
+
             HttpEntity<java.util.HashMap<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            
+
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restTemplate.postForObject(
                 aiEngineUrl + "/global-ai", entity, Map.class
             );
-            
+
             return ResponseEntity.ok(response);
+        } catch (org.springframework.web.client.HttpClientErrorException.TooManyRequests e) {
+            // Engine 429 (daily token quota or provider busy) — pass the JSON
+            // body through so the frontend can show the engine's message.
+            return ResponseEntity.status(429)
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(e.getResponseBodyAsString());
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("answer", "AI request failed: " + e.getMessage()));
         }
     }
 
     @PostMapping("/local-ask")
-    public ResponseEntity<?> askLocalAI(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> askLocalAI(@RequestBody Map<String, String> body,
+                                        org.springframework.security.core.Authentication authentication) {
         try {
             String question = body.get("question");
             String sessionId = body.get("session_id");
             String model = body.get("model");
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-            
+
             java.util.HashMap<String, Object> requestBody = new java.util.HashMap<>();
             requestBody.put("question", question);
             requestBody.put("has_file", false);
+            requestBody.put("user_email", authentication.getName());
             if (sessionId != null) requestBody.put("session_id", sessionId);
             if (model != null) requestBody.put("model", model);
-            
+
             HttpEntity<java.util.HashMap<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            
+
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restTemplate.postForObject(
                 aiEngineUrl + "/local-ai", entity, Map.class
             );
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("answer", "Local AI request failed: " + e.getMessage()));

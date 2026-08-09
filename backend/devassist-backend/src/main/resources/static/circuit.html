@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit — DevAssist AI</title>
+<style id="pageCss">
+* { margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --teal:#06f5cd; --purple:#7c3aed; --bg:#0a0a0a;
+  --txt:#e2e8f0; --mut:#94a3b8; --dim:#64748b; --faint:#475569;
+  --line:rgba(255,255,255,0.08); --glass:rgba(255,255,255,0.03);
+}
+body{
+  font-family:'Inter',system-ui,sans-serif; background:var(--bg);
+  background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size:20px 20px; color:#fff; height:100vh; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.mono{ font-family:'JetBrains Mono','Consolas',monospace; }
+.grad-text{ background:linear-gradient(135deg,var(--teal),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.grad-btn{ background:linear-gradient(135deg,var(--teal),var(--purple)); color:#0a0a0a; font-weight:700; border:none; border-radius:8px; cursor:pointer; }
+.grad-btn:hover{ filter:brightness(1.1); }
+.ghost-btn{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; border-radius:8px; cursor:pointer; }
+.ghost-btn:hover{ background:rgba(255,255,255,0.1); }
+.glass{ background:var(--glass); border:1px solid var(--line); border-radius:12px; }
+
+/* ---------- TOP BAR ---------- */
+.topbar{ height:56px; flex-shrink:0; display:flex; align-items:center; padding:0 20px; gap:14px;
+  background:rgba(10,10,10,0.9); border-bottom:1px solid var(--line); }
+.logo{ font-weight:800; font-size:17px; cursor:pointer; }
+.crumb{ color:var(--dim); font-size:13px; }
+.beta{ font-size:10px; font-weight:700; letter-spacing:1px; padding:3px 8px; border-radius:20px;
+  background:rgba(124,58,237,0.25); color:#c084fc; border:1px solid #7c3aed55; }
+.meter{ margin-left:auto; font-size:12px; color:var(--mut); background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:20px; display:flex; gap:8px; align-items:center;}
+.model-badge{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--mut);
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:6px 12px; border-radius:20px; }
+.dot-green{ width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80; }
+.avatar{ width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--purple));
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#0a0a0a; }
+
+/* ---------- START SCREEN ---------- */
+#start{ flex:1; display:flex; flex-direction:column; align-items:center; padding:20px; overflow-y:auto; }
+/* auto margins center the content when short but keep the top scrollable
+   when MY CIRCUITS makes the page tall */
+#start > :first-child{ margin-top:auto; }
+#start > :last-child{ margin-bottom:auto; }
+.hero-h1{ font-size:46px; font-weight:800; margin-bottom:12px; text-align:center; }
+.hero-sub{ color:var(--mut); font-size:16px; margin-bottom:34px; text-align:center; max-width:640px; line-height:1.5;}
+.prompt-box{ width:min(760px,92vw); background:rgba(255,255,255,0.04); border:1px solid rgba(6,245,205,0.35);
+  border-radius:16px; padding:18px; box-shadow:0 0 40px rgba(6,245,205,0.07); }
+.prompt-box textarea{ width:100%; background:transparent; border:none; outline:none; resize:none; color:var(--txt);
+  font-family:inherit; font-size:15px; min-height:64px; line-height:1.5;}
+.prompt-box textarea::placeholder{ color:var(--faint); }
+.prompt-foot{ display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
+.chip{ font-size:12px; color:var(--mut); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+  padding:6px 12px; border-radius:20px; }
+.send-btn{ margin-left:auto; padding:10px 24px; font-size:14px; }
+.tpl-row{ display:flex; gap:12px; margin-top:26px; flex-wrap:wrap; justify-content:center;}
+.tpl{ width:180px; padding:16px; text-align:left; cursor:pointer; transition:border-color .15s, transform .15s; border-radius:12px;}
+.tpl:hover{ border-color:rgba(6,245,205,0.5); transform:translateY(-2px); }
+.tpl .ic{ font-size:22px; margin-bottom:8px; }
+.tpl .t{ font-size:13px; font-weight:600; margin-bottom:4px; }
+.tpl .d{ font-size:11px; color:var(--dim); line-height:1.4; }
+.hero-note{ margin-top:28px; font-size:12px; color:var(--faint); }
+
+/* ---------- MY CIRCUITS (saved sessions) ---------- */
+#myCircuits{ width:min(760px,92vw); margin-top:34px; display:none; }
+.mc-head{ font-size:12px; font-weight:700; letter-spacing:1.2px; color:var(--mut); margin-bottom:10px; }
+.mc-sub{ font-weight:400; color:var(--faint); letter-spacing:0; text-transform:none; }
+.mc-row{ display:flex; align-items:center; gap:10px; padding:12px 16px; margin-bottom:8px; }
+.mc-main{ flex:1; min-width:0; }
+.mc-title{ font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mc-meta{ font-size:11px; color:var(--dim); margin-top:2px; }
+.mc-btn{ padding:7px 14px; font-size:12px; flex-shrink:0; }
+
+/* ---------- WORKSPACE ---------- */
+#ws{ flex:1; display:none; gap:12px; padding:12px; overflow:hidden; }
+.chat-col{ width:380px; min-width:300px; display:flex; flex-direction:column; overflow:hidden;}
+.chat-scroll{ flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; overflow-y:auto; }
+.chat-scroll::-webkit-scrollbar{ width:6px; } .chat-scroll::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.1); border-radius:3px;}
+.msg-user{ align-self:flex-end; max-width:85%; background:rgba(124,58,237,0.2); border:1px solid #7c3aed44;
+  border-radius:12px 12px 2px 12px; padding:12px 14px; font-size:13px; color:var(--txt); line-height:1.5; }
+.msg-ai{ align-self:flex-start; max-width:94%; background:rgba(255,255,255,0.04); border:1px solid var(--line);
+  border-radius:12px 12px 12px 2px; padding:12px 14px; font-size:13px; color:#cbd5e1; line-height:1.55; }
+.msg-err{ border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.07); }
+.steps{ display:flex; flex-direction:column; gap:4px; margin-top:10px; }
+.step{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--mut); padding:6px 8px;
+  border-radius:8px; cursor:pointer; border:1px solid transparent; transition:all .15s;}
+.step:hover{ background:rgba(255,255,255,0.05); }
+.step .n{ width:18px; height:18px; flex-shrink:0; border-radius:50%; border:1px solid var(--faint); font-size:10px;
+  display:flex; align-items:center; justify-content:center; color:var(--faint); margin-top:1px;}
+.step.done{ color:#4ade80; } .step.done .n{ border-color:#4ade80; color:#4ade80; }
+.step.active{ color:var(--teal); background:rgba(6,245,205,0.08); border-color:rgba(6,245,205,0.3);}
+.step.active .n{ border-color:var(--teal); color:var(--teal); }
+.sugg-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.sugg{ font-size:11.5px; color:var(--teal); background:rgba(6,245,205,0.08); border:1px solid rgba(6,245,205,0.3);
+  padding:5px 11px; border-radius:20px; cursor:pointer; }
+.sugg:hover{ background:rgba(6,245,205,0.18); }
+.chat-input{ margin:12px; padding:10px 12px; display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:12px; }
+.chat-input input{ flex:1; background:transparent; border:none; outline:none; color:var(--txt); font-size:13px; font-family:inherit;}
+.chat-input input::placeholder{ color:var(--faint); }
+.mini-send{ width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+
+/* canvas column */
+.canvas-col{ flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.canvas-col:fullscreen{ background:var(--bg);
+  background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size:20px 20px; border:none; border-radius:0; }
+.canvas-head{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+.viz-title{ font-size:14px; font-weight:700; }
+.tag{ font-size:10px; font-weight:700; letter-spacing:0.8px; padding:3px 8px; border-radius:20px;
+  background:rgba(6,245,205,0.12); color:var(--teal); border:1px solid rgba(6,245,205,0.35); }
+.canvas-head .sp{ flex:1; }
+.hbtn{ padding:8px 14px; font-size:12.5px; display:flex; align-items:center; gap:6px; }
+
+/* ---------- THE BOARD (pan + zoom canvas) ---------- */
+#viewport{ flex:1; position:relative; overflow:hidden; cursor:grab; touch-action:none; }
+#viewport.dragging{ cursor:grabbing; }
+#boardEl{ position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform; }
+.frame{ position:absolute; top:60px; background:rgba(16,17,20,0.92); border:1px solid var(--line);
+  border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.45); }
+.frame.active{ border-color:rgba(6,245,205,0.55); box-shadow:0 0 34px rgba(6,245,205,0.12), 0 10px 40px rgba(0,0,0,0.45); }
+.frame:not(.active):hover{ border-color:rgba(6,245,205,0.3); cursor:pointer; }
+.frame-head{ display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--line);
+  font-size:12.5px; font-weight:700; color:var(--mut); cursor:pointer; }
+.frame.active .frame-head{ color:var(--teal); }
+.frame-head .fdot{ width:8px; height:8px; border-radius:50%; background:var(--faint); flex-shrink:0; }
+.frame.active .frame-head .fdot{ background:var(--teal); box-shadow:0 0 8px var(--teal); }
+.frame-body{ padding:20px; }
+.frame-loading{ width:380px; }
+
+/* zoom controls overlay */
+.zoom-ctrl{ position:absolute; right:14px; bottom:14px; z-index:5; display:flex; align-items:center; gap:6px;
+  background:rgba(10,10,10,0.85); border:1px solid var(--line); border-radius:10px; padding:6px; }
+.zbtn{ width:30px; height:30px; border-radius:7px; font-size:15px; display:flex; align-items:center; justify-content:center; }
+.zlbl{ min-width:46px; text-align:center; font-size:11.5px; color:var(--mut); cursor:pointer;
+  font-family:'JetBrains Mono',monospace; }
+.board-hint{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  pointer-events:none; z-index:2; }
+
+/* loading / empty state */
+.loading-wrap{ display:flex; flex-direction:column; align-items:center; gap:18px; color:var(--mut); padding:20px 0; }
+.loading-dots{ display:flex; gap:8px; }
+.loading-dots span{ width:12px; height:12px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--purple)); animation:ldot 1.2s ease infinite; }
+.loading-dots span:nth-child(2){ animation-delay:0.15s; } .loading-dots span:nth-child(3){ animation-delay:0.3s; }
+@keyframes ldot{ 0%,100%{ transform:translateY(0); opacity:0.4;} 50%{ transform:translateY(-10px); opacity:1;} }
+.loading-txt{ font-size:14px; animation:lpulse 1.6s ease infinite; }
+@keyframes lpulse{ 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.empty-hint{ color:var(--dim); font-size:13.5px; text-align:center; line-height:1.7; max-width:420px; }
+
+/* caption */
+.caption{ margin:0 14px; padding:12px 16px; font-size:13.5px; color:var(--txt); line-height:1.5; text-align:center;
+  background:rgba(6,245,205,0.05); border:1px solid rgba(6,245,205,0.2); border-radius:10px; min-height:46px;}
+.caption .mono{ color:var(--teal); }
+.caption b{ color:#fff; }
+
+/* ---------- PLAYER BAR ---------- */
+.player{ margin:12px 14px 14px; padding:10px 16px; display:flex; align-items:center; gap:14px; }
+.pbtn{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:15px; flex-shrink:0; }
+.pbtn.main{ width:46px; height:46px; font-size:18px; }
+.scrub-wrap{ flex:1; display:flex; flex-direction:column; gap:5px; }
+.scrub{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:3px;
+  background:rgba(255,255,255,0.1); outline:none; cursor:pointer;}
+.scrub::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--purple)); cursor:pointer; box-shadow:0 0 8px rgba(6,245,205,0.6);}
+.scrub-lbl{ display:flex; justify-content:space-between; font-size:11px; color:var(--dim); }
+.speed{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1;
+  border-radius:8px; padding:7px 10px; font-size:12px; cursor:pointer; outline:none;}
+.speed option{ background:#16181d; }
+
+/* ---------- ARRAY / BARS VIZ ---------- */
+.bs-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+.bs-play{ display:flex; align-items:center; gap:8px; margin-bottom:18px; font-size:12.5px; color:var(--mut); flex-wrap:wrap; justify-content:center;}
+.bs-play input{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px; color:var(--teal); font-family:'JetBrains Mono',monospace; font-size:13px; padding:6px 8px; outline:none; text-align:center;}
+.bs-play input.tgt{ width:64px; }
+.bs-play input.vals{ width:220px; text-align:left; }
+.bs-play button{ padding:7px 14px; font-size:12px; }
+.cells{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:840px;}
+.cellbox{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+.cell{ width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#cbd5e1;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); transition:all .35s; }
+.cell.dead{ opacity:0.18; transform:scale(0.9); }
+.cell.mid{ background:rgba(251,191,36,0.15); border-color:#fbbf24; color:#fbbf24; box-shadow:0 0 14px rgba(251,191,36,0.3); transform:translateY(-6px);}
+.cell.found{ background:rgba(74,222,128,0.18); border-color:#4ade80; color:#4ade80;
+  box-shadow:0 0 18px rgba(74,222,128,0.5); animation:pulse 0.9s ease infinite; transform:translateY(-6px);}
+@keyframes pulse{ 0%,100%{transform:translateY(-6px) scale(1);} 50%{transform:translateY(-6px) scale(1.1);} }
+.idx{ font-size:10px; color:var(--faint); font-family:'JetBrains Mono',monospace;}
+.ptr{ font-size:9.5px; font-weight:700; letter-spacing:0.5px; height:14px; }
+.ptr.lo{ color:var(--teal);} .ptr.hi{ color:#c084fc;} .ptr.md{ color:#fbbf24;}
+.legend{ display:flex; gap:16px; margin-top:22px; font-size:11.5px; color:var(--dim); flex-wrap:wrap; justify-content:center;}
+.legend b{ font-weight:600; }
+.lg{ display:flex; align-items:center; gap:6px;}
+.sw{ width:12px; height:12px; border-radius:4px; }
+
+/* sort bars */
+.bars{ display:flex; align-items:flex-end; gap:8px; height:220px; }
+.barbox{ display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
+.bar{ width:44px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,rgba(6,245,205,0.35),rgba(124,58,237,0.35));
+  border:1px solid rgba(255,255,255,0.15); transition:all .3s; display:flex; align-items:flex-start; justify-content:center;
+  padding-top:6px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#e2e8f0;}
+.bar.cmp{ background:linear-gradient(180deg,rgba(251,191,36,0.5),rgba(251,191,36,0.2)); border-color:#fbbf24; }
+.bar.swp{ background:linear-gradient(180deg,rgba(244,114,182,0.55),rgba(244,114,182,0.2)); border-color:#f472b6; }
+.bar.srt{ background:linear-gradient(180deg,rgba(74,222,128,0.5),rgba(74,222,128,0.15)); border-color:#4ade80; }
+
+/* ---------- shared card text bits (journey + timeline) ---------- */
+.rt{ font-size:14px; font-weight:700; margin-bottom:3px;}
+.rd{ font-size:12px; color:var(--mut); margin-bottom:8px; line-height:1.5;}
+.rd:last-child{ margin-bottom:0; }
+.rtags{ display:flex; flex-wrap:wrap; gap:6px;}
+.rtag{ font-size:10.5px; color:#cbd5e1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  padding:3px 9px; border-radius:20px; font-family:'JetBrains Mono',monospace;}
+.rdur{ font-size:10.5px; color:var(--teal); margin-left:auto; white-space:nowrap; font-weight:600;}
+.rhead{ display:flex; align-items:baseline; gap:8px;}
+
+/* ---------- JOURNEY TRAIL (flowchart) — zigzag path that lights up ---------- */
+.jz{ position:relative; width:860px; max-width:100%; padding:8px 0; }
+.jz-svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.jz-row{ position:relative; display:flex; margin:30px 0; opacity:0.28; transition:opacity .4s; cursor:pointer; }
+.jz-row.left{ justify-content:flex-start; } .jz-row.right{ justify-content:flex-end; }
+.jz-row.on{ opacity:1; }
+.jz-item{ display:flex; align-items:center; gap:14px; width:58%; }
+.jz-row.right .jz-item{ flex-direction:row-reverse; }
+.jz-dot{ width:46px; height:46px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:16px; color:var(--mut); background:#14151b; border:2px solid rgba(255,255,255,0.22);
+  position:relative; z-index:1; transition:all .3s; }
+.jz-row.done .jz-dot, .jz-row.current .jz-dot{
+  background:linear-gradient(135deg,var(--teal),var(--purple)); color:#0a0a0a; border-color:transparent; }
+.jz-row.current .jz-dot{ animation:dotpulse 1.1s ease infinite; }
+@keyframes dotpulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(6,245,205,0.55);} 50%{ box-shadow:0 0 0 12px rgba(6,245,205,0);} }
+.jz-card{ flex:1; padding:13px 16px; border-radius:12px; background:#12141a;
+  border:1px solid var(--line); transition:all .3s; }
+.jz-items{ margin:2px 0 8px; display:flex; flex-direction:column; gap:3px; }
+.jz-it{ font-size:11.5px; color:#a9b4c6; line-height:1.5; display:flex; gap:6px; }
+.jz-it::before{ content:'▸'; color:var(--teal); flex-shrink:0; }
+.jz-row.current .jz-card{ border-color:var(--teal); box-shadow:0 0 26px rgba(6,245,205,0.18); }
+.jz-row.done .jz-card{ border-color:rgba(74,222,128,0.25); }
+
+/* ---------- TIMELINE SPINE (text-steps) — cards alternate around a filling spine ---------- */
+.tl{ position:relative; width:860px; max-width:100%; padding:6px 0; }
+.tl-spine{ position:absolute; left:50%; top:0; bottom:0; width:3px; transform:translateX(-50%);
+  background:rgba(255,255,255,0.09); border-radius:2px; overflow:hidden; }
+.tl-fill{ width:100%; height:0; background:linear-gradient(180deg,var(--teal),var(--purple));
+  transition:height .45s ease; box-shadow:0 0 12px rgba(6,245,205,0.5); }
+.tl-row{ position:relative; display:flex; margin:22px 0; opacity:0.28; transition:opacity .4s; cursor:pointer; }
+.tl-row.left{ justify-content:flex-start; } .tl-row.right{ justify-content:flex-end; }
+.tl-row.on{ opacity:1; }
+.tl-dot{ position:absolute; left:50%; top:16px; transform:translateX(-50%); width:36px; height:36px;
+  border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;
+  color:var(--mut); background:#14151b; border:2px solid rgba(255,255,255,0.22); z-index:1; transition:all .3s; }
+.tl-row.done .tl-dot, .tl-row.current .tl-dot{
+  background:linear-gradient(135deg,var(--teal),var(--purple)); color:#0a0a0a; border-color:transparent; }
+.tl-row.current .tl-dot{ animation:dotpulse 1.1s ease infinite; }
+.tl-card{ width:44%; padding:13px 16px; border-radius:12px; background:#12141a;
+  border:1px solid var(--line); position:relative; transition:all .3s; }
+.tl-card::after{ content:''; position:absolute; top:32px; width:5%; height:2px; background:rgba(255,255,255,0.14); }
+.tl-row.left .tl-card::after{ left:100%; } .tl-row.right .tl-card::after{ right:100%; }
+.tl-row.current .tl-card{ border-color:var(--teal); box-shadow:0 0 26px rgba(6,245,205,0.15); }
+.tl-row.done .tl-card::after, .tl-row.current .tl-card::after{ background:var(--teal); }
+
+/* ---------- interview popup (data collection before sketching) ---------- */
+#ivOverlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(5,6,8,0.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); z-index:60; }
+.iv-card{ width:min(500px,92vw); background:#101116; border:1px solid rgba(6,245,205,0.35);
+  border-radius:16px; padding:20px 22px; box-shadow:0 20px 80px rgba(0,0,0,0.6), 0 0 50px rgba(6,245,205,0.08); }
+.iv-head{ display:flex; align-items:center; justify-content:space-between; font-weight:800; font-size:15px; margin-bottom:8px;}
+.iv-x{ width:30px; height:30px; border-radius:8px; }
+.iv-msg{ font-size:12.5px; color:var(--mut); margin-bottom:16px; line-height:1.5; }
+.iv-q{ font-size:15px; font-weight:700; margin-bottom:12px; line-height:1.45; }
+.iv-opts{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+.iv-opt{ font-size:13px; color:var(--teal); background:rgba(6,245,205,0.08); border:1px solid rgba(6,245,205,0.3);
+  padding:8px 16px; border-radius:22px; cursor:pointer; transition:all .15s; }
+.iv-opt:hover{ background:rgba(6,245,205,0.2); }
+.iv-opt.sel{ background:linear-gradient(135deg,var(--teal),var(--purple)); color:#0a0a0a; border-color:transparent; font-weight:700; }
+.iv-free{ width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); border-radius:10px;
+  color:var(--txt); font-size:13px; padding:10px 12px; outline:none; font-family:inherit; margin-bottom:14px; }
+.iv-free:focus{ border-color:rgba(6,245,205,0.4); }
+.iv-foot{ display:flex; align-items:center; gap:10px; }
+.iv-prog{ font-size:11px; color:var(--dim); }
+.iv-btn{ padding:9px 18px; font-size:13px; }
+
+/* toast */
+#toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(80px); transition:transform .3s;
+  background:#16181d; border:1px solid rgba(6,245,205,0.4); color:var(--txt); font-size:13px; padding:12px 20px;
+  border-radius:12px; z-index:50; box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+#toast.show{ transform:translateX(-50%) translateY(0); }
+
+@media (max-width:860px){ .chat-col{ display:none; } }
+</style>
+</head>
+<body>
+
+<!-- ================= TOP BAR ================= -->
+<div class="topbar">
+  <div class="logo" onclick="window.location.href='/dashboard.html'" title="Back to dashboard">⚡ DevAssist</div>
+  <div class="crumb">/</div>
+  <div class="logo grad-text" id="featureName" style="font-size:15px;">Circuit</div>
+  <div class="beta">BETA</div>
+  <div class="meter" id="tokenMeter" style="display:none"
+       title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
+  <div class="model-badge" style="margin-left:auto"><span class="dot-green"></span> GPT-OSS-120B · Groq</div>
+  <div class="avatar" id="avatar">·</div>
+</div>
+
+<!-- ================= START SCREEN ================= -->
+<div id="start">
+  <div class="hero-h1">See it. <span class="grad-text">Don't just read it.</span></div>
+  <div class="hero-sub">Ask <span id="featureNameSub">Circuit</span> anything — an algorithm, a concept, a career roadmap — and get a living diagram
+    you can step through, replay, and play with. Learning, animated.</div>
+  <div class="prompt-box">
+    <textarea id="promptTa" rows="2" placeholder="Try: “explain binary search visually”  ·  “roadmap to become a frontend developer”  ·  “how does bubble sort work?”"></textarea>
+    <div class="prompt-foot">
+      <div class="chip">🎞 Step-by-step</div>
+      <div class="chip">🗺 Infinite board</div>
+      <div class="chip">🔍 Pan &amp; zoom</div>
+      <button class="grad-btn send-btn" onclick="submitPrompt()">Visualize ⚡</button>
+    </div>
+  </div>
+  <div class="tpl-row">
+    <div class="tpl glass" onclick="askFromStart('Explain binary search visually')">
+      <div class="ic">🔍</div><div class="t">Binary Search</div>
+      <div class="d">Watch the search space shrink, step by step. Change the target &amp; replay.</div>
+    </div>
+    <div class="tpl glass" onclick="askFromStart('Roadmap to become a frontend developer')">
+      <div class="ic">🗺️</div><div class="t">Frontend Roadmap</div>
+      <div class="d">The path from zero to frontend developer as an animated journey map.</div>
+    </div>
+    <div class="tpl glass" onclick="askFromStart('How does bubble sort work?')">
+      <div class="ic">🫧</div><div class="t">Bubble Sort</div>
+      <div class="d">Compare, swap, repeat — see the biggest values bubble to the top.</div>
+    </div>
+    <div class="tpl glass" onclick="askFromStart('How does HTTPS keep a connection secure?')">
+      <div class="ic">✨</div><div class="t">Anything else…</div>
+      <div class="d">Recursion, HTTPS, OAuth, system design — Circuit diagrams it all.</div>
+    </div>
+  </div>
+  <div id="myCircuits">
+    <div class="mc-head">🗂 MY CIRCUITS <span class="mc-sub">— reopen a board and continue where you left off</span></div>
+    <div id="mcList"></div>
+  </div>
+  <div class="hero-note">keyboard: Space = play/pause, ←/→ = step · drag board to pan, scroll to zoom · Enter = ask</div>
+</div>
+
+<!-- ================= WORKSPACE ================= -->
+<div id="ws">
+  <div class="chat-col glass">
+    <div class="chat-scroll" id="chatScroll"></div>
+    <div class="chat-input">
+      <input id="followTa" placeholder="Ask a follow-up… e.g. target = 7, or a new question"
+             onkeydown="if(event.key==='Enter')sendFollow()">
+      <button class="grad-btn mini-send" onclick="sendFollow()">➤</button>
+    </div>
+  </div>
+
+  <div class="canvas-col glass">
+    <div class="canvas-head">
+      <div class="viz-title" id="vizTitle">Circuit</div>
+      <div class="tag" id="vizTag">BOARD</div>
+      <div class="sp"></div>
+      <button class="ghost-btn hbtn" id="fsBtn" onclick="toggleFullscreen()" title="Preview full screen — press Esc to exit">⤢ Full screen</button>
+      <button class="ghost-btn hbtn" onclick="exportSVG()">⬇ Export SVG</button>
+      <button class="ghost-btn hbtn" onclick="copySteps()">📋 Copy steps</button>
+      <button class="grad-btn hbtn" onclick="goHome()">✦ New question</button>
+    </div>
+
+    <div id="viewport">
+      <div id="boardEl"></div>
+      <div class="board-hint" id="boardHint" style="display:none">
+        <div class="empty-hint">Nothing on the board yet. Try something like:<br>
+          <b>“explain binary search visually”</b><br><b>“roadmap to become a frontend developer”</b><br>
+          <b>“how does HTTPS work?”</b></div>
+      </div>
+      <div class="zoom-ctrl" data-noexport>
+        <button class="ghost-btn zbtn" onclick="zoomStep(-1)" title="Zoom out">−</button>
+        <div class="zlbl" id="zoomLbl" onclick="zoomReset()" title="Reset zoom to 100%">100%</div>
+        <button class="ghost-btn zbtn" onclick="zoomStep(1)" title="Zoom in">＋</button>
+        <button class="ghost-btn zbtn" onclick="fitActive()" title="Fit current circuit">⛶</button>
+        <button class="ghost-btn zbtn" onclick="fitAll()" title="Fit all circuits">🗺</button>
+        <button class="ghost-btn zbtn" onclick="toggleFullscreen()" title="Preview full screen — press Esc to exit">⤢</button>
+      </div>
+    </div>
+
+    <div class="caption" id="caption"></div>
+    <div class="player glass">
+      <button class="ghost-btn pbtn" onclick="seek(0)" title="Restart">⏮</button>
+      <button class="ghost-btn pbtn" onclick="stepBy(-1)" title="Previous step">◀</button>
+      <button class="grad-btn pbtn main" id="playBtn" onclick="togglePlay()" title="Play / pause">▶</button>
+      <button class="ghost-btn pbtn" onclick="stepBy(1)" title="Next step">▶▶</button>
+      <div class="scrub-wrap">
+        <input type="range" class="scrub" id="scrub" min="0" max="1" value="0" oninput="seek(+this.value)">
+        <div class="scrub-lbl"><span id="stepLbl">Step 0 / 0</span><span id="phaseLbl"></span></div>
+      </div>
+      <select class="speed" id="speedSel" onchange="setSpeed()">
+        <option value="2600">0.5×</option>
+        <option value="1500" selected>1×</option>
+        <option value="800">2×</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- interview popup — collects the user's situation before sketching -->
+<div id="ivOverlay">
+  <div class="iv-card">
+    <div class="iv-head"><span>📝 Let me get your details</span>
+      <button class="iv-x ghost-btn" onclick="closeInterview()" title="Cancel">✕</button></div>
+    <div class="iv-msg" id="ivMsg"></div>
+    <div class="iv-q" id="ivQ"></div>
+    <div class="iv-opts" id="ivOpts"></div>
+    <input id="ivFree" class="iv-free" placeholder="or type your own answer…"
+           onkeydown="if(event.key==='Enter')ivNext()">
+    <div class="iv-foot">
+      <span class="iv-prog mono" id="ivProg"></span>
+      <span style="flex:1"></span>
+      <button class="ghost-btn iv-btn" id="ivBack" onclick="ivBack()">← Back</button>
+      <button class="grad-btn iv-btn" id="ivNextBtn" onclick="ivNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-guard.js"></script>
+<script>
+/* ============================================================
+   CIRCUIT — visual step-by-step answers on an infinite board.
+   The AI engine returns a strict-JSON "circuit spec" (see
+   design-mockups/circuit/SPEC.md); every answer becomes a frame
+   on a pannable/zoomable canvas — new answers land BESIDE the
+   previous ones, nothing disappears.
+   ============================================================ */
+var FEATURE = { NAME: 'Circuit' };   // display name — rename in ONE place
+
+var circuits = [];                    // every sub-circuit on the board, oldest first
+var state = {
+  active: null,                       // the circuit the player controls
+  playing: false, timer: null, interval: 1500,
+  lastPrompt: '', busy: false
+};
+// One board session = ONE saved "circuit" (a collection of sub-circuits).
+// convo is the plain-text transcript sent as LLM context AND persisted.
+var session = { id: null, timer: null };
+var convo = [];
+/* Frames flow like a mind-map: PER_ROW per row with an alternating vertical
+   stagger, then wrap to a fresh row below — not one endless straight line. */
+var board = { x: 40, y: 20, z: 1, pending: null,
+              nextX: 60, rowY: 60, rowBottom: 60, inRow: 0 };
+var FRAME_GAP = 90, ROW_GAP = 140, PER_ROW = 3, STAGGER = 70;
+
+/* ---------------- generic helpers ---------------- */
+function $(id){ return document.getElementById(id); }
+function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove('show'); }, 2600); }
+function addMsg(cls, html){ var d = document.createElement('div'); d.className = cls; d.innerHTML = html;
+  $('chatScroll').appendChild(d); $('chatScroll').scrollTop = 1e9; return d; }
+
+function resetBoard(){
+  pause();
+  circuits.forEach(function(c){ c.frame.remove(); });
+  circuits = []; state.active = null;
+  cancelLoadingFrame();
+  board.x = 40; board.y = 20; board.z = 1;
+  board.nextX = 60; board.rowY = 60; board.rowBottom = 60; board.inRow = 0;
+  applyBoard(); updateBoardHint();
+  $('caption').innerHTML = ''; $('vizTitle').textContent = FEATURE.NAME; $('vizTag').textContent = 'BOARD';
+  $('chatScroll').innerHTML = '';
+}
+function goHome(){
+  clearTimeout(session.timer);
+  if (circuits.length) saveSession();   // final save snapshots synchronously
+  resetBoard();
+  session.id = null; convo = [];
+  $('ws').style.display = 'none'; $('start').style.display = 'flex';
+  loadSessions();
+}
+
+/* ---------------- boot ---------------- */
+document.addEventListener('DOMContentLoaded', async function(){
+  var session = await requireAuth();
+  if (!session) return;
+  var name = getUserDisplayName(session.user);
+  $('avatar').textContent = (name[0] || '·').toUpperCase();
+  $('featureName').textContent = FEATURE.NAME;
+  $('featureNameSub').textContent = FEATURE.NAME;
+  document.title = FEATURE.NAME + ' — DevAssist AI';
+  initBoardControls();
+  refreshUsage();
+  loadSessions();
+});
+
+/* ---------------- token usage meter ---------------- */
+async function refreshUsage(){
+  try {
+    var res = await authFetch('/api/usage');
+    if (!res.ok) return;
+    var u = await res.json();
+    var meter = $('tokenMeter');
+    meter.textContent = '🔋 ' + u.user_tokens.toLocaleString() + ' / ' + u.user_limit.toLocaleString() + ' tokens today';
+    meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
+                      : u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '';
+    meter.style.display = 'flex';
+  } catch (e) { /* the meter is cosmetic — never let it break the page */ }
+}
+
+/* ============================================================
+   BOARD — pan (drag), zoom (wheel / pinch / buttons)
+   ============================================================ */
+function applyBoard(){
+  $('boardEl').style.transform = 'translate(' + board.x + 'px,' + board.y + 'px) scale(' + board.z + ')';
+  $('zoomLbl').textContent = Math.round(board.z * 100) + '%';
+}
+function zoomAt(vx, vy, factor){
+  var nz = Math.min(2.5, Math.max(0.15, board.z * factor));
+  var k = nz / board.z;
+  board.x = vx - (vx - board.x) * k;
+  board.y = vy - (vy - board.y) * k;
+  board.z = nz;
+  applyBoard();
+}
+function zoomStep(dir){
+  var vp = $('viewport').getBoundingClientRect();
+  zoomAt(vp.width / 2, vp.height / 2, dir > 0 ? 1.25 : 0.8);
+}
+function zoomReset(){
+  var vp = $('viewport').getBoundingClientRect();
+  zoomAt(vp.width / 2, vp.height / 2, 1 / board.z);
+}
+/** Center a frame in the viewport, zooming out just enough to see all of it. */
+function fitFrame(frame){
+  if (!frame) return;
+  var vp = $('viewport').getBoundingClientRect();
+  var fw = frame.offsetWidth, fh = frame.offsetHeight;
+  var fx = frame.offsetLeft, fy = frame.offsetTop;
+  var z = Math.min(1.15, (vp.width - 70) / fw, (vp.height - 70) / fh);
+  z = Math.max(0.15, z);
+  board.z = z;
+  board.x = (vp.width - fw * z) / 2 - fx * z;
+  board.y = (vp.height - fh * z) / 2 - fy * z;
+  applyBoard();
+}
+function fitActive(){
+  if (state.active) fitFrame(state.active.frame);
+  else if (circuits.length) fitFrame(circuits[circuits.length - 1].frame);
+}
+function fitAll(){
+  if (!circuits.length) return;
+  var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+  circuits.forEach(function(c){
+    minX = Math.min(minX, c.frame.offsetLeft); minY = Math.min(minY, c.frame.offsetTop);
+    maxX = Math.max(maxX, c.frame.offsetLeft + c.frame.offsetWidth);
+    maxY = Math.max(maxY, c.frame.offsetTop + c.frame.offsetHeight);
+  });
+  var vp = $('viewport').getBoundingClientRect();
+  var z = Math.min(1, (vp.width - 70) / (maxX - minX), (vp.height - 70) / (maxY - minY));
+  z = Math.max(0.15, z);
+  board.z = z;
+  board.x = (vp.width - (maxX - minX) * z) / 2 - minX * z;
+  board.y = (vp.height - (maxY - minY) * z) / 2 - minY * z;
+  applyBoard();
+}
+/** If an element (e.g. the current roadmap stage) is outside the viewport,
+    pan just enough to bring it into view. */
+function keepVisible(el){
+  if (!el) return;
+  var vp = $('viewport').getBoundingClientRect();
+  var r = el.getBoundingClientRect();
+  var m = 40;
+  if (r.top < vp.top + m) board.y += (vp.top + m) - r.top;
+  else if (r.bottom > vp.bottom - m) board.y -= r.bottom - (vp.bottom - m);
+  if (r.left < vp.left + m) board.x += (vp.left + m) - r.left;
+  else if (r.right > vp.right - m) board.x -= r.right - (vp.right - m);
+  applyBoard();
+}
+
+function initBoardControls(){
+  var vp = $('viewport');
+  var drag = null, suppressClick = false;
+
+  // NOTE: no setPointerCapture here — capturing retargets the subsequent
+  // click event to the viewport, which silently breaks click-to-activate
+  // on circuit frames. Drags are tracked on window instead.
+  vp.addEventListener('pointerdown', function(e){
+    if (e.button !== 0) return;
+    if (e.target.closest('input, button, select, textarea, .zoom-ctrl')) return;
+    suppressClick = false;
+    drag = { sx: e.clientX, sy: e.clientY, bx: board.x, by: board.y, moved: false };
+  });
+  window.addEventListener('pointermove', function(e){
+    if (!drag) return;
+    var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (Math.abs(dx) + Math.abs(dy) > 4) { drag.moved = true; vp.classList.add('dragging'); }
+    if (drag.moved){ board.x = drag.bx + dx; board.y = drag.by + dy; applyBoard(); }
+  });
+  window.addEventListener('pointerup', function(){
+    if (drag && drag.moved) suppressClick = true;
+    drag = null; vp.classList.remove('dragging');
+  });
+  window.addEventListener('pointercancel', function(){ drag = null; vp.classList.remove('dragging'); });
+  // a click right after a pan is the end of the pan, not a real click
+  vp.addEventListener('click', function(e){
+    if (suppressClick){ e.stopPropagation(); e.preventDefault(); suppressClick = false; }
+  }, true);
+  // wheel / trackpad pinch = zoom at the cursor
+  vp.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var rect = vp.getBoundingClientRect();
+    zoomAt(e.clientX - rect.left, e.clientY - rect.top, Math.exp(-e.deltaY * 0.0016));
+  }, { passive: false });
+
+  document.addEventListener('fullscreenchange', function(){
+    var on = !!document.fullscreenElement;
+    $('fsBtn').innerHTML = on ? '⤢ Exit (Esc)' : '⤢ Full screen';
+    setTimeout(fitActive, 120); // reframe once the new size settles
+  });
+
+  applyBoard(); updateBoardHint();
+}
+
+/** Native fullscreen on the whole canvas column (board + caption + player).
+    The browser keeps it open until the user presses Esc. */
+function toggleFullscreen(){
+  if (document.fullscreenElement){ document.exitFullscreen(); return; }
+  var el = document.querySelector('.canvas-col');
+  if (!el.requestFullscreen){ toast('Full screen is not available in this browser'); return; }
+  el.requestFullscreen().catch(function(){ toast('Full screen was blocked by the browser'); });
+}
+function updateBoardHint(){
+  $('boardHint').style.display = (circuits.length || board.pending) ? 'none' : 'flex';
+}
+
+/* ---------------- frames ---------------- */
+function makeFrame(title, width){
+  var frame = document.createElement('div');
+  frame.className = 'frame';
+  frame.style.left = board.nextX + 'px';
+  frame.style.top = (board.rowY + (board.inRow % 2 === 1 ? STAGGER : 0)) + 'px';
+  if (width) frame.style.width = width + 'px';
+  frame.innerHTML = '<div class="frame-head"><span class="fdot"></span><span class="ftitle">' + esc(title) + '</span></div>' +
+                    '<div class="frame-body"></div>';
+  $('boardEl').appendChild(frame);
+  return frame;
+}
+
+/** Final placement once real content (and so real size) is in the frame:
+    advance the row slot, wrap to a new row after PER_ROW frames. */
+function placeFrame(frame){
+  var stagger = board.inRow % 2 === 1 ? STAGGER : 0;
+  frame.style.left = board.nextX + 'px';
+  frame.style.top = (board.rowY + stagger) + 'px';
+  board.rowBottom = Math.max(board.rowBottom, board.rowY + stagger + frame.offsetHeight);
+  board.nextX += frame.offsetWidth + FRAME_GAP;
+  board.inRow++;
+  if (board.inRow >= PER_ROW){
+    board.inRow = 0; board.nextX = 60;
+    board.rowY = board.rowBottom + ROW_GAP;
+  }
+}
+function startLoadingFrame(){
+  cancelLoadingFrame();
+  var frame = makeFrame('drawing…', 380);
+  frame.classList.add('frame-loading');
+  frame.querySelector('.frame-body').innerHTML =
+    '<div class="loading-wrap"><div class="loading-dots"><span></span><span></span><span></span></div>' +
+    '<div class="loading-txt">drawing your circuit…</div></div>';
+  board.pending = frame;
+  updateBoardHint();
+  fitFrame(frame);
+  $('vizTag').textContent = 'DRAWING…';
+}
+function cancelLoadingFrame(){
+  if (board.pending){ board.pending.remove(); board.pending = null; }
+  updateBoardHint();
+  if (state.active) $('vizTag').textContent = state.active.viz.tagFor(state.active.data);
+  else $('vizTag').textContent = 'BOARD';
+}
+
+/* ---------------- player (drives the ACTIVE circuit) ---------------- */
+function render(){
+  var c = state.active;
+  if (!c || !c.steps.length) return;
+  var s = c.steps[c.i];
+  c.viz.draw(s, c.i, c);
+  $('caption').innerHTML = s.note || '';
+  $('scrub').max = c.steps.length - 1; $('scrub').value = c.i;
+  $('stepLbl').textContent = 'Step ' + (c.i + 1) + ' / ' + c.steps.length;
+  $('phaseLbl').textContent = s.phase || '';
+  if (c.stepListEl){
+    var rows = c.stepListEl.querySelectorAll('.step');
+    rows.forEach(function(r, k){
+      r.className = 'step' + (k < c.i ? ' done' : k === c.i ? ' active' : '');
+      if (k === c.i) r.scrollIntoView({ block: 'nearest' });
+    });
+  }
+}
+function seek(i){ var c = state.active; if (!c || !c.steps.length) return;
+  c.i = Math.max(0, Math.min(c.steps.length - 1, i)); render(); }
+function stepBy(d){ pause(); var c = state.active; if (c) seek(c.i + d); }
+function togglePlay(){ state.playing ? pause() : play(); }
+function play(){
+  var c = state.active;
+  if (!c || !c.steps.length) return;
+  if (c.i >= c.steps.length - 1) c.i = 0;
+  state.playing = true; $('playBtn').textContent = '⏸'; tick();
+}
+function tick(){
+  state.timer = setTimeout(function(){
+    var c = state.active;
+    if (!state.playing || !c) return;
+    if (c.i < c.steps.length - 1){ c.i++; render(); tick(); }
+    else pause();
+  }, state.interval);
+  render();
+}
+function pause(){ state.playing = false; $('playBtn').textContent = '▶'; clearTimeout(state.timer); }
+function setSpeed(){ state.interval = +$('speedSel').value; }
+document.addEventListener('keydown', function(e){
+  if ($('ws').style.display !== 'flex') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space'){ e.preventDefault(); togglePlay(); }
+  if (e.key === 'ArrowRight') stepBy(1);
+  if (e.key === 'ArrowLeft') stepBy(-1);
+});
+
+/** Make a circuit the one the player controls (clicking its frame or its step list). */
+function activate(c, focus){
+  if (!c || state.active === c){ if (focus) fitFrame(c.frame); return; }
+  pause();
+  state.active = c;
+  circuits.forEach(function(o){ o.frame.classList.toggle('active', o === c); });
+  $('vizTitle').textContent = c.title;
+  $('vizTag').textContent = c.viz.tagFor(c.data);
+  render();
+  if (focus) fitFrame(c.frame);
+}
+
+/* ---------------- asking the AI ---------------- */
+function submitPrompt(){
+  var p = $('promptTa').value.trim();
+  if (!p){ toast('Type a question first ✍️'); return; }
+  askFromStart(p);
+}
+function askFromStart(prompt){
+  $('start').style.display = 'none'; $('ws').style.display = 'flex';
+  $('promptTa').value = '';
+  ask(prompt);
+}
+function sendFollow(){
+  var v = $('followTa').value.trim(); if (!v) return;
+  $('followTa').value = '';
+  if (handleLocalFollowUp(v)) return;
+  ask(v);
+}
+function askSuggestion(text){
+  if (handleLocalFollowUp(text)) return;
+  ask(text);
+}
+
+function plainText(html){
+  var d = document.createElement('div'); d.innerHTML = html == null ? '' : String(html);
+  return d.textContent || '';
+}
+/** The session transcript the LLM sees, so follow-ups continue the topic. */
+function buildContext(){
+  return convo.slice(-10).map(function(m){
+    return (m.role === 'user' ? 'User: ' : 'Circuit: ') + m.text;
+  }).join('\n').slice(-1500);
+}
+
+async function ask(prompt, displayText){
+  if (state.busy){ toast('One moment — still drawing the last circuit ✏️'); return; }
+  state.busy = true;
+  state.lastPrompt = prompt;
+  pause();
+  addMsg('msg-user', esc(displayText || prompt));
+  var context = buildContext();
+  convo.push({ role: 'user', text: String(prompt).slice(0, 400) });
+  startLoadingFrame();
+  try {
+    var res = await authFetch('/api/circuit/ask', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: prompt, context: context })
+    });
+    var data = null;
+    try { data = await res.json(); } catch (e) { /* non-JSON body */ }
+    refreshUsage();
+    if (res.status === 429){ aiError(quotaMessage(data), true); return; }
+    if (!res.ok || !data){ aiError('The AI engine had a problem drawing that circuit.', true); return; }
+    if (data.status === 'interview'){
+      cancelLoadingFrame();
+      convo.push({ role: 'ai', text: 'asked for details: ' + String(data.message || '').slice(0, 200) });
+      openInterview(data);
+      return;
+    }
+    if (data.status === 'needs_detail'){
+      cancelLoadingFrame();
+      convo.push({ role: 'ai', text: String(data.message || '').slice(0, 200) });
+      addMsg('msg-ai', esc(data.message || 'Could you tell me a bit more about what you want to see?'));
+      return;
+    }
+    if (data.status !== 'ok' || !data.circuit){ aiError(data.message || 'Something went wrong.', true); return; }
+    var c = specToCircuit(data.circuit, prompt, displayText || prompt);
+    mountCircuit(c, { autoplay: true });
+    convo.push({ role: 'ai', text: 'drew "' + c.title + '": ' + plainText(c.intro).slice(0, 200) });
+    scheduleSave();
+  } catch (e) {
+    if (e && e.message === 'Not authenticated') return;
+    aiError('Could not reach the server. Check your connection.', true);
+  } finally {
+    state.busy = false;
+  }
+}
+
+function quotaMessage(data){
+  if (data && data.status === 'quota'){
+    return data.scope === 'global'
+      ? 'DevAssist has used up its shared AI capacity for today. It resets at midnight UTC — see you then! 🌙'
+      : 'You\'ve used your personal AI tokens for today. They reset at midnight UTC. 🌙';
+  }
+  return (data && data.message) || 'Circuit is busy right now. Please try again in a minute.';
+}
+
+/* ---------------- interview popup flow ---------------- */
+var interview = null;
+function openInterview(data){
+  var questions = data.questions || [];
+  if (!questions.length){
+    addMsg('msg-ai', esc(data.message || 'Could you tell me a bit more?'));
+    return;
+  }
+  interview = { questions: questions, answers: [], idx: 0, original: state.lastPrompt };
+  addMsg('msg-ai', esc(data.message || 'A few quick questions first') + ' — answer the popup and I\'ll sketch your personal circuit 📝');
+  $('ivMsg').textContent = data.message || 'A few quick questions so I can draw YOUR map:';
+  $('ivOverlay').style.display = 'flex';
+  ivRender();
+}
+function ivRender(){
+  var q = interview.questions[interview.idx];
+  $('ivProg').textContent = 'question ' + (interview.idx + 1) + ' / ' + interview.questions.length;
+  $('ivQ').textContent = q.q;
+  var opts = $('ivOpts'); opts.innerHTML = '';
+  (q.options || []).forEach(function(o){
+    var b = document.createElement('div');
+    b.className = 'iv-opt' + (interview.answers[interview.idx] === o ? ' sel' : '');
+    b.textContent = o;
+    b.onclick = function(){ $('ivFree').value = ''; interview.answers[interview.idx] = o; ivNext(); };
+    opts.appendChild(b);
+  });
+  var free = $('ivFree');
+  var cur = interview.answers[interview.idx] || '';
+  free.value = (q.options || []).indexOf(cur) === -1 ? cur : '';
+  free.placeholder = (q.options || []).length ? 'or type your own answer…' : 'type your answer…';
+  $('ivBack').style.visibility = interview.idx ? 'visible' : 'hidden';
+  $('ivNextBtn').textContent = interview.idx === interview.questions.length - 1 ? 'Sketch my circuit ⚡' : 'Next →';
+  free.focus();
+}
+function ivBack(){ if (interview && interview.idx > 0){ interview.idx--; ivRender(); } }
+function ivNext(){
+  if (!interview) return;
+  var typed = $('ivFree').value.trim();
+  if (typed) interview.answers[interview.idx] = typed;
+  if (!interview.answers[interview.idx]){ toast('Pick an option or type an answer 🙂'); return; }
+  if (interview.idx < interview.questions.length - 1){ interview.idx++; ivRender(); return; }
+  finishInterview();
+}
+function finishInterview(){
+  var iv = interview;
+  closeInterview();
+  var lines = iv.questions.map(function(q, i){
+    return '- ' + q.q + ' -> ' + (iv.answers[i] || '(skipped)');
+  });
+  var full = iv.original + '\n\nMy details (answers to your questions):\n' + lines.join('\n') +
+    '\nNow draw the complete, detailed circuit from my current state to the goal, ' +
+    'with small concrete steps at every stage. Do not ask more questions.';
+  ask(full, '📝 My details: ' + iv.answers.join(' · '));
+}
+function closeInterview(){ interview = null; $('ivOverlay').style.display = 'none'; }
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && interview) closeInterview();
+});
+
+function aiError(message, retryable){
+  cancelLoadingFrame();
+  var m = addMsg('msg-ai msg-err', esc(message));
+  if (retryable){
+    var row = document.createElement('div'); row.className = 'sugg-row';
+    var chip = document.createElement('div'); chip.className = 'sugg'; chip.textContent = '↻ Retry';
+    chip.onclick = function(){ ask(state.lastPrompt); };
+    row.appendChild(chip); m.appendChild(row);
+  }
+}
+
+/* ---------------- loading a circuit spec onto the board ---------------- */
+function specToCircuit(spec, promptFull, promptShown){
+  var vizKey = RENDERERS[spec.viz_type] ? spec.viz_type : 'text-steps';
+  return {
+    id: circuits.length,
+    title: spec.title || FEATURE.NAME,
+    viz: RENDERERS[vizKey], vizKey: vizKey,
+    data: spec.data || {},
+    steps: (spec.steps || []).map(function(s){
+      var flat = Object.assign({}, s.state || {});
+      flat.short = s.short; flat.note = s.note;
+      return flat;
+    }),
+    i: 0,
+    prompt: promptFull || '', shownPrompt: promptShown || promptFull || '',
+    intro: spec.intro || '', suggestions: spec.suggestions || [],
+    frame: null, stepListEl: null
+  };
+}
+
+/** Put a circuit on the board + into the chat. Used by live asks AND by
+    rebuilding a saved session (opts.addUserMsg replays the user's message). */
+function mountCircuit(c, opts){
+  opts = opts || {};
+  if (opts.addUserMsg && c.shownPrompt) addMsg('msg-user', esc(c.shownPrompt));
+
+  // the loading placeholder (if any) becomes this circuit's frame
+  var frame = board.pending || makeFrame(c.title, null);
+  board.pending = null;
+  frame.classList.remove('frame-loading');
+  frame.style.width = c.viz.frameWidth ? c.viz.frameWidth + 'px' : '';
+  frame.querySelector('.ftitle').textContent = c.title;
+  c.frame = frame;
+  frame.addEventListener('click', function(e){
+    if (e.target.closest('input, button, select')) return;
+    activate(c, false);
+  });
+
+  c.viz.mount(frame.querySelector('.frame-body'), c.data, c);
+  placeFrame(frame);
+
+  // chat: intro + step list + suggestion chips
+  var m = addMsg('msg-ai', c.intro || '');
+  appendStepList(m, c);
+  if ((c.suggestions || []).length){
+    var row = document.createElement('div'); row.className = 'sugg-row';
+    c.suggestions.forEach(function(txt){
+      var chip = document.createElement('div'); chip.className = 'sugg'; chip.textContent = txt;
+      chip.onclick = function(){ askSuggestion(txt); };
+      row.appendChild(chip);
+    });
+    m.appendChild(row);
+  }
+
+  circuits.push(c);
+  updateBoardHint();
+  state.active = null;          // force activate() to do the full switch
+  activate(c, opts.focus !== false);
+  if (opts.autoplay) setTimeout(play, 600);
+}
+
+/* ---------------- saved sessions (MY CIRCUITS) ---------------- */
+function sessionPayload(){
+  return {
+    convo: convo.slice(-40),
+    circuits: circuits.map(function(c){
+      return { prompt: c.prompt, shownPrompt: c.shownPrompt, intro: c.intro,
+               suggestions: c.suggestions, title: c.title, viz: c.vizKey,
+               data: c.data, steps: c.steps, i: c.i };
+    })
+  };
+}
+function scheduleSave(){
+  clearTimeout(session.timer);
+  session.timer = setTimeout(saveSession, 1200);
+}
+async function saveSession(){
+  if (!circuits.length) return;
+  // snapshot NOW — goHome clears the board right after its final save call
+  var body = JSON.stringify({ title: circuits[0].title,
+                              payload: sessionPayload(),
+                              subCount: circuits.length });
+  try {
+    if (session.id){
+      await authFetch('/api/circuit/sessions/' + session.id, { method: 'PUT', body: body });
+    } else {
+      var res = await authFetch('/api/circuit/sessions', { method: 'POST', body: body });
+      if (res.ok){ var d = await res.json(); if (d && d.id) session.id = d.id; }
+    }
+  } catch (e) { /* saving is best-effort — never break the board */ }
+}
+async function loadSessions(){
+  try {
+    var res = await authFetch('/api/circuit/sessions');
+    if (!res.ok) return;
+    var list = await res.json();
+    var box = $('myCircuits'), el = $('mcList');
+    if (!Array.isArray(list) || !list.length){ box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    el.innerHTML = '';
+    list.forEach(function(s){
+      var row = document.createElement('div'); row.className = 'mc-row glass';
+      var main = document.createElement('div'); main.className = 'mc-main';
+      main.innerHTML = '<div class="mc-title">' + esc(s.title) + '</div>' +
+        '<div class="mc-meta">⚡ ' + s.subCount + ' sub-circuit' + (s.subCount === 1 ? '' : 's') +
+        ' · ' + niceDate(s.updatedAt) + '</div>';
+      var open = document.createElement('button'); open.className = 'grad-btn mc-btn';
+      open.textContent = 'Open ▸';
+      open.onclick = function(){ openSession(s.id); };
+      var del = document.createElement('button'); del.className = 'ghost-btn mc-btn';
+      del.textContent = '🗑'; del.title = 'Delete this circuit';
+      del.onclick = function(){ deleteSession(s.id, s.title, row); };
+      row.appendChild(main); row.appendChild(open); row.appendChild(del);
+      el.appendChild(row);
+    });
+  } catch (e) { /* gallery is best-effort */ }
+}
+function niceDate(iso){
+  try { return new Date(iso).toLocaleString(undefined,
+        { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+  catch (e) { return ''; }
+}
+async function deleteSession(id, title, row){
+  if (!confirm('Delete "' + title + '"? This cannot be undone.')) return;
+  try {
+    var res = await authFetch('/api/circuit/sessions/' + id, { method: 'DELETE' });
+    if (res.ok){
+      row.remove();
+      if (session.id === id) session.id = null;
+      if (!$('mcList').children.length) $('myCircuits').style.display = 'none';
+      toast('Circuit deleted 🗑');
+    } else toast('Could not delete right now');
+  } catch (e) { toast('Could not delete right now'); }
+}
+async function openSession(id){
+  try {
+    var res = await authFetch('/api/circuit/sessions/' + id);
+    if (!res.ok){ toast('Could not open that circuit'); return; }
+    rebuildSession(await res.json());
+  } catch (e) { toast('Could not open that circuit'); }
+}
+function rebuildSession(saved){
+  $('start').style.display = 'none'; $('ws').style.display = 'flex';
+  resetBoard();
+  session.id = saved.id;
+  var p = saved.payload || {};
+  convo = Array.isArray(p.convo) ? p.convo : [];
+  (p.circuits || []).forEach(function(sc){
+    var c = {
+      id: circuits.length,
+      title: sc.title || FEATURE.NAME,
+      viz: RENDERERS[sc.viz] || RENDERERS['text-steps'],
+      vizKey: RENDERERS[sc.viz] ? sc.viz : 'text-steps',
+      data: sc.data || {},
+      steps: Array.isArray(sc.steps) ? sc.steps : [],
+      i: Math.max(0, Math.min(sc.i || 0, (sc.steps || []).length - 1)),
+      prompt: sc.prompt || '', shownPrompt: sc.shownPrompt || sc.prompt || '',
+      intro: sc.intro || '', suggestions: sc.suggestions || [],
+      frame: null, stepListEl: null
+    };
+    mountCircuit(c, { addUserMsg: true, autoplay: false, focus: false });
+  });
+  if (circuits.length){
+    activate(circuits[circuits.length - 1], false);
+    fitAll();
+    toast('Circuit restored — continue where you left off ▶');
+  } else {
+    updateBoardHint();
+  }
+}
+
+/** Numbered clickable step list appended to a chat message, synced with the player. */
+function appendStepList(msgEl, c){
+  var list = document.createElement('div'); list.className = 'steps';
+  c.steps.forEach(function(s, k){
+    var r = document.createElement('div'); r.className = 'step';
+    var n = document.createElement('span'); n.className = 'n'; n.textContent = k + 1;
+    var t = document.createElement('span'); t.textContent = s.short || '';
+    r.appendChild(n); r.appendChild(t);
+    r.onclick = function(){ activate(c, true); pause(); seek(k); };
+    list.appendChild(r);
+  });
+  c.stepListEl = list;
+  msgEl.appendChild(list);
+  $('chatScroll').scrollTop = 1e9;
+}
+
+/* ---------------- local re-runs (your own test cases, zero tokens) ---------------- */
+function parseNumbers(text){
+  return String(text || '').split(/[,\s]+/)
+    .map(function(x){ return Number(x); })
+    .filter(function(n){ return isFinite(n); })
+    .slice(0, 24);
+}
+
+/** "target = 7", "values = 3, 9, 27" → local replay on the ACTIVE circuit when
+    we know the algorithm. Returns true when handled without an LLM call. */
+function handleLocalFollowUp(text){
+  var c = state.active;
+  var algo = c && c.data && c.data.algorithm;
+  var mT = text.match(/^\s*target\s*=?\s*(-?\d+(?:\.\d+)?)\s*$/i);
+  var mV = text.match(/^\s*(?:values|array|test\s*case)\s*=?\s*([-\d,.\s]+)$/i);
+  if (mT && c && c.viz === RENDERERS.array && algo === 'binary-search'){
+    addMsg('msg-user', esc(text));
+    rerunArray(+mT[1], c.data.values);
+    return true;
+  }
+  if (mV){
+    var vals = parseNumbers(mV[1]);
+    if (vals.length < 2){ toast('Give me at least two numbers, e.g. values = 5, 2, 8'); return true; }
+    if (c && c.viz === RENDERERS.array && algo === 'binary-search'){
+      addMsg('msg-user', esc(text));
+      rerunArray(c.data.target, vals);
+      return true;
+    }
+    if (c && c.viz === RENDERERS.bars && algo === 'bubble-sort'){
+      addMsg('msg-user', esc(text));
+      rerunBars(vals);
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Replace the ACTIVE circuit's steps with a locally simulated run. */
+function applyLocalRerun(c, msgHtml){
+  pause();
+  c.i = 0;
+  c.viz.mount(c.frame.querySelector('.frame-body'), c.data, c);
+  addMsg('msg-ai', msgHtml);
+  appendStepList(addMsg('msg-ai', ''), c);
+  render();
+  fitFrame(c.frame);
+  convo.push({ role: 'ai', text: 're-ran ' + (c.data.algorithm || 'the circuit') + ' locally with a custom test case' });
+  scheduleSave();
+  setTimeout(play, 400);
+}
+function rerunArray(target, values){
+  var c = state.active; if (!c) return;
+  var sorted = values.slice().sort(function(a, b){ return a - b; });
+  c.data = { algorithm: 'binary-search', values: sorted, target: target };
+  c.steps = bsStepsFor(sorted, target);
+  applyLocalRerun(c, 'Re-running <b>binary search</b> with target = <b>' + esc(target) +
+    '</b> on <span class="mono">[' + sorted.join(', ') + ']</span> — computed right here in your browser, zero tokens ⚡');
+}
+function rerunBars(values){
+  var c = state.active; if (!c) return;
+  c.data = { algorithm: 'bubble-sort', values: values.slice() };
+  c.steps = bubbleStepsFor(values.slice());
+  applyLocalRerun(c, 'Re-running <b>bubble sort</b> on <span class="mono">[' + values.join(', ') +
+    ']</span> — computed right here in your browser, zero tokens ⚡');
+}
+
+/** Client-side binary search step generator (same shape as the LLM's steps). */
+function bsStepsFor(a, t){
+  var st = [], lo = 0, hi = a.length - 1, n = 0;
+  st.push({ lo: lo, hi: hi, mid: -1, phase: 'setup', short: 'Start: search space = whole array',
+    note: 'The array is <b>sorted</b> — that\'s what makes binary search possible. Search space: indexes <span class="mono">' + lo + '–' + hi + '</span>. Target = <span class="mono">' + t + '</span>.' });
+  while (lo <= hi){
+    var mid = (lo + hi) >> 1; n++;
+    if (a[mid] === t){
+      st.push({ lo: lo, hi: hi, mid: mid, found: true, phase: 'found', short: 'arr[' + mid + '] = ' + a[mid] + ' → FOUND 🎯',
+        note: '<span class="mono">mid = ⌊(' + lo + '+' + hi + ')/2⌋ = ' + mid + '</span>. arr[' + mid + '] = <b>' + a[mid] + '</b> equals the target — <b>found in ' + n + ' comparison' + (n > 1 ? 's' : '') + '</b> (linear search could need up to ' + a.length + ') 🎯' });
+      return st;
+    }
+    if (a[mid] < t){
+      st.push({ lo: lo, hi: hi, mid: mid, phase: 'compare #' + n, short: 'arr[' + mid + '] = ' + a[mid] + ' < ' + t + ' → go right',
+        note: '<span class="mono">mid = ' + mid + '</span>, arr[' + mid + '] = <b>' + a[mid] + '</b> &lt; ' + t + ' → the target can only be <b>right</b> of mid. Discard the left half.' });
+      lo = mid + 1;
+    } else {
+      st.push({ lo: lo, hi: hi, mid: mid, phase: 'compare #' + n, short: 'arr[' + mid + '] = ' + a[mid] + ' > ' + t + ' → go left',
+        note: '<span class="mono">mid = ' + mid + '</span>, arr[' + mid + '] = <b>' + a[mid] + '</b> &gt; ' + t + ' → the target can only be <b>left</b> of mid. Discard the right half.' });
+      hi = mid - 1;
+    }
+  }
+  st.push({ lo: lo, hi: hi, mid: -1, empty: true, phase: 'not found', short: 'Search space empty → not present',
+    note: 'low &gt; high — the search space is <b>empty</b>. <span class="mono">' + t + '</span> is not in the array. Total comparisons: ' + n + ' (O(log n)).' });
+  return st;
+}
+
+/** Client-side bubble sort step generator (same shape as the LLM's steps). */
+function bubbleStepsFor(a){
+  var st = [], n = a.length;
+  st.push({ a: a.slice(), cmp: [], srt: n, phase: 'setup', short: 'Unsorted array — let\'s bubble!',
+    note: 'Bubble sort repeatedly walks the array, <b>swapping neighbours that are out of order</b>. After each pass the largest remaining value has "bubbled" to the end.' });
+  for (var pass = 0; pass < n - 1; pass++){
+    var swapped = false;
+    for (var j = 0; j < n - 1 - pass; j++){
+      if (a[j] > a[j + 1]){
+        var tmp = a[j]; a[j] = a[j + 1]; a[j + 1] = tmp; swapped = true;
+        st.push({ a: a.slice(), cmp: [j, j + 1], swap: true, srt: n - pass, phase: 'pass ' + (pass + 1),
+          short: 'swap ' + a[j + 1] + ' ↔ ' + a[j],
+          note: '<span class="mono">' + a[j + 1] + ' &gt; ' + a[j] + '</span> → out of order → <b>swap</b>. Bigger values drift right like bubbles rising. (pass ' + (pass + 1) + ')' });
+      }
+    }
+    st.push({ a: a.slice(), cmp: [], srt: n - pass - 1, phase: 'pass ' + (pass + 1) + ' done',
+      short: 'Pass ' + (pass + 1) + ' done — ' + a[n - 1 - pass] + ' locked in',
+      note: 'End of pass ' + (pass + 1) + ': <b>' + a[n - 1 - pass] + '</b> is in its final position (green). ' + (swapped ? '' : 'No swaps happened — the array is already sorted, so we can stop early. ') });
+    if (!swapped) break;
+  }
+  st.push({ a: a.slice(), cmp: [], srt: 0, phase: 'sorted', short: 'Fully sorted ✅',
+    note: '<b>Sorted!</b> Bubble sort is <span class="mono">O(n²)</span> — lovely to watch, painful at scale. Great for learning, never for production. ✅' });
+  return st;
+}
+
+/* ============================================================
+   RENDERERS — one per viz_type.
+   Interface: tagFor(data), frameWidth, mount(bodyEl, data, ctx),
+   draw(step, index, ctx) — all DOM lookups scoped to ctx.frame.
+   ============================================================ */
+var RENDERERS = {};
+
+/* ---------- array (binary search & friends) ---------- */
+RENDERERS.array = {
+  frameWidth: 900,
+  tagFor: function(data){ return data.algorithm === 'binary-search' ? 'PLAY WITH IT' : 'STEP-BY-STEP'; },
+  mount: function(el, data){
+    var play = '';
+    if (data.algorithm === 'binary-search'){
+      play = '<div class="bs-play" data-noexport>🕹 <b>Your test case:</b> target ' +
+        '<input class="tgt mono" type="number" value="' + esc(data.target) + '"> ' +
+        'values <input class="vals mono" placeholder="e.g. 2, 5, 8, 12" value="' + esc((data.values || []).join(', ')) + '">' +
+        '<button class="grad-btn" onclick="runArrayTestCase(this)">Run ⚡</button>' +
+        '<span style="color:var(--faint)">values are sorted automatically</span></div>';
+    }
+    el.innerHTML = '<div class="bs-wrap">' + play +
+      '<div class="cells"></div>' +
+      '<div class="legend">' +
+      '<span class="lg"><span class="sw" style="background:rgba(251,191,36,0.4);border:1px solid #fbbf24"></span><b>mid</b> — being compared</span>' +
+      '<span class="lg"><span class="sw" style="background:rgba(74,222,128,0.4);border:1px solid #4ade80"></span><b>found</b></span>' +
+      '<span class="lg"><span class="sw" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.3)"></span>in search space</span>' +
+      '<span class="lg"><span class="sw" style="background:rgba(255,255,255,0.03);opacity:0.3;border:1px solid rgba(255,255,255,0.2)"></span>discarded</span>' +
+      '</div></div>';
+  },
+  draw: function(s, idx, c){
+    var values = c.data.values || [];
+    var lo = typeof s.lo === 'number' ? s.lo : 0;
+    var hi = typeof s.hi === 'number' ? s.hi : values.length - 1;
+    var mid = typeof s.mid === 'number' ? s.mid : -1;
+    var html = '';
+    values.forEach(function(v, k){
+      var cls = 'cell', ptr = '';
+      if (k < lo || k > hi || s.empty) cls += ' dead';
+      if (k === mid) cls += (s.found ? ' found' : ' mid');
+      if (!s.empty){
+        if (k === lo && k === hi) ptr = '<span class="ptr lo">LO·HI</span>';
+        else if (k === lo) ptr = '<span class="ptr lo">LOW</span>';
+        else if (k === hi) ptr = '<span class="ptr hi">HIGH</span>';
+        else if (k === mid) ptr = '<span class="ptr md">MID</span>';
+        else ptr = '<span class="ptr"></span>';
+      } else ptr = '<span class="ptr"></span>';
+      html += '<div class="cellbox"><span class="idx">' + k + '</span><div class="' + cls + '">' + esc(v) + '</div>' + ptr + '</div>';
+    });
+    var cells = c.frame.querySelector('.cells'); if (cells) cells.innerHTML = html;
+  }
+};
+function runArrayTestCase(btn){
+  var wrap = btn.closest('.bs-play');
+  var t = Number(wrap.querySelector('input.tgt').value);
+  var vals = parseNumbers(wrap.querySelector('input.vals').value);
+  if (!isFinite(t)){ toast('Give me a numeric target 🎯'); return; }
+  if (vals.length < 2){ toast('Give me at least two numbers to search in'); return; }
+  var c = circuitOf(btn); if (c) activate(c, false);
+  rerunArray(t, vals);
+}
+/** Which circuit does a DOM node inside a frame belong to? */
+function circuitOf(el){
+  var frame = el.closest('.frame');
+  for (var k = 0; k < circuits.length; k++) if (circuits[k].frame === frame) return circuits[k];
+  return null;
+}
+
+/* ---------- bars (sorting) ---------- */
+RENDERERS.bars = {
+  frameWidth: 700,
+  tagFor: function(data){ return data.algorithm === 'bubble-sort' ? 'PLAY WITH IT' : 'ANIMATED'; },
+  mount: function(el, data){
+    var play = '';
+    if (data.algorithm === 'bubble-sort'){
+      play = '<div class="bs-play" data-noexport>🕹 <b>Your test case:</b> values ' +
+        '<input class="vals mono" placeholder="e.g. 42, 17, 89, 5" value="' + esc((data.values || []).join(', ')) + '">' +
+        '<button class="grad-btn" onclick="runBarsTestCase(this)">Run ⚡</button></div>';
+    }
+    el.innerHTML = '<div class="bs-wrap">' + play + '<div class="bars"></div>' +
+      '<div class="legend">' +
+      '<span class="lg"><span class="sw" style="background:rgba(251,191,36,0.4);border:1px solid #fbbf24"></span><b>comparing</b></span>' +
+      '<span class="lg"><span class="sw" style="background:rgba(244,114,182,0.4);border:1px solid #f472b6"></span><b>swapped</b></span>' +
+      '<span class="lg"><span class="sw" style="background:rgba(74,222,128,0.4);border:1px solid #4ade80"></span><b>sorted — locked in</b></span>' +
+      '</div></div>';
+  },
+  draw: function(s, idx, c){
+    var base = c.data.values || [];
+    var arr = Array.isArray(s.a) ? s.a : base;
+    var max = Math.max.apply(null, base.length ? base : [1]);
+    var cmp = Array.isArray(s.cmp) ? s.cmp : [];
+    var srt = typeof s.srt === 'number' ? s.srt : arr.length;
+    var html = '';
+    arr.forEach(function(v, k){
+      var cls = 'bar';
+      if (k >= srt) cls += ' srt';
+      else if (cmp.indexOf(k) > -1) cls += (s.swap ? ' swp' : ' cmp');
+      html += '<div class="barbox"><div class="' + cls + '" style="height:' + (28 + (v / max) * 160) + 'px;width:44px;">' + esc(v) + '</div><span class="idx">' + k + '</span></div>';
+    });
+    var bars = c.frame.querySelector('.bars'); if (bars) bars.innerHTML = html;
+  }
+};
+function runBarsTestCase(btn){
+  var vals = parseNumbers(btn.closest('.bs-play').querySelector('input.vals').value)
+    .filter(function(n){ return n > 0; });
+  if (vals.length < 2){ toast('Give me at least two positive numbers to sort'); return; }
+  var c = circuitOf(btn); if (c) activate(c, false);
+  rerunBars(vals);
+}
+
+/* ---------- flowchart (roadmaps / processes) — winding journey trail ---------- */
+/** Draw the S-shaped trail through the milestone dots and prepare the
+    gradient "progress" path (revealed with the stroke-dash trick). */
+function buildTrail(jz){
+  var svg = jz.querySelector('.jz-svg');
+  var rows = jz.querySelectorAll('.jz-row');
+  if (!rows.length) return;
+  var cr = jz.getBoundingClientRect(), z = board.z || 1;
+  var pts = [], bands = [];
+  rows.forEach(function(row){
+    var dot = row.querySelector('.jz-dot');
+    var r = dot.getBoundingClientRect();
+    pts.push({ x: (r.left - cr.left + r.width / 2) / z, y: (r.top - cr.top + r.height / 2) / z });
+    var rr = row.getBoundingClientRect();
+    bands.push({ top: (rr.top - cr.top) / z, bottom: (rr.bottom - cr.top) / z });
+  });
+  svg.setAttribute('viewBox', '0 0 ' + jz.offsetWidth + ' ' + jz.offsetHeight);
+  // Circuit-trace routing: drop out of a dot, run through the EMPTY corridor
+  // between the two rows, then rise into the next dot — the wire never crosses
+  // a card, no matter how tall the cards are.
+  var d = 'M ' + pts[0].x + ' ' + pts[0].y;
+  for (var i = 1; i < pts.length; i++){
+    var a = pts[i - 1], b = pts[i];
+    var my = (bands[i - 1].bottom + bands[i].top) / 2;
+    my = Math.max(a.y + 18, Math.min(my, b.y - 18));
+    var r = Math.max(2, Math.min(16, Math.abs(b.x - a.x) / 2, my - a.y, b.y - my));
+    var s = b.x > a.x ? 1 : -1;
+    d += ' L ' + a.x + ' ' + (my - r) +
+         ' Q ' + a.x + ' ' + my + ' ' + (a.x + s * r) + ' ' + my +
+         ' L ' + (b.x - s * r) + ' ' + my +
+         ' Q ' + b.x + ' ' + my + ' ' + b.x + ' ' + (my + r) +
+         ' L ' + b.x + ' ' + b.y;
+  }
+  var base = svg.querySelector('.jz-base'), prog = svg.querySelector('.jz-prog');
+  base.setAttribute('d', d); prog.setAttribute('d', d);
+  var len = prog.getTotalLength();
+  prog.setAttribute('stroke-dasharray', len);
+  prog.setAttribute('data-len', len);
+  prog.style.strokeDashoffset = len;
+}
+
+RENDERERS.flowchart = {
+  frameWidth: 920,
+  tagFor: function(){ return 'JOURNEY MAP'; },
+  mount: function(el, data, c){
+    var stages = data.stages || [];
+    var html = '<div class="jz">' +
+      '<svg class="jz-svg"><defs><linearGradient id="jzg' + c.id + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#06f5cd"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>' +
+      '<path class="jz-base" d="" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="3" stroke-dasharray="7 7"/>' +
+      '<path class="jz-prog" d="" fill="none" stroke="url(#jzg' + c.id + ')" stroke-width="3.5" stroke-linecap="round"/>' +
+      '</svg>';
+    stages.forEach(function(r, k){
+      html += '<div class="jz-row ' + (k % 2 ? 'right' : 'left') + '" data-k="' + k + '"><div class="jz-item">' +
+        '<div class="jz-dot">' + (k + 1) + '</div>' +
+        '<div class="jz-card"><div class="rhead"><div class="rt">' + esc(r.title) + '</div>' +
+        (r.duration ? '<div class="rdur">' + esc(r.duration) + '</div>' : '') + '</div>' +
+        (r.desc ? '<div class="rd">' + esc(r.desc) + '</div>' : '') +
+        (Array.isArray(r.items) && r.items.length ? '<div class="jz-items">' +
+          r.items.slice(0, 8).map(function(it){ return '<div class="jz-it">' + esc(it) + '</div>'; }).join('') + '</div>' : '') +
+        (Array.isArray(r.tags) && r.tags.length ? '<div class="rtags">' +
+          r.tags.map(function(t){ return '<span class="rtag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+        '</div></div></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+    el.querySelectorAll('.jz-row').forEach(function(row){
+      row.addEventListener('click', function(){
+        activate(c, false); pause(); seekStage(c, +row.getAttribute('data-k'));
+      });
+    });
+    buildTrail(el.querySelector('.jz'));
+  },
+  draw: function(s, idx, c){
+    var stages = c.data.stages || [];
+    var k = typeof s.k === 'number' ? s.k : idx - 1;
+    var finished = k >= stages.length;
+    var current = null;
+    c.frame.querySelectorAll('.jz-row').forEach(function(row){
+      var j = +row.getAttribute('data-k');
+      row.className = 'jz-row ' + (j % 2 ? 'right' : 'left') +
+        ((finished || j <= k) ? ' on' : '') +
+        ((finished || j < k) ? ' done' : '') +
+        (j === k ? ' current' : '');
+      if (j === k) current = row;
+    });
+    var prog = c.frame.querySelector('.jz-prog');
+    if (prog){
+      var len = +prog.getAttribute('data-len') || 0;
+      var frac = finished ? 1
+               : k <= 0 ? 0
+               : stages.length > 1 ? k / (stages.length - 1) : 1;
+      prog.style.strokeDashoffset = len * (1 - frac);
+    }
+    if (current && c === state.active) keepVisible(current);
+  }
+};
+/** A stage click jumps the player to the step whose state.k matches. */
+function seekStage(c, k){
+  for (var i = 0; i < c.steps.length; i++){
+    if (c.steps[i].k === k){ seek(i); return; }
+  }
+  seek(Math.min(k + 1, c.steps.length - 1));
+}
+
+/* ---------- text-steps (universal fallback) — filling timeline spine ---------- */
+RENDERERS['text-steps'] = {
+  frameWidth: 920,
+  tagFor: function(){ return 'STEP-BY-STEP'; },
+  mount: function(el, data, c){
+    var html = '<div class="tl"><div class="tl-spine"><div class="tl-fill"></div></div>';
+    c.steps.forEach(function(s, k){
+      html += '<div class="tl-row ' + (k % 2 ? 'right' : 'left') + '" data-k="' + k + '">' +
+        '<div class="tl-dot">' + (k + 1) + '</div>' +
+        '<div class="tl-card"><div class="rt">' + esc(s.short) + '</div>' +
+        '<div class="rd">' + (s.note || '') + '</div></div></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+    el.querySelectorAll('.tl-row').forEach(function(row){
+      row.addEventListener('click', function(){
+        activate(c, false); pause(); seek(+row.getAttribute('data-k'));
+      });
+    });
+  },
+  draw: function(s, idx, c){
+    var current = null;
+    c.frame.querySelectorAll('.tl-row').forEach(function(row){
+      var j = +row.getAttribute('data-k');
+      row.className = 'tl-row ' + (j % 2 ? 'right' : 'left') +
+        (j <= idx ? ' on' : '') + (j < idx ? ' done' : '') + (j === idx ? ' current' : '');
+      if (j === idx) current = row;
+    });
+    var tl = c.frame.querySelector('.tl'), fill = c.frame.querySelector('.tl-fill');
+    if (current && tl && fill){
+      var z = board.z || 1;
+      var dot = current.querySelector('.tl-dot');
+      var y = (dot.getBoundingClientRect().top - tl.getBoundingClientRect().top) / z + 18;
+      fill.style.height = Math.max(0, y) + 'px';
+    }
+    if (current && c === state.active) keepVisible(current);
+  }
+};
+
+/* ---------------- export & copy (active circuit) ---------------- */
+function exportSVG(){
+  var c = state.active;
+  if (!c){ toast('Nothing to export yet — ask a question first ✍️'); return; }
+  var node = c.frame.querySelector('.frame-body');
+  var clone = node.cloneNode(true);
+  clone.querySelectorAll('[data-noexport]').forEach(function(el){ el.remove(); });
+  clone.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+    + 'padding:24px;font-family:Inter,system-ui,sans-serif;color:#fff;';
+  var w = Math.max(node.scrollWidth, 320), h = Math.max(node.scrollHeight, 240);
+  var css = document.getElementById('pageCss').textContent;
+  var xhtml = new XMLSerializer().serializeToString(clone);
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">' +
+    '<rect width="100%" height="100%" fill="#0a0a0a"/>' +
+    '<foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">' +
+    '<style>' + css.replace(/]]>/g, '') + '</style>' + xhtml +
+    '</div></foreignObject></svg>';
+  var blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'circuit-' + (c.title || 'diagram').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.svg';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  toast('Exported ' + a.download + ' ⬇');
+}
+
+function copySteps(){
+  var c = state.active;
+  if (!c || !c.steps.length){ toast('No steps to copy yet'); return; }
+  var txt = c.title + '\n' + c.steps.map(function(s, k){
+    return (k + 1) + '. ' + String(s.note || s.short || '').replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  }).join('\n');
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(
+    function(){ toast('Steps copied to clipboard 📋'); },
+    function(){ toast('Copy not available in this context'); });
+}
+
+/* Enter submits from the hero textarea (Shift+Enter = newline) */
+$('promptTa').addEventListener('keydown', function(e){
+  if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submitPrompt(); }
+});
+</script>
+</body>
+</html>

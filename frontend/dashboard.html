@@ -44,15 +44,14 @@
             z-index: 100;
         }
         .sidebar-brand {
-            padding: 0px 16px; /* Reduced padding to lift the brand logo/text */
+            padding: 16px 12px;
             display: flex;
             align-items: center;
-            gap: 0px;
+            gap: 10px;
             cursor: pointer;
         }
-        .sidebar-brand img { 
-            width: 100px; height: 100px; object-fit: contain; 
-            margin-top: 0px; margin-right: -6px; margin-left: -24px; /* Removed top margin to reach the very top */
+        .sidebar-brand img {
+            width: 64px; height: 64px; flex-shrink: 0; object-fit: contain;
             filter: drop-shadow(0 0 10px rgba(6, 245, 205, 0.4));
         }
         .sidebar-brand span { 
@@ -148,6 +147,62 @@
             margin: 4px;
         }
 
+        /* ===== FULL ACCOUNT PANEL ===== */
+        .user-menu { padding: 0; overflow: hidden; }
+        .acct-head {
+            display: flex; align-items: center; gap: 12px; padding: 16px;
+            background: linear-gradient(135deg, rgba(6,245,205,0.08), rgba(124,58,237,0.08));
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .acct-avatar {
+            width: 44px; height: 44px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.15); background: #1e293b;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; color: #06f5cd;
+        }
+        .acct-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .acct-id { min-width: 0; flex: 1; }
+        .acct-name { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .acct-email { font-size: 11.5px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .acct-provider {
+            display: none; align-items: center; gap: 4px; margin-top: 5px; font-size: 9px; font-weight: 700;
+            letter-spacing: 0.6px; text-transform: uppercase; color: #4ade80;
+            background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3);
+            padding: 2px 7px; border-radius: 20px;
+        }
+        .acct-usage { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .acct-usage-top { display: flex; justify-content: space-between; font-size: 11.5px; color: #94a3b8; margin-bottom: 6px; }
+        .acct-usage-top b { color: #e2e8f0; font-weight: 600; }
+        .acct-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
+        .acct-bar > div { height: 100%; width: 0; background: linear-gradient(90deg,#06f5cd,#7c3aed); transition: width .4s; border-radius: 3px; }
+        .acct-links { padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+        .acct-links .emoji { width: 18px; text-align: center; flex-shrink: 0; }
+
+        /* toggle switch */
+        .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; display: inline-block; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch .track { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 20px; transition: .25s; cursor: pointer; }
+        .switch .track::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: .25s; }
+        .switch input:checked + .track { background: linear-gradient(135deg,#06f5cd,#7c3aed); }
+        .switch input:checked + .track::before { transform: translateX(18px); }
+
+        /* preferences / help modal rows */
+        .pref-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .pref-row:last-child { border-bottom: none; }
+        .pref-label { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 3px; }
+        .pref-desc { font-size: 12px; color: #64748b; line-height: 1.4; max-width: 320px; }
+        .pref-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 9px 12px; border-radius: 8px; font-size: 13px; outline: none; min-width: 170px; }
+        .pref-input:focus { border-color: rgba(6,245,205,0.4); }
+        .btn-ghost-sm { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 8px; padding: 8px 14px; font-size: 12.5px; cursor: pointer; }
+        .btn-ghost-sm:hover { background: rgba(255,255,255,0.1); }
+        .btn-ghost-sm.danger { color: #f87171; border-color: rgba(248,113,113,0.3); }
+        .btn-ghost-sm.danger:hover { background: rgba(248,113,113,0.1); }
+        .help-link { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 9px; font-size: 13.5px; color: #cbd5e1; cursor: pointer; text-decoration: none; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; transition: all .2s; }
+        .help-link:hover { background: rgba(255,255,255,0.05); border-color: rgba(6,245,205,0.3); }
+        .kbd { font-family: monospace; font-size: 11px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; padding: 2px 7px; color: #e2e8f0; }
+
+        /* reduce-motion preference */
+        body.reduce-motion .wire { animation: none !important; }
+
         .user-info { display: flex; align-items: center; gap: 12px; }
         .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #1e293b; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); }
         .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -209,7 +264,16 @@
             flex-direction: column;
             gap: 10px;
             user-select: none;
+            transition: transform 0.22s cubic-bezier(0.19,1,0.22,1), box-shadow 0.22s ease, border-color 0.22s ease;
         }
+        /* gentle float-up on hover for a livelier feel */
+        .workflow-node:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6), 0 0 22px rgba(6, 245, 205, 0.14);
+            border-color: rgba(6, 245, 205, 0.35);
+            z-index: 40;
+        }
+        body.reduce-motion .workflow-node:hover { transform: none; }
         .workflow-node:active { cursor: grabbing; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 50; }
         
         .node-header {
@@ -242,25 +306,61 @@
         .btn-run:hover { background: rgba(59, 130, 246, 0.2); color: #fff; }
 
         /* Specific Node Colors */
-        .node-core .node-icon { background: rgba(6, 245, 205, 0.2); color: #06f5cd; border: 1px solid rgba(6,245,205,0.3); }
-        .node-core { 
-            background: transparent !important;
-            border-color: rgba(6,245,205,0.4); 
-            box-shadow: 0 0 20px rgba(6, 245, 205, 0.1); 
+        /* ===== CORE NODE — structurally distinct from the flat feature nodes ===== */
+        .node-core {
+            background: rgba(9, 13, 25, 0.6) !important;
+            backdrop-filter: blur(4px);
+            border: 1.5px solid rgba(6, 245, 205, 0.45);
+            border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
             z-index: 30;
             position: relative;
             overflow: hidden;
-            width: 190px !important; /* Made the card slightly narrower */
+            width: 190px !important;
+            height: 190px;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            animation: corePulse 3.2s ease-in-out infinite, coreMorph 16s ease-in-out infinite;
         }
-        #core-3d-container { 
-            position: relative; 
+        /* living organic "blob" — the boundary slowly reshapes for an intelligent, alive feel */
+        @keyframes coreMorph {
+            0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
+            25%      { border-radius: 58% 42% 37% 63% / 55% 48% 52% 45%; }
+            50%      { border-radius: 63% 37% 52% 48% / 63% 37% 45% 55%; }
+            75%      { border-radius: 45% 55% 48% 52% / 42% 58% 63% 37%; }
+        }
+        /* the central core zooms in a little on hover (instead of the float) */
+        .node-core:hover { transform: scale(1.04); }
+        /* pulsing aura ring sets the core apart as the central hub */
+        @keyframes corePulse {
+            0%, 100% { box-shadow: 0 0 22px rgba(6,245,205,0.12), inset 0 0 22px rgba(124,58,237,0.05); border-color: rgba(6,245,205,0.4); }
+            50%      { box-shadow: 0 0 42px rgba(6,245,205,0.30), inset 0 0 30px rgba(124,58,237,0.12); border-color: rgba(6,245,205,0.72); }
+        }
+        /* slow rotating conic sheen behind the 3D core */
+        .node-core::before {
+            content: ''; position: absolute; inset: -35%; z-index: 0; pointer-events: none;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(6,245,205,0.16) 55deg, transparent 130deg, rgba(124,58,237,0.16) 215deg, transparent 300deg);
+            animation: coreSheen 9s linear infinite;
+        }
+        @keyframes coreSheen { to { transform: rotate(360deg); } }
+        .node-core > * { position: relative; z-index: 1; }
+        body.reduce-motion .node-core, body.reduce-motion .node-core::before { animation: none; }
+        .core-badge {
+            font-size: 9px; font-weight: 800; letter-spacing: 1.6px; color: #06f5cd;
+            background: rgba(6, 245, 205, 0.1); border: 1px solid rgba(6, 245, 205, 0.3);
+            padding: 3px 11px; border-radius: 20px; margin-bottom: 2px;
+        }
+        #core-3d-container {
+            position: relative;
             width: 100%;
-            height: 100px; /* Reduced slightly from 120px */
-            margin-top: 5px;
-            z-index: 10; 
+            height: 94px;
+            z-index: 10;
             opacity: 1;
             pointer-events: none;
         }
+        .core-title { text-align: center; font-size: 13px; font-weight: 800; letter-spacing: 0.3px; color: #f8fafc; margin-top: 2px; }
+        .core-title span { background: linear-gradient(135deg, #06f5cd, #7c3aed); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
         
         .node-blue .node-icon { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
         .node-purple .node-icon { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
@@ -270,6 +370,7 @@
         .node-green .node-icon { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
         .node-gold .node-icon { background: rgba(250, 204, 21, 0.2); color: #facc15; border: 1px solid rgba(250,204,21,0.3); }
         .node-cyan .node-icon { background: rgba(34, 211, 238, 0.2); color: #22d3ee; border: 1px solid rgba(34,211,238,0.3); }
+        .node-teal .node-icon { background: rgba(6, 245, 205, 0.2); color: #06f5cd; border: 1px solid rgba(6,245,205,0.3); }
 
         /* LOCAL AI MODAL */
         .modal-overlay {
@@ -323,7 +424,9 @@
 
         /* BENTO GRID SECTION (Imported from Landing) */
         .bento-section {
-            padding: 10px 40px 140px; /* Further reduced to ensure the text crop is perfectly centered on the baseline */
+            /* 12vh top padding keeps the "Everything you need. Unified." heading
+               fully below the first viewport (the hero is 94vh) */
+            padding: 12vh 40px 140px;
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -431,6 +534,12 @@
             <a href="voidmain.html" class="nav-link">
                 <span class="nav-icon">🚀</span><span>VoidMain</span>
             </a>
+            <a href="ignite.html" class="nav-link">
+                <span class="nav-icon">🔥</span><span>Ignite</span>
+            </a>
+            <a href="circuit.html" class="nav-link">
+                <span class="nav-icon">🔌</span><span>Circuit</span>
+            </a>
         </div>
 
         <!-- RECENTS SECTION -->
@@ -442,17 +551,29 @@
         </div>
 
         <div class="user-profile" id="userProfileBtn">
-            <!-- Account Dropdown Menu -->
+            <!-- Account Panel -->
             <div class="user-menu" id="userDropdown">
-                <div class="menu-item">
-                    <span>👤</span> Profile Settings
+                <div class="acct-head">
+                    <div class="acct-avatar"><img id="acctAvatarImg" src="https://api.dicebear.com/7.x/initials/svg?seed=Guest&backgroundColor=1e293b" alt="Avatar"></div>
+                    <div class="acct-id">
+                        <div class="acct-name" id="acctName">Guest</div>
+                        <div class="acct-email" id="acctEmail">Not signed in</div>
+                        <span class="acct-provider" id="acctProvider"></span>
+                    </div>
                 </div>
-                <div class="menu-item">
-                    <span>⚙️</span> Preferences
+                <div class="acct-usage" id="acctUsage" style="display:none;">
+                    <div class="acct-usage-top"><span>🔋 Daily AI tokens</span><span><b id="acctTokUsed">0</b> / <span id="acctTokLimit">0</span></span></div>
+                    <div class="acct-bar"><div id="acctTokBar"></div></div>
                 </div>
-                <div class="menu-divider"></div>
-                <div class="menu-item danger" onclick="logout()">
-                    <span>🚪</span> Sign Out
+                <div class="acct-links">
+                    <div class="menu-item" onclick="window.location.href='circuit.html'"><span class="emoji">🔌</span> My Circuits</div>
+                    <div class="menu-item" onclick="window.location.href='ignite.html'"><span class="emoji">🔥</span> My Ignite Projects</div>
+                    <div class="menu-item" onclick="window.location.href='local-ai.html'"><span class="emoji">🚀</span> Offline Studio</div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item" onclick="openPreferences()"><span class="emoji">⚙️</span> Preferences</div>
+                    <div class="menu-item" onclick="openHelp()"><span class="emoji">❓</span> Help &amp; Shortcuts</div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-item danger" onclick="logout()"><span class="emoji">🚪</span> Sign Out</div>
                 </div>
             </div>
 
@@ -462,12 +583,61 @@
                 </div>
                 <div class="user-details">
                     <h4 id="sidebarName">Guest</h4>
-                    <p>Get Help</p>
+                    <p id="sidebarSub">Manage account</p>
                 </div>
             </div>
             <div class="user-arrow">⬍</div>
         </div>
     </aside>
+
+    <!-- ===== PREFERENCES MODAL ===== -->
+    <div class="modal-overlay" id="prefsModal">
+        <div class="modal-content" style="width:520px;">
+            <div class="modal-header"><h2>⚙️ Preferences</h2><button class="btn-close" onclick="closePreferences()">×</button></div>
+            <div class="modal-body">
+                <div class="pref-row">
+                    <div><div class="pref-label">Display name</div><div class="pref-desc">Shown across your DevAssist workspace.</div></div>
+                    <input class="pref-input" id="prefName" placeholder="Your name">
+                </div>
+                <div class="pref-row">
+                    <div><div class="pref-label">Reduce motion</div><div class="pref-desc">Pause the animated wires and moving background effects.</div></div>
+                    <label class="switch"><input type="checkbox" id="prefMotion" onchange="applyMotionPref()"><span class="track"></span></label>
+                </div>
+                <div class="pref-row">
+                    <div><div class="pref-label">Clear local data</div><div class="pref-desc">Removes offline Chat history and Circuit cache stored in this browser. Your account and saved work are not affected.</div></div>
+                    <button class="btn-ghost-sm danger" onclick="clearLocalData()">Clear</button>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button class="btn-ghost-sm" onclick="closePreferences()">Cancel</button>
+                    <button class="btn-brand" onclick="savePreferences()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HELP MODAL ===== -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal-content" style="width:520px;">
+            <div class="modal-header"><h2>❓ Help &amp; Shortcuts</h2><button class="btn-close" onclick="closeHelp()">×</button></div>
+            <div class="modal-body">
+                <div style="font-size:12px; font-weight:700; letter-spacing:1px; color:#64748b; text-transform:uppercase; margin-bottom:10px;">Quick start</div>
+                <a class="help-link" href="global.html"><span>💬</span> Ask anything in Global AI</a>
+                <a class="help-link" href="circuit.html"><span>🔌</span> Visualize a concept in Circuit</a>
+                <a class="help-link" href="local-ai.html"><span>🚀</span> Go fully offline with Offline Studio</a>
+
+                <div style="font-size:12px; font-weight:700; letter-spacing:1px; color:#64748b; text-transform:uppercase; margin:20px 0 12px;">Keyboard shortcuts (Circuit)</div>
+                <div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#94a3b8;">
+                    <div style="display:flex; justify-content:space-between;"><span>Play / pause the animation</span><span class="kbd">Space</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Step forward / back</span><span><span class="kbd">←</span> <span class="kbd">→</span></span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Pan the board / zoom</span><span>drag · scroll</span></div>
+                </div>
+
+                <div style="font-size:12px; font-weight:700; letter-spacing:1px; color:#64748b; text-transform:uppercase; margin:20px 0 12px;">Support</div>
+                <a class="help-link" href="mailto:sudharsanrenganathan7@gmail.com"><span>✉️</span> Email support</a>
+                <div style="font-size:11.5px; color:#475569; margin-top:14px; text-align:center;">DevAssist AI · your AI development workspace</div>
+            </div>
+        </div>
+    </div>
 
     <!-- MAIN WORKSPACE -->
     <main class="workspace">
@@ -478,11 +648,29 @@
             
             <!-- CORE NODE (Center) -->
             <div class="workflow-node node-core" id="node-core">
-                <div class="node-header">
-                    <div class="node-icon">🧠</div>
-                    <div class="node-title">DevAssist Core</div>
-                </div>
+                <div class="core-badge">◈ NEURAL CORE</div>
                 <div id="core-3d-container"></div>
+                <div class="core-title">DevAssist <span>Core</span></div>
+            </div>
+
+            <!-- IGNITE (Left Top) -->
+            <div class="workflow-node node-red" id="node-ignite">
+                <div class="node-header">
+                    <div class="node-icon">🔥</div>
+                    <div class="node-title">Ignite</div>
+                </div>
+                <div class="node-desc">Build full frontend projects from one prompt.</div>
+                <div class="btn-run" onclick="window.location.href='ignite.html'">Open Ignite</div>
+            </div>
+
+            <!-- CIRCUIT (Right-Mid Bottom) -->
+            <div class="workflow-node node-teal" id="node-circuit">
+                <div class="node-header">
+                    <div class="node-icon">🔌</div>
+                    <div class="node-title">Circuit <span style="font-size:9px; padding:2px 6px; margin-left:6px; border-radius:4px; background:rgba(124,58,237,0.2); color:#c084fc; border:1px solid rgba(124,58,237,0.35)">BETA</span></div>
+                </div>
+                <div class="node-desc">Visual step-by-step answers you can play with.</div>
+                <div class="btn-run" onclick="window.location.href='circuit.html'">Open Circuit</div>
             </div>
 
             <!-- CHAT NODE (Top Left) -->
@@ -657,6 +845,33 @@
                         <p>Your ultimate practice arena. Sharpen your algorithmic skills and prepare for technical challenges in a competitive coding environment designed for mastering data structures and logic puzzles.</p>
                     </div>
                 </div>
+
+                <!-- Card 7: Ignite (Standard) -->
+                <div class="bento-card" style="cursor:pointer;" onclick="window.location.href='ignite.html'">
+                    <div class="bento-icon-lg" style="background: rgba(248, 113, 113, 0.1); color: #f87171; border-color:#f8717144;">🔥</div>
+                    <div style="margin-top: auto;">
+                        <h3>Ignite</h3>
+                        <p>From one prompt to a finished frontend. Ignite plans and generates complete multi-file HTML/CSS/JS projects, then lets you preview, edit, and resume them anytime.</p>
+                    </div>
+                </div>
+
+                <!-- Card 8: Circuit (Standard) -->
+                <div class="bento-card" style="cursor:pointer;" onclick="window.location.href='circuit.html'">
+                    <div class="bento-icon-lg" style="background: rgba(6, 245, 205, 0.1); color: #06f5cd; border-color:#06f5cd44;">🔌</div>
+                    <div style="margin-top: auto;">
+                        <h3>Circuit <span style="font-size:11px; padding:2px 8px; margin-left:4px; border-radius:6px; background:rgba(124,58,237,0.2); color:#c084fc; border:1px solid rgba(124,58,237,0.35); vertical-align:middle;">BETA</span></h3>
+                        <p>See it, don't just read it. Ask an algorithm, a concept, or a roadmap and get a living, animated diagram you can step through, replay, and play with.</p>
+                    </div>
+                </div>
+
+                <!-- Card 9: Offline Studio (Standard) -->
+                <div class="bento-card" style="cursor:pointer;" onclick="window.location.href='local-ai.html'">
+                    <div class="bento-icon-lg" style="background: rgba(129, 140, 248, 0.1); color: #818cf8; border-color:#818cf844;">🚀</div>
+                    <div style="margin-top: auto;">
+                        <h3>Offline Studio</h3>
+                        <p>The whole platform, on your machine. Run Chat and document Q&amp;A entirely offline against a local model — no internet, no account, installable as a desktop app.</p>
+                    </div>
+                </div>
             </div>
 
         <!-- ABOUT SECTION -->
@@ -737,6 +952,14 @@
                             <div class="dl-bar" id="dlBar"></div>
                         </div>
                         <p id="dlStatus" style="font-size:12px; color:#64748b; margin-top:8px; display:none;">Downloading... 0%</p>
+
+                        <div style="margin-top:20px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.08);">
+                            <div style="font-size:13px; font-weight:600; margin-bottom:6px;">🚀 Offline Studio</div>
+                            <p style="font-size:12.5px; color:#94a3b8; margin-bottom:12px; line-height:1.5;">
+                                Once set up, use <b>Chat</b> and <b>Docs</b> entirely on your machine — no internet, no account. Add the embedding model for document Q&amp;A on large files:</p>
+                            <div class="code-box"><span>ollama pull nomic-embed-text</span><button class="btn-copy" onclick="locCopyText('ollama pull nomic-embed-text', this)">Copy</button></div>
+                            <button class="btn-brand" style="margin-top:14px;" onclick="window.location.href='local-ai.html'">Open Offline Studio ▸</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -749,21 +972,32 @@
                     </div>
                     
                     <div class="inst-step">
-                        <h4><span class="step-num">2</span> Pull a Model</h4>
-                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Open your terminal/command prompt and run:</p>
-                        <div class="code-box">
+                        <h4><span class="step-num">2</span> Pull the Models</h4>
+                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Open your terminal/command prompt and run both (chat model + document embedding model):</p>
+                        <div class="code-box" style="margin-bottom:8px;">
                             <span>ollama pull llama3</span>
                             <button class="btn-copy" onclick="locCopyText('ollama pull llama3', this)">Copy</button>
                         </div>
+                        <div class="code-box">
+                            <span>ollama pull nomic-embed-text</span>
+                            <button class="btn-copy" onclick="locCopyText('ollama pull nomic-embed-text', this)">Copy</button>
+                        </div>
                     </div>
-                    
+
                     <div class="inst-step">
                         <h4><span class="step-num">3</span> Keep Server Running</h4>
-                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Ensure Ollama is running in the background.</p>
+                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Start Ollama so the browser can reach it, and keep it running:</p>
                         <div class="code-box">
-                            <span>ollama serve</span>
-                            <button class="btn-copy" onclick="locCopyText('ollama serve', this)">Copy</button>
+                            <span>OLLAMA_ORIGINS=* ollama serve</span>
+                            <button class="btn-copy" onclick="locCopyText('OLLAMA_ORIGINS=* ollama serve', this)">Copy</button>
                         </div>
+                        <p style="font-size:12px; color:#64748b; margin-left:28px; margin-top:8px;">Windows PowerShell: <span style="color:#06f5cd; font-family:monospace;">$env:OLLAMA_ORIGINS="*"; ollama serve</span></p>
+                    </div>
+
+                    <div class="inst-step">
+                        <h4><span class="step-num">4</span> Open the Studio</h4>
+                        <p style="font-size:13px; color:#94a3b8; margin-left:28px; margin-bottom:8px;">Launch the offline Chat &amp; Docs workspace.</p>
+                        <button class="btn-brand" style="margin-left:28px;" onclick="window.location.href='local-ai.html'">Open Offline Studio ▸</button>
                     </div>
                 </div>
                 
@@ -783,27 +1017,120 @@
         </div>
     </div>
 
-    <!-- Auth Guard & Scripts -->
-    <script src="auth-guard.js"></script>
+    <!-- Scripts (auth-guard.js is already loaded in <head>) -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const username = localStorage.getItem("username") || "Guest";
-            const seed = encodeURIComponent(username);
-            const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=1e293b`;
-            
-            document.getElementById("sidebarName").textContent = username;
-            document.getElementById("avatarImgEl").src = avatarUrl;
+            applyMotionPref(true);   // apply saved reduce-motion before wires animate
+            populateAccount();
+            refreshAccountUsage();
 
             // Position nodes after layout is known
             positionNodes();
             setTimeout(drawWires, 60);
         });
 
-        function logout() {
+        // ===== ACCOUNT BAR =====
+        function dicebear(name) {
+            return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || 'Guest')}&backgroundColor=1e293b`;
+        }
+        async function populateAccount() {
+            let name = localStorage.getItem("username") || "Guest";
+            let email = "", avatar = "", provider = "";
+            try {
+                if (typeof getUser === "function") {
+                    const user = await getUser();
+                    if (user) {
+                        name = (typeof getUserDisplayName === "function") ? getUserDisplayName(user) : (user.email || "User");
+                        email = (typeof getUserEmail === "function") ? getUserEmail(user) : (user.email || "");
+                        avatar = (typeof getUserAvatar === "function") ? (getUserAvatar(user) || "") : "";
+                        provider = (typeof getUserProvider === "function") ? (getUserProvider(user) || "") : "";
+                    }
+                }
+            } catch (e) { /* fall back to Guest */ }
+
+            const override = localStorage.getItem("displayName");
+            if (override && override.trim()) name = override.trim();
+            const img = avatar || dicebear(name);
+
+            document.getElementById("sidebarName").textContent = name;
+            document.getElementById("sidebarSub").textContent = email || "Manage account";
+            document.getElementById("avatarImgEl").src = img;
+            document.getElementById("acctAvatarImg").src = img;
+            document.getElementById("acctName").textContent = name;
+            document.getElementById("acctEmail").textContent = email || "Not signed in";
+            const pv = document.getElementById("acctProvider");
+            if (provider) {
+                pv.textContent = (provider === "google" ? "◆ Google" : "✉ Email");
+                pv.style.display = "inline-flex";
+            } else {
+                pv.style.display = "none";
+            }
+        }
+        async function refreshAccountUsage() {
+            if (typeof authFetch !== "function") return;
+            try {
+                const res = await authFetch("/api/usage");
+                if (!res.ok) return;
+                const u = await res.json();
+                document.getElementById("acctUsage").style.display = "block";
+                document.getElementById("acctTokUsed").textContent = (u.user_tokens || 0).toLocaleString();
+                document.getElementById("acctTokLimit").textContent = (u.user_limit || 0).toLocaleString();
+                const pct = u.user_limit ? Math.min(100, (u.user_tokens / u.user_limit) * 100) : 0;
+                const bar = document.getElementById("acctTokBar");
+                bar.style.width = pct + "%";
+                bar.style.background = pct >= 100 ? "#f87171"
+                    : pct >= 80 ? "linear-gradient(90deg,#fbbf24,#f87171)"
+                    : "linear-gradient(90deg,#06f5cd,#7c3aed)";
+            } catch (e) { /* usage meter is cosmetic */ }
+        }
+        async function logout() {
+            try {
+                if (typeof signOut === "function") { await signOut(); return; }  // real Supabase sign-out
+            } catch (e) { /* fall through */ }
             localStorage.removeItem("username");
             localStorage.removeItem("token");
             window.location.href = "login.html";
         }
+
+        // ===== PREFERENCES =====
+        function openPreferences() {
+            document.getElementById("prefName").value =
+                localStorage.getItem("displayName") || document.getElementById("acctName").textContent || "";
+            document.getElementById("prefMotion").checked = localStorage.getItem("reduceMotion") === "1";
+            document.getElementById("prefsModal").classList.add("active");
+        }
+        function closePreferences() { document.getElementById("prefsModal").classList.remove("active"); }
+        function savePreferences() {
+            const name = document.getElementById("prefName").value.trim();
+            if (name) localStorage.setItem("displayName", name); else localStorage.removeItem("displayName");
+            localStorage.setItem("reduceMotion", document.getElementById("prefMotion").checked ? "1" : "0");
+            applyMotionPref();
+            populateAccount();
+            closePreferences();
+        }
+        function applyMotionPref(fromStorage) {
+            const on = fromStorage ? localStorage.getItem("reduceMotion") === "1"
+                                   : document.getElementById("prefMotion").checked;
+            document.body.classList.toggle("reduce-motion", on);
+        }
+        function clearLocalData() {
+            if (!confirm("Clear offline Chat history and Circuit cache from this browser? Your account and saved work are not affected.")) return;
+            ["devassist_offline_chat"].forEach(k => localStorage.removeItem(k));
+            Object.keys(localStorage).forEach(k => { if (/^circuit/i.test(k)) localStorage.removeItem(k); });
+            alert("Local data cleared.");
+        }
+
+        // ===== HELP =====
+        function openHelp() { document.getElementById("helpModal").classList.add("active"); }
+        function closeHelp() { document.getElementById("helpModal").classList.remove("active"); }
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") { closePreferences(); closeHelp(); }
+        });
+        // click backdrop to close either modal
+        ["prefsModal", "helpModal"].forEach(id => {
+            const m = document.getElementById(id);
+            if (m) m.addEventListener("click", (e) => { if (e.target === m) m.classList.remove("active"); });
+        });
 
         // Toggle User Dropdown
         const userProfileBtn = document.getElementById('userProfileBtn');
@@ -822,21 +1149,24 @@
             }
         });
 
-        // --- LAYOUT POSITIONING ---
-        // Positions are expressed as percentages of workspace width/height
-        // so they scale correctly on any screen size.
-        // Based on the screenshot layout proportions.
+        // --- LAYOUT POSITIONING — FINALIZED 2026-07-13 (locked to findings screenshot) ---
+        // Positions are percentages of the canvas width/height, so the EXACT
+        // arrangement below is preserved identically on every load — nodes do not
+        // move. DO NOT change these values; this is the approved, final node layout.
         const nodePositions = {
-            'node-chat':        { lp: 0.01,  tp: 0.20 },  // Left Top
-            'node-secret':      { lp: 0.01,  tp: 0.55 },  // Left Bottom
-            'node-code':        { lp: 0.26,  tp: 0.04 },  // Middle Top
-            'node-core':        { lp: 0.27,  tp: 0.38 },  // Middle Center
-            'node-local-ai':    { lp: 0.26,  tp: 0.76 },  // Middle Bottom
-            'node-compiler':    { lp: 0.53,  tp: 0.20 },  // Right-Mid Top
-            'node-voidmain':    { lp: 0.53,  tp: 0.55 },  // Right-Mid Bottom
-            'node-leaderboard': { lp: 0.78,  tp: 0.06 },  // Far Right Top
-            'node-history':     { lp: 0.81,  tp: 0.40 },  // Far Right Mid
-            'node-problems':    { lp: 0.78,  tp: 0.74 },  // Far Right Bottom
+            // 4×3 grid — FINAL, matches findings/ 2026-07-13 screenshot exactly
+            'node-ignite':      { lp: 0.02,  tp: 0.07 },   // Left Top — nudged up (user)
+            'node-chat':        { lp: 0.01,  tp: 0.39 },   // Left Middle — nudged up (user)
+            'node-secret':      { lp: 0.02,  tp: 0.75 },   // Left Bottom
+            'node-code':        { lp: 0.26,  tp: 0.04 },   // Middle Top — height set to finding (user)
+            'node-core':        { lp: 0.27,  tp: 0.38 },   // Middle Center
+            'node-local-ai':    { lp: 0.26,  tpx: 545 },   // Middle Bottom — fixed height (user)
+            'node-compiler':    { lp: 0.52,  tp: 0.06 },   // Right-Mid Top — nudged up (user)
+            'node-voidmain':    { lp: 0.545, tp: 0.405 },  // Right-Mid Middle — nudged up; equal gaps to compiler & circuit (user)
+            'node-circuit':     { lp: 0.515, tp: 0.75 },   // Right-Mid Bottom — same height as Secret AI (user)
+            'node-leaderboard': { lp: 0.78,  tp: 0.06 },   // Far Right Top
+            'node-history':     { lp: 0.81,  tp: 0.40 },   // Far Right Mid
+            'node-problems':    { lp: 0.78,  tp: 0.74 },   // Far Right Bottom
         };
 
         function positionNodes() {
@@ -847,8 +1177,9 @@
             for (const [id, pos] of Object.entries(nodePositions)) {
                 const el = document.getElementById(id);
                 if (!el) continue;
-                el.style.left = Math.round(W * pos.lp) + 'px';
-                el.style.top  = Math.round(H * pos.tp) + 'px';
+                // lpx/tpx = exact pixel override (fixed placement); otherwise fraction of canvas
+                el.style.left = (pos.lpx != null ? pos.lpx : Math.round(W * pos.lp)) + 'px';
+                el.style.top  = (pos.tpx != null ? pos.tpx : Math.round(H * pos.tp)) + 'px';
             }
             drawWires();
         }
@@ -866,6 +1197,8 @@
             { id: 'w5', from: 'node-voidmain', to: 'node-problems',    color: '#fbbf24' },
             { id: 'w6', from: 'node-voidmain', to: 'node-history',     color: '#fbbf24' },
             { id: 'w7', from: 'node-voidmain', to: 'node-leaderboard', color: '#fbbf24' },
+            { id: 'w10', from: 'node-core', to: 'node-ignite',  color: '#06f5cd' },
+            { id: 'w11', from: 'node-core', to: 'node-circuit', color: '#06f5cd' },
         ];
 
         connections.forEach(conn => {
@@ -1106,7 +1439,9 @@
             'secret.html': { name: 'Secret AI', icon: '🔐' },
             'code-analyzer.html': { name: 'Code Analyzer', icon: '🔍' },
             'online-compiler.html': { name: 'Online Compiler', icon: '💻' },
-            'voidmain.html': { name: 'VoidMain', icon: '⚡' }
+            'voidmain.html': { name: 'VoidMain', icon: '⚡' },
+            'ignite.html': { name: 'Ignite', icon: '🔥' },
+            'circuit.html': { name: 'Circuit', icon: '🔌' }
         };
 
         // Global Dynamic Interceptor
@@ -1129,63 +1464,96 @@
                 window.location.href = url;
             }
         });
-        // --- THREE.JS 3D CORE (High-Fidelity Glass Knot) ---
-        let scene, camera, renderer, globe, innerGlobe;
+        // --- THREE.JS 3D CORE (Neural Connectome) ---
+        // Prior cores saved in design-mockups/dashboard-core-alpha.js (glass knot)
+        // and dashboard-core-alpha2.js (neural brain core) — say "alpha" / "alpha 2"
+        // to restore. This version is a rotating neural-network graph: nodes spread
+        // evenly on a sphere, linked by glowing synapse lines (near = teal, longer =
+        // purple) that fire/pulse out of phase, around a bright pulsing core.
+        let scene, camera, renderer, brain, nodePts, linkNear, linkFar, coreSun, coreGlow, particles, particleData = [];
         const container = document.getElementById('core-3d-container');
         function init3DCore() {
             if (!container) return;
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            
+            camera = new THREE.PerspectiveCamera(70, (container.clientWidth || 200) / (container.clientHeight || 150), 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            const width = container.clientWidth || 200;
-            const height = container.clientHeight || 150;
-            renderer.setSize(width, height);
+            renderer.setSize(container.clientWidth || 200, container.clientHeight || 150);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            // Complex organic geometry (Organic Glass Swirl) - scaled for small card
-            const geometry = new THREE.TorusKnotGeometry(1.2, 0.45, 150, 24, 2, 3);
-            
-            // Photorealistic Glass Material with Attenuation and Iridescence
-            const material = new THREE.MeshPhysicalMaterial({
-                color: 0xffffff,
-                metalness: 0.1,
-                roughness: 0,
-                transmission: 1.0, 
-                thickness: 4.0,
-                ior: 1.5,
-                iridescence: 1.0,
-                iridescenceIOR: 1.7,
-                transparent: true,
-                opacity: 1,
-                clearcoat: 1,
-                clearcoatRoughness: 0.05,
-                attenuationColor: 0x7c3aed, // Purple internal depth
-                attenuationDistance: 2.0
-            });
+            brain = new THREE.Group();
+            scene.add(brain);
 
-            globe = new THREE.Mesh(geometry, material);
-            scene.add(globe);
+            // Evenly distribute nodes on a sphere (Fibonacci lattice)
+            const N = 42, R = 1.6;
+            const nodes = [];
+            const inc = Math.PI * (3 - Math.sqrt(5));
+            for (let i = 0; i < N; i++) {
+                const y = 1 - (i / (N - 1)) * 2;
+                const rad = Math.sqrt(Math.max(0, 1 - y * y));
+                const phi = i * inc;
+                nodes.push(new THREE.Vector3(Math.cos(phi) * rad * R, y * R, Math.sin(phi) * rad * R));
+            }
 
-            // Inner Glowing Core (The "Neural Sun") - scaled smaller
-            const innerGeom = new THREE.SphereGeometry(0.6, 32, 32);
-            const innerMat = new THREE.MeshBasicMaterial({ 
-                color: 0x7c3aed, 
-                transparent: true, 
-                opacity: 0.8 
-            });
-            innerGlobe = new THREE.Mesh(innerGeom, innerMat);
-            scene.add(innerGlobe);
+            // Node glowing dots
+            const npos = new Float32Array(N * 3);
+            nodes.forEach((v, i) => { npos[i * 3] = v.x; npos[i * 3 + 1] = v.y; npos[i * 3 + 2] = v.z; });
+            const nGeo = new THREE.BufferGeometry();
+            nGeo.setAttribute('position', new THREE.BufferAttribute(npos, 3));
+            nodePts = new THREE.Points(nGeo, new THREE.PointsMaterial({
+                color: 0xa5f3fc, size: 0.15, transparent: true, opacity: 0.95,
+                blending: THREE.AdditiveBlending, depthWrite: false
+            }));
+            brain.add(nodePts);
 
-            // Neural Lighting (Rim/Spot effects)
-            const p1 = new THREE.PointLight(0x06f5cd, 50, 15); p1.position.set(5, 5, 8); scene.add(p1);
-            const p2 = new THREE.PointLight(0x7c3aed, 60, 15); p2.position.set(-5, -5, 8); scene.add(p2);
-            const p3 = new THREE.PointLight(0x3b82f6, 40, 15); p3.position.set(0, 0, -8); scene.add(p3);
-            
-            scene.add(new THREE.AmbientLight(0x404040, 0.5));
+            // Synapse links: near (teal) and mid-range (purple)
+            const nearPos = [], farPos = [];
+            for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) {
+                const dst = nodes[i].distanceTo(nodes[j]);
+                if (dst < 1.1) nearPos.push(nodes[i].x, nodes[i].y, nodes[i].z, nodes[j].x, nodes[j].y, nodes[j].z);
+                else if (dst < 1.55) farPos.push(nodes[i].x, nodes[i].y, nodes[i].z, nodes[j].x, nodes[j].y, nodes[j].z);
+            }
+            const mkLinks = (arr, color, opacity) => {
+                const g = new THREE.BufferGeometry();
+                g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arr), 3));
+                const m = new THREE.LineBasicMaterial({ color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false });
+                brain.add(new THREE.LineSegments(g, m));
+                return m;
+            };
+            linkNear = mkLinks(nearPos, 0x06f5cd, 0.5);
+            linkFar  = mkLinks(farPos, 0x7c3aed, 0.28);
 
-            camera.position.z = 3.5;
+            // Bright pulsing core + glow
+            coreSun = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 24),
+                new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 }));
+            scene.add(coreSun);
+            coreGlow = new THREE.Mesh(new THREE.SphereGeometry(0.7, 24, 24),
+                new THREE.MeshBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false }));
+            scene.add(coreGlow);
+
+            // Emitted sparks — particles orbiting in tilted planes JUST OUTSIDE the
+            // graph, so they read as energy flying out of the connectome
+            const NP = 55;
+            const ppos = new Float32Array(NP * 3);
+            particleData = [];
+            for (let i = 0; i < NP; i++) {
+                particleData.push({
+                    r: 1.75 + Math.random() * 1.45,
+                    speed: 0.3 + Math.random() * 0.9,
+                    off: Math.random() * Math.PI * 2,
+                    tilt: Math.random() * Math.PI,
+                    yaw: Math.random() * Math.PI * 2
+                });
+            }
+            const ppGeo = new THREE.BufferGeometry();
+            ppGeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
+            particles = new THREE.Points(ppGeo, new THREE.PointsMaterial({
+                color: 0x67e8f9, size: 0.08, transparent: true, opacity: 0.85,
+                blending: THREE.AdditiveBlending, depthWrite: false
+            }));
+            scene.add(particles);
+
+            camera.position.z = 4.2;
             animate3D();
         }
 
@@ -1193,22 +1561,36 @@
 
         function animate3D() {
             requestAnimationFrame(animate3D);
-            const time = Date.now() * 0.001;
+            const t = Date.now() * 0.001;
+            const calm = document.body.classList.contains('reduce-motion') ? 0.35 : 1;
 
-            if (globe) {
-                globe.rotation.y += 0.006;
-                globe.rotation.x += 0.003;
-                globe.rotation.z += 0.002;
-                const scale = 1 + Math.sin(time * 0.7) * 0.04;
-                globe.scale.set(scale, scale, scale);
+            if (brain) {
+                brain.rotation.y += 0.005 * calm;
+                brain.rotation.x = Math.sin(t * 0.25 * calm) * 0.25;
             }
-            
-            if (innerGlobe) {
-                const s2 = 1 + Math.cos(time * 0.7) * 0.1;
-                innerGlobe.scale.set(s2, s2, s2);
-                innerGlobe.material.opacity = 0.5 + Math.sin(time * 1.2) * 0.3;
+            if (linkNear) linkNear.opacity = 0.35 + (Math.sin(t * 2.2) + 1) * 0.14;       // synapses firing
+            if (linkFar)  linkFar.opacity  = 0.16 + (Math.sin(t * 1.5 + 1.5) + 1) * 0.10; // out of phase
+            if (nodePts)  nodePts.material.size = 0.14 + Math.sin(t * 3) * 0.03;
+            if (coreSun)  { const s = 1 + Math.sin(t * 2.6) * 0.14; coreSun.scale.set(s, s, s); }
+            if (coreGlow) {
+                const g = 1 + Math.sin(t * 2.6) * 0.2; coreGlow.scale.set(g, g, g);
+                coreGlow.material.opacity = 0.12 + (Math.sin(t * 2.6) + 1) * 0.05;
             }
-
+            if (particles) {
+                const arr = particles.geometry.attributes.position.array;
+                for (let i = 0; i < particleData.length; i++) {
+                    const d = particleData[i];
+                    const a = t * d.speed * calm + d.off;
+                    let x = Math.cos(a) * d.r, y = Math.sin(a) * d.r, z = 0;
+                    const y2 = y * Math.cos(d.tilt) - z * Math.sin(d.tilt);
+                    const z2 = y * Math.sin(d.tilt) + z * Math.cos(d.tilt);
+                    arr[i * 3]     = x * Math.cos(d.yaw) + z2 * Math.sin(d.yaw);
+                    arr[i * 3 + 1] = y2;
+                    arr[i * 3 + 2] = -x * Math.sin(d.yaw) + z2 * Math.cos(d.yaw);
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+                particles.rotation.y += 0.001 * calm;
+            }
             renderer.render(scene, camera);
         }
 

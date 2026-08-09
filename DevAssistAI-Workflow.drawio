@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" modified="2026-07-10T00:00:00.000Z" agent="DevAssistAI" version="24.0.0">
+  <diagram name="DevAssist AI Workflow" id="devassist-workflow">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="&lt;b&gt;&lt;font style=&quot;font-size: 22px&quot;&gt;DevAssist AI — Complete System Workflow&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 11px&quot; color=&quot;#666666&quot;&gt;Frontend (Vercel) · Backend Gateway (Spring Boot, Render) · AI Engine (FastAPI, Render) · Supabase · Groq LLM · Wandbox&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="377" y="10" width="900" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ============ ROW 1 : USER + AUTH ============ -->
+        <mxCell id="user" value="&lt;b&gt;User&lt;/b&gt;&lt;br&gt;(any browser)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="50" y="90" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="auth" value="&lt;b&gt;Supabase Auth&lt;/b&gt;&lt;br&gt;Login / Signup&lt;br&gt;issues JWT token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="290" y="85" width="190" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="dash" value="&lt;b&gt;Dashboard&lt;/b&gt;&lt;br&gt;hub of all 6 features&lt;br&gt;(recent activity shown)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="580" y="85" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="guard" value="&lt;b&gt;Every protected page&lt;/b&gt;&lt;br&gt;requireAuth() checks login on load&lt;br&gt;authFetch() attaches JWT to every API call&lt;br&gt;🔋 usage meter shows remaining AI budget" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="80" width="310" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="1. sign in" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1" edge="1" parent="1" source="user" target="auth"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" value="2. JWT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1" edge="1" parent="1" source="auth" target="dash"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="dash" target="guard"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ ROW 2 : SIX FEATURES ============ -->
+        <mxCell id="f1" value="&lt;b&gt;Global AI&lt;/b&gt;&lt;br&gt;general programming chat&lt;br&gt;• multi-chat history, pin, search&lt;br&gt;• model selector (Groq models)&lt;br&gt;• export chat to PDF&lt;br&gt;• optional Local AI (Ollama)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5f5ee;strokeColor=#0e8c7c;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="230" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f2" value="&lt;b&gt;Secret AI (RAG)&lt;/b&gt;&lt;br&gt;private document Q&amp;amp;A&lt;br&gt;• upload PDF (≤50 MB) → Storage&lt;br&gt;• ask questions about the doc&lt;br&gt;• answers ONLY from the doc&lt;br&gt;• per-document chat sessions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8def8;strokeColor=#7c3aed;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="310" y="230" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f3" value="&lt;b&gt;Code Analyzer&lt;/b&gt;&lt;br&gt;paste code (Java/Py/C/C++/JS)&lt;br&gt;• errors + improvements&lt;br&gt;• optimized code + diff&lt;br&gt;• complexity O(n²) → O(n)&lt;br&gt;• performance graph" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#2563eb;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="580" y="230" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f4" value="&lt;b&gt;Online Compiler&lt;/b&gt;&lt;br&gt;Monaco editor in browser&lt;br&gt;• write, run, dry-run code&lt;br&gt;• multiple languages&lt;br&gt;• stdin + output display" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="850" y="230" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f5" value="&lt;b&gt;VoidMain (Judge)&lt;/b&gt;&lt;br&gt;LeetCode-style practice&lt;br&gt;• problems + hidden tests&lt;br&gt;• verdicts: AC / WA / TLE / CE / RE&lt;br&gt;• submission history&lt;br&gt;• leaderboard ranking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="230" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f6" value="&lt;b&gt;Ignite (AI Project Builder)&lt;/b&gt;&lt;br&gt;prompt → complete web project&lt;br&gt;• plan → file-by-file generation&lt;br&gt;• live file tree + code viewer&lt;br&gt;• live preview, AI edits, ZIP&lt;br&gt;• auto-save + resume" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1380" y="230" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ed" value="3. user opens a feature" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1" edge="1" parent="1" source="dash" target="f3"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ ROW 3 : BACKEND GATEWAY ============ -->
+        <mxCell id="gw" value="&lt;b&gt;&lt;font style=&quot;font-size:14px&quot;&gt;Backend Gateway — Spring Boot 3 (Java 21) · Docker on Render&lt;/font&gt;&lt;/b&gt;&lt;br&gt;JWT filter verifies every request (identity always from token, never from request body) · Controllers → Services → JPA Repositories&lt;br&gt;persists all data · proxies AI requests · streams responses · KeepAlive pings AI engine every 14 min (prevents free-tier sleep)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#1a56b0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="390" y="430" width="880" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="ef1" value="4. REST + JWT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1" edge="1" parent="1" source="f1" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ef2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="f2" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ef3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="f3" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ef4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="f4" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ef5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="f5" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ef6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="f6" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ ROW 4 : DATA / AI / EXECUTION ============ -->
+        <mxCell id="db" value="&lt;b&gt;Supabase (free tier)&lt;/b&gt;&lt;br&gt;&lt;b&gt;PostgreSQL&lt;/b&gt; via PgBouncer, RLS on:&lt;br&gt;users · chats &amp;amp; messages · documents&lt;br&gt;doc-chat sessions · vm_problems&lt;br&gt;vm_submissions · leaderboard&lt;br&gt;ignite_projects · activity log&lt;br&gt;&lt;b&gt;token ledger:&lt;/b&gt; user_daily_usage +&lt;br&gt;global_daily_usage&lt;br&gt;&lt;b&gt;Storage:&lt;/b&gt; uploaded PDFs" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="590" width="290" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="engine" value="&lt;b&gt;&lt;font style=&quot;font-size:13px&quot;&gt;AI Engine — FastAPI (Python 3.11) on Render&lt;/font&gt;&lt;/b&gt;&lt;br&gt;every LLM call passes through one function: &lt;b&gt;safe_generate()&lt;/b&gt;&lt;br&gt;&lt;br&gt;① &lt;b&gt;Quota check&lt;/b&gt;: estimate tokens (chars÷4 + max output) —&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;over user cap (~22K/day) or global pool (190K/day)? → reject 429&lt;br&gt;② &lt;b&gt;Generate&lt;/b&gt;: call LLM, stream tokens back; retry ×3 with backoff&lt;br&gt;③ &lt;b&gt;Secret AI path&lt;/b&gt;: BM25 retrieval — chunk PDF (900 chars),&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;pick top-6 chunks, answer from document only&lt;br&gt;④ &lt;b&gt;Ignite path&lt;/b&gt;: plan → generate one file per streaming call&lt;br&gt;⑤ &lt;b&gt;Record usage&lt;/b&gt;: exact tokens → atomic ledger upsert in DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5f5ee;strokeColor=#0e8c7c;strokeWidth=2;align=left;spacingLeft=10;spacing=6;" vertex="1" parent="1">
+          <mxGeometry x="480" y="580" width="520" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="wandbox" value="&lt;b&gt;Wandbox Sandbox&lt;/b&gt;&lt;br&gt;remote compile &amp;amp; run&lt;br&gt;(user code never runs&lt;br&gt;on our servers)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="590" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="groq" value="&lt;b&gt;Groq LLM API&lt;/b&gt;&lt;br&gt;openai/gpt-oss-120b&lt;br&gt;free tier: 200K tokens/day (shared)&lt;br&gt;provider switchable → NVIDIA NIM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="720" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eg1" value="5a. save / load data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1;exitX=0;exitY=0.5;" edge="1" parent="1" source="gw" target="db"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eg2" value="5b. AI request" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1" edge="1" parent="1" source="gw" target="engine"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="eg3" value="5c. compiler / judge code execution" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1;exitX=1;exitY=0.5;" edge="1" parent="1" source="gw" target="wandbox"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ee1" value="6. inference (streaming)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1;exitX=1;exitY=0.7;" edge="1" parent="1" source="engine" target="groq"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ee2" value="7. atomic token-usage upsert" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1;exitX=0;exitY=0.7;" edge="1" parent="1" source="engine" target="db"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ee3" value="8. streamed answer back to user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontStyle=1;dashed=1;strokeColor=#0e8c7c;exitX=0.5;exitY=0;entryX=0.7;entryY=1;" edge="1" parent="1" source="engine" target="gw"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- ============ BOTTOM NOTES ============ -->
+        <mxCell id="note1" value="&lt;b&gt;If quota exceeded:&lt;/b&gt; request rejected (HTTP 429 / in-band quota error) → UI stops retrying and shows a friendly message + 🔋 remaining-budget meter. Provider errors (busy) are retried; quota errors are not." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="870" width="460" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="note2" value="&lt;b&gt;Free-tier survival tricks:&lt;/b&gt; keep-alive ping (14 min) defeats server sleep · lazy imports for fast cold start · BM25 instead of heavy embeddings (fits 512 MB RAM) · one file per LLM call in Ignite (fits 8K tokens/min limit) · resume skips completed files after interruption." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="560" y="870" width="560" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="note3" value="&lt;b&gt;Security:&lt;/b&gt; every row in DB carries the user&#39;s Supabase UUID — all queries filter by it · secrets only in environment variables · cross-user access returns 404 · untrusted code only in external sandbox." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="870" width="460" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

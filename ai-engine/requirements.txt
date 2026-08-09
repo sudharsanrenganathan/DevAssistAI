@@ -10,3 +10,4 @@ requests
 pydantic
 pdf2image
 pytesseract
+pytest

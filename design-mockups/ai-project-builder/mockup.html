@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0a0a0a;
+  background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #fff;
+  width: 1440px; height: 900px; overflow: hidden;
+}
+.mono { font-family: 'JetBrains Mono', 'Consolas', monospace; }
+.grad-text { background: linear-gradient(135deg, #06f5cd, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.grad-btn { background: linear-gradient(135deg, #06f5cd, #7c3aed); color: #0a0a0a; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; }
+.ghost-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 8px; cursor: pointer; }
+.glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+
+/* ---------- TOP BAR ---------- */
+.topbar { height: 56px; display: flex; align-items: center; padding: 0 20px; gap: 14px;
+  background: rgba(10,10,10,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo { font-weight: 800; font-size: 17px; }
+.crumb { color: #64748b; font-size: 13px; }
+.beta { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 20px;
+  background: rgba(124,58,237,0.25); color: #c084fc; border: 1px solid #7c3aed55; }
+.model-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; }
+.dot-green { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#06f5cd,#7c3aed);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#0a0a0a; }
+
+.screen { display: none; height: 844px; }
+body[data-screen="1"] #s1, body[data-screen="2"] #s2, body[data-screen="3"] #s3, body[data-screen="4"] #s4 { display: flex; }
+
+/* ---------- SCREEN 1 : EMPTY / HERO ---------- */
+#s1 { flex-direction: column; align-items: center; justify-content: center; }
+.hero-h1 { font-size: 44px; font-weight: 800; margin-bottom: 12px; text-align:center; }
+.hero-sub { color: #94a3b8; font-size: 16px; margin-bottom: 36px; text-align:center; }
+.prompt-box { width: 760px; background: rgba(255,255,255,0.04); border: 1px solid rgba(6,245,205,0.35);
+  border-radius: 16px; padding: 20px; box-shadow: 0 0 40px rgba(6,245,205,0.07); }
+.prompt-box textarea-fake { display:block; color: #64748b; font-size: 15px; min-height: 74px; }
+.prompt-foot { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.chip { font-size: 12px; color: #94a3b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  padding: 6px 12px; border-radius: 20px; }
+.send-btn { margin-left: auto; padding: 10px 22px; font-size: 14px; }
+.tpl-row { display: flex; gap: 12px; margin-top: 28px; }
+.tpl { width: 172px; padding: 16px; text-align: left; }
+.tpl .ic { font-size: 22px; margin-bottom: 8px; }
+.tpl .t { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.tpl .d { font-size: 11px; color: #64748b; line-height: 1.4; }
+.hero-note { margin-top: 30px; font-size: 12px; color: #475569; }
+
+/* ---------- WORKSPACE SHELL (screens 2-4) ---------- */
+.ws { flex: 1; display: flex; gap: 12px; padding: 12px; }
+.chat-col { width: 400px; display: flex; flex-direction: column; }
+.chat-scroll { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+.msg-user { align-self: flex-end; max-width: 85%; background: rgba(124,58,237,0.2); border: 1px solid #7c3aed44;
+  border-radius: 12px 12px 2px 12px; padding: 12px 14px; font-size: 13px; color: #e2e8f0; line-height: 1.5; }
+.msg-ai { align-self: flex-start; max-width: 92%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 12px 2px; padding: 12px 14px; font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+.steps { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #94a3b8; }
+.step.done { color: #4ade80; }
+.step.active { color: #06f5cd; }
+.step.todo { color: #475569; }
+.spin { width: 12px; height: 12px; border: 2px solid rgba(6,245,205,0.25); border-top-color: #06f5cd; border-radius: 50%; display:inline-block; }
+.progress-wrap { margin-top: 12px; }
+.progress-bar { height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; width: 64%; background: linear-gradient(90deg,#06f5cd,#7c3aed); border-radius: 3px; }
+.progress-lbl { display:flex; justify-content:space-between; font-size: 11px; color: #64748b; margin-top: 6px; }
+.chat-input { margin: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; }
+.chat-input .ph { color: #475569; font-size: 13px; flex: 1; }
+.mini-send { width: 34px; height: 34px; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size:15px; }
+.sugg-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sugg { font-size: 11.5px; color: #06f5cd; background: rgba(6,245,205,0.08); border: 1px solid rgba(6,245,205,0.3);
+  padding: 5px 11px; border-radius: 20px; }
+
+.work-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.work-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.tab-group { display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 3px; }
+.wtab { padding: 6px 18px; font-size: 12.5px; border-radius: 6px; color: #64748b; }
+.wtab.on { background: rgba(6,245,205,0.15); color: #06f5cd; font-weight: 600; }
+.work-head .sp { flex: 1; }
+.hbtn { padding: 8px 14px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
+.work-body { flex: 1; display: flex; overflow: hidden; }
+
+/* file tree */
+.tree { width: 250px; border-right: 1px solid rgba(255,255,255,0.08); padding: 12px 8px; font-size: 12.5px; overflow: hidden; }
+.tree-h { font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; color: #475569; padding: 0 8px 10px; }
+.tnode { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 6px; color: #94a3b8; }
+.tnode.folder { color: #cbd5e1; font-weight: 600; }
+.tnode.sel { background: rgba(6,245,205,0.12); color: #06f5cd; }
+.tnode.writing { color: #06f5cd; }
+.tnode.pending { color: #334155; }
+.ind1 { padding-left: 24px; } .ind2 { padding-left: 40px; }
+.badge-new { font-size: 9px; background: rgba(74,222,128,0.15); color: #4ade80; padding: 1px 5px; border-radius: 4px; margin-left: auto; }
+
+/* editor */
+.editor { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.etabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.etab { padding: 9px 16px; font-size: 12px; color: #64748b; border-right: 1px solid rgba(255,255,255,0.06); display:flex; gap:8px; align-items:center; }
+.etab.on { color: #06f5cd; background: rgba(6,245,205,0.05); border-bottom: 2px solid #06f5cd; }
+.code { flex: 1; padding: 14px 0; font-size: 12.5px; line-height: 1.75; overflow: hidden; }
+.cl { display: flex; }
+.ln { width: 46px; text-align: right; padding-right: 16px; color: #334155; flex-shrink: 0; user-select: none; }
+.ct { color: #cbd5e1; white-space: pre; }
+.tg { color: #f472b6; } .at { color: #fbbf24; } .st { color: #4ade80; } .cm { color: #475569; } .tx { color: #cbd5e1; } .kw { color: #c084fc; }
+.cursor { display: inline-block; width: 7px; height: 14px; background: #06f5cd; vertical-align: text-bottom; }
+.statusbar { height: 28px; display: flex; align-items: center; gap: 18px; padding: 0 14px; font-size: 11px; color: #64748b;
+  border-top: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+
+/* preview */
+.preview-wrap { flex: 1; padding: 16px; display: flex; flex-direction: column; }
+.browser { flex: 1; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; background: #fff; }
+.browser-bar { height: 40px; background: #16181d; display: flex; align-items: center; gap: 10px; padding: 0 14px; }
+.tl { width: 11px; height: 11px; border-radius: 50%; }
+.url { flex: 1; max-width: 480px; margin: 0 auto; background: rgba(255,255,255,0.07); border-radius: 6px; font-size: 11.5px;
+  color: #94a3b8; padding: 6px 14px; text-align: center; }
+.dev-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 3px; }
+.dev { padding: 4px 10px; font-size: 11px; color: #64748b; border-radius: 4px; }
+.dev.on { background: rgba(6,245,205,0.2); color: #06f5cd; }
+
+/* fake rendered site */
+.site { flex: 1; background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%); color: #0f172a; padding: 0; overflow: hidden; }
+.site-nav { display: flex; align-items: center; padding: 18px 48px; gap: 28px; }
+.site-logo { font-weight: 800; font-size: 18px; color: #4f46e5; }
+.site-link { font-size: 13px; color: #475569; }
+.site-cta { margin-left: auto; background: #4f46e5; color: #fff; font-size: 13px; font-weight: 600; padding: 9px 18px; border-radius: 8px; }
+.site-hero { text-align: center; padding: 64px 40px 40px; }
+.site-h1 { font-size: 40px; font-weight: 800; color: #0f172a; }
+.site-h1 span { color: #4f46e5; }
+.site-p { color: #64748b; font-size: 15px; margin: 14px auto 26px; max-width: 520px; line-height: 1.6; }
+.site-btns { display: flex; gap: 12px; justify-content: center; }
+.sb1 { background: #4f46e5; color: #fff; padding: 12px 26px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+.sb2 { background: #fff; color: #0f172a; padding: 12px 26px; border-radius: 10px; font-weight: 600; font-size: 14px; border: 1px solid #e2e8f0; }
+.site-cards { display: flex; gap: 18px; justify-content: center; padding: 30px 60px; }
+.site-card { background: #fff; border-radius: 14px; padding: 22px; width: 220px; box-shadow: 0 4px 20px rgba(15,23,42,0.06); text-align: left; }
+.sc-ic { width: 38px; height: 38px; border-radius: 10px; background: #eef2ff; display:flex; align-items:center; justify-content:center; font-size: 18px; margin-bottom: 12px; }
+.sc-t { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.sc-d { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+.toast { position: absolute; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 10px;
+  background: rgba(20,24,30,0.95); border: 1px solid rgba(74,222,128,0.4); border-radius: 10px; padding: 12px 18px; font-size: 12.5px; color: #4ade80; }
+</style>
+</head>
+<body data-screen="1">
+
+<div class="topbar">
+  <div class="logo"><span class="grad-text">⚡ DevAssist AI</span></div>
+  <div class="crumb">/ &nbsp;AI Project Builder</div>
+  <span class="beta">BETA</span>
+  <div class="model-badge"><span class="dot-green"></span> DeepSeek R1 · NVIDIA NIM</div>
+  <div class="avatar">S</div>
+</div>
+
+<!-- ============ SCREEN 1 : START ============ -->
+<div class="screen" id="s1">
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+    <div class="hero-h1">What do you want to <span class="grad-text">build</span>?</div>
+    <div class="hero-sub">Describe your project in detail — I'll generate the complete frontend, file by file.</div>
+    <div class="prompt-box">
+      <textarea-fake>Build a modern portfolio website for a photographer named Arjun. Dark theme, gallery grid with hover zoom, about section, contact form, smooth scroll animations...</textarea-fake>
+      <div class="prompt-foot">
+        <span class="chip">✚ Attach reference</span>
+        <span class="chip">◐ Theme: Auto</span>
+        <span class="chip">HTML · CSS · JS</span>
+        <button class="grad-btn send-btn">Generate Project ⚡</button>
+      </div>
+    </div>
+    <div class="tpl-row">
+      <div class="tpl glass"><div class="ic">▣</div><div class="t">Portfolio</div><div class="d">Personal site with gallery &amp; contact form</div></div>
+      <div class="tpl glass"><div class="ic">➤</div><div class="t">Landing Page</div><div class="d">Product page with hero, pricing, FAQ</div></div>
+      <div class="tpl glass"><div class="ic">▦</div><div class="t">Dashboard</div><div class="d">Admin panel with charts &amp; tables</div></div>
+      <div class="tpl glass"><div class="ic">◉</div><div class="t">Mini Game</div><div class="d">Browser game with canvas &amp; scores</div></div>
+    </div>
+    <div class="hero-note">⚡ Frontend projects only — HTML, CSS &amp; JavaScript · Powered by DeepSeek R1 via NVIDIA NIM</div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 2 : GENERATING ============ -->
+<div class="screen" id="s2">
+  <div class="ws">
+    <div class="chat-col glass">
+      <div class="chat-scroll">
+        <div class="msg-user">Build a modern portfolio website for a photographer named Arjun. Dark theme, gallery grid with hover zoom, about section, contact form, smooth scroll animations.</div>
+        <div class="msg-ai">
+          <b style="color:#06f5cd">⚡ Building your project…</b>
+          <div class="steps">
+            <div class="step done">✔ &nbsp;Analyzing prompt &amp; planning architecture</div>
+            <div class="step done">✔ &nbsp;Created <span class="mono">index.html</span></div>
+            <div class="step done">✔ &nbsp;Created <span class="mono">css/style.css</span></div>
+            <div class="step done">✔ &nbsp;Created <span class="mono">css/animations.css</span></div>
+            <div class="step active"><span class="spin"></span> &nbsp;Writing <span class="mono">js/gallery.js</span>…</div>
+            <div class="step todo">○ &nbsp;js/contact-form.js</div>
+            <div class="step todo">○ &nbsp;assets &amp; README.md</div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            <div class="progress-lbl"><span>8 of 12 files</span><span>64% · ~40s left</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input"><span class="ph">Generation in progress — you can queue changes…</span><button class="mini-send ghost-btn">‖</button></div>
+    </div>
+    <div class="work-col glass">
+      <div class="work-head">
+        <div class="tab-group"><span class="wtab on">&lt;/&gt; Code</span><span class="wtab">◉ Preview</span></div>
+        <span class="sp"></span>
+        <button class="hbtn ghost-btn" style="opacity:.45">↓ Download ZIP</button>
+        <button class="hbtn ghost-btn" style="opacity:.45">▶ Live Preview</button>
+      </div>
+      <div class="work-body">
+        <div class="tree">
+          <div class="tree-h">EXPLORER · PORTFOLIO-ARJUN</div>
+          <div class="tnode folder">▾ css</div>
+          <div class="tnode ind1">✦ style.css <span class="badge-new">NEW</span></div>
+          <div class="tnode ind1">✦ animations.css <span class="badge-new">NEW</span></div>
+          <div class="tnode folder">▾ js</div>
+          <div class="tnode ind1 writing"><span class="spin"></span> gallery.js</div>
+          <div class="tnode ind1 pending">○ contact-form.js</div>
+          <div class="tnode folder pending">○ ▸ assets</div>
+          <div class="tnode sel">◆ index.html</div>
+          <div class="tnode pending">○ README.md</div>
+        </div>
+        <div class="editor">
+          <div class="etabs"><div class="etab on">gallery.js</div><div class="etab">index.html</div></div>
+          <div class="code mono">
+            <div class="cl"><span class="ln">1</span><span class="ct"><span class="cm">// Gallery grid with hover zoom &amp; lightbox</span></span></div>
+            <div class="cl"><span class="ln">2</span><span class="ct"><span class="kw">const</span> gallery = document.<span class="at">querySelector</span>(<span class="st">'.gallery-grid'</span>);</span></div>
+            <div class="cl"><span class="ln">3</span><span class="ct"><span class="kw">const</span> images = [...gallery.<span class="at">querySelectorAll</span>(<span class="st">'img'</span>)];</span></div>
+            <div class="cl"><span class="ln">4</span><span class="ct"></span></div>
+            <div class="cl"><span class="ln">5</span><span class="ct">images.<span class="at">forEach</span>((img, i) =&gt; {</span></div>
+            <div class="cl"><span class="ln">6</span><span class="ct">  img.<span class="at">addEventListener</span>(<span class="st">'click'</span>, () =&gt; <span class="at">openLightbox</span>(i));</span></div>
+            <div class="cl"><span class="ln">7</span><span class="ct">  img.style.animationDelay = <span class="st">`${i * 80}ms`</span>;</span></div>
+            <div class="cl"><span class="ln">8</span><span class="ct">});</span></div>
+            <div class="cl"><span class="ln">9</span><span class="ct"></span></div>
+            <div class="cl"><span class="ln">10</span><span class="ct"><span class="kw">function</span> <span class="at">openLightbox</span>(index) {</span></div>
+            <div class="cl"><span class="ln">11</span><span class="ct">  <span class="kw">const</span> overlay = document.<span class="at">createElement</span>(<span class="st">'div'</span>);</span></div>
+            <div class="cl"><span class="ln">12</span><span class="ct">  overlay.className = <span class="st">'lightbox'</span>;<span class="cursor"></span></span></div>
+          </div>
+          <div class="statusbar"><span style="color:#06f5cd">⚡ Generating… streaming from DeepSeek R1</span><span>UTF-8</span><span>JavaScript</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 3 : COMPLETE + CODE VIEWER ============ -->
+<div class="screen" id="s3">
+  <div class="ws">
+    <div class="chat-col glass">
+      <div class="chat-scroll">
+        <div class="msg-user">Build a modern portfolio website for a photographer named Arjun. Dark theme, gallery grid with hover zoom, about section, contact form, smooth scroll animations.</div>
+        <div class="msg-ai">
+          <b style="color:#4ade80">✔ Project completed!</b><br>
+          Generated <b>12 files</b> in 1m 24s — responsive portfolio with gallery lightbox, animated sections and a working contact form. Click any file to inspect the code, or open Live Preview.
+          <div class="sugg-row">
+            <span class="sugg">＋ Add a blog section</span>
+            <span class="sugg">✦ Try light theme</span>
+            <span class="sugg">▯ Improve mobile nav</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input"><span class="ph">Ask for changes… e.g. "make the hero full-screen"</span><button class="mini-send grad-btn">➤</button></div>
+    </div>
+    <div class="work-col glass">
+      <div class="work-head">
+        <div class="tab-group"><span class="wtab on">&lt;/&gt; Code</span><span class="wtab">◉ Preview</span></div>
+        <span class="sp"></span>
+        <button class="hbtn ghost-btn">❐ Copy file</button>
+        <button class="hbtn ghost-btn">▶ Live Preview</button>
+        <button class="hbtn grad-btn">↓ Download ZIP</button>
+      </div>
+      <div class="work-body">
+        <div class="tree">
+          <div class="tree-h">EXPLORER · PORTFOLIO-ARJUN</div>
+          <div class="tnode folder">▾ assets</div>
+          <div class="tnode ind1">▣ hero-bg.svg</div>
+          <div class="tnode ind1">▣ placeholder-1.svg</div>
+          <div class="tnode folder">▾ css</div>
+          <div class="tnode ind1">✦ style.css</div>
+          <div class="tnode ind1">✦ animations.css</div>
+          <div class="tnode ind1">✦ responsive.css</div>
+          <div class="tnode folder">▾ js</div>
+          <div class="tnode ind1">ƒ main.js</div>
+          <div class="tnode ind1">ƒ gallery.js</div>
+          <div class="tnode ind1">ƒ contact-form.js</div>
+          <div class="tnode sel">◆ index.html</div>
+          <div class="tnode">¶ README.md</div>
+        </div>
+        <div class="editor">
+          <div class="etabs"><div class="etab on">index.html ●</div><div class="etab">style.css</div><div class="etab">gallery.js</div></div>
+          <div class="code mono">
+            <div class="cl"><span class="ln">1</span><span class="ct"><span class="tg">&lt;!DOCTYPE html&gt;</span></span></div>
+            <div class="cl"><span class="ln">2</span><span class="ct"><span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="st">"en"</span><span class="tg">&gt;</span></span></div>
+            <div class="cl"><span class="ln">3</span><span class="ct"><span class="tg">&lt;head&gt;</span></span></div>
+            <div class="cl"><span class="ln">4</span><span class="ct">  <span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="st">"UTF-8"</span><span class="tg">&gt;</span></span></div>
+            <div class="cl"><span class="ln">5</span><span class="ct">  <span class="tg">&lt;title&gt;</span><span class="tx">Arjun — Photographer</span><span class="tg">&lt;/title&gt;</span></span></div>
+            <div class="cl"><span class="ln">6</span><span class="ct">  <span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"css/style.css"</span><span class="tg">&gt;</span></span></div>
+            <div class="cl"><span class="ln">7</span><span class="ct"><span class="tg">&lt;/head&gt;</span></span></div>
+            <div class="cl"><span class="ln">8</span><span class="ct"><span class="tg">&lt;body&gt;</span></span></div>
+            <div class="cl"><span class="ln">9</span><span class="ct">  <span class="tg">&lt;nav</span> <span class="at">class</span>=<span class="st">"navbar"</span><span class="tg">&gt;</span></span></div>
+            <div class="cl"><span class="ln">10</span><span class="ct">    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="st">"logo"</span><span class="tg">&gt;</span><span class="tx">ARJUN.</span><span class="tg">&lt;/div&gt;</span></span></div>
+            <div class="cl"><span class="ln">11</span><span class="ct">    <span class="tg">&lt;ul</span> <span class="at">class</span>=<span class="st">"nav-links"</span><span class="tg">&gt;</span></span></div>
+            <div class="cl"><span class="ln">12</span><span class="ct">      <span class="tg">&lt;li&gt;&lt;a</span> <span class="at">href</span>=<span class="st">"#gallery"</span><span class="tg">&gt;</span><span class="tx">Gallery</span><span class="tg">&lt;/a&gt;&lt;/li&gt;</span></span></div>
+            <div class="cl"><span class="ln">13</span><span class="ct">      <span class="tg">&lt;li&gt;&lt;a</span> <span class="at">href</span>=<span class="st">"#about"</span><span class="tg">&gt;</span><span class="tx">About</span><span class="tg">&lt;/a&gt;&lt;/li&gt;</span></span></div>
+            <div class="cl"><span class="ln">14</span><span class="ct">      <span class="tg">&lt;li&gt;&lt;a</span> <span class="at">href</span>=<span class="st">"#contact"</span><span class="tg">&gt;</span><span class="tx">Contact</span><span class="tg">&lt;/a&gt;&lt;/li&gt;</span></span></div>
+            <div class="cl"><span class="ln">15</span><span class="ct">    <span class="tg">&lt;/ul&gt;</span></span></div>
+            <div class="cl"><span class="ln">16</span><span class="ct">  <span class="tg">&lt;/nav&gt;</span></span></div>
+            <div class="cl"><span class="ln">17</span><span class="ct">  <span class="tg">&lt;header</span> <span class="at">class</span>=<span class="st">"hero"</span><span class="tg">&gt;</span> <span class="cm">&lt;!-- animated hero section --&gt;</span></span></div>
+            <div class="cl"><span class="ln">18</span><span class="ct">    <span class="tg">&lt;h1&gt;</span><span class="tx">Capturing moments,</span><span class="tg">&lt;br&gt;</span><span class="tx">creating memories.</span><span class="tg">&lt;/h1&gt;</span></span></div>
+          </div>
+          <div class="statusbar"><span style="color:#4ade80">✔ 12 files · 48.2 KB total</span><span>index.html · 96 lines</span><span>HTML</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast">✔ &nbsp;portfolio-arjun.zip ready — 48 KB</div>
+</div>
+
+<!-- ============ SCREEN 4 : LIVE PREVIEW ============ -->
+<div class="screen" id="s4">
+  <div class="ws">
+    <div class="chat-col glass">
+      <div class="chat-scroll">
+        <div class="msg-user">Build a modern portfolio website for a photographer named Arjun…</div>
+        <div class="msg-ai">
+          <b style="color:#4ade80">✔ Project completed!</b><br>
+          Live preview is running. Toggle device sizes to test responsiveness — or tell me what to change.
+          <div class="sugg-row">
+            <span class="sugg">✦ Change accent color</span>
+            <span class="sugg">✎ Rewrite hero text</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input"><span class="ph">Ask for changes…</span><button class="mini-send grad-btn">➤</button></div>
+    </div>
+    <div class="work-col glass">
+      <div class="work-head">
+        <div class="tab-group"><span class="wtab">&lt;/&gt; Code</span><span class="wtab on">◉ Preview</span></div>
+        <span class="sp"></span>
+        <div class="dev-toggle"><span class="dev on">▭ Desktop</span><span class="dev">▯ Tablet</span><span class="dev">▯ Mobile</span></div>
+        <button class="hbtn ghost-btn">↗ Open in new tab</button>
+        <button class="hbtn grad-btn">↓ Download ZIP</button>
+      </div>
+      <div class="preview-wrap">
+        <div class="browser">
+          <div class="browser-bar">
+            <span class="tl" style="background:#f87171"></span><span class="tl" style="background:#facc15"></span><span class="tl" style="background:#4ade80"></span>
+            <div class="url">preview.devassist.ai/portfolio-arjun</div>
+            <span style="color:#64748b;font-size:13px">↻</span>
+          </div>
+          <div class="site">
+            <div class="site-nav">
+              <span class="site-logo">ARJUN.</span>
+              <span class="site-link">Gallery</span><span class="site-link">About</span><span class="site-link">Contact</span>
+              <span class="site-cta">Book a shoot</span>
+            </div>
+            <div class="site-hero">
+              <div class="site-h1">Capturing moments,<br><span>creating memories.</span></div>
+              <div class="site-p">Award-winning photographer based in Chennai. Specialising in portraits, weddings and street photography.</div>
+              <div class="site-btns"><span class="sb1">View gallery</span><span class="sb2">Get in touch</span></div>
+            </div>
+            <div class="site-cards">
+              <div class="site-card"><div class="sc-ic">◉</div><div class="sc-t">Portraits</div><div class="sc-d">Studio &amp; outdoor portrait sessions with pro retouching.</div></div>
+              <div class="site-card"><div class="sc-ic">❤</div><div class="sc-t">Weddings</div><div class="sc-d">Full-day coverage, candid moments, cinematic albums.</div></div>
+              <div class="site-card"><div class="sc-ic">▦</div><div class="sc-t">Street</div><div class="sc-d">Urban stories captured across India's busiest cities.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const p = new URLSearchParams(location.search);
+document.body.dataset.screen = p.get('screen') || '1';
+</script>
+</body>
+</html>

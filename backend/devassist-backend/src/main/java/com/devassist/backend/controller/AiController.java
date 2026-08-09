@@ -1,11 +1,13 @@
 package com.devassist.backend.controller;
 
+import com.devassist.backend.entity.Chat;
+import com.devassist.backend.entity.ChatSession;
 import com.devassist.backend.entity.Document;
+import com.devassist.backend.repository.ChatRepository;
+import com.devassist.backend.repository.ChatSessionRepository;
 import com.devassist.backend.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
-import com.devassist.backend.entity.*;
-import com.devassist.backend.repository.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -174,7 +176,9 @@ public class AiController {
     // ================================================================
     @PostMapping("/rag")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> askRagNew(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Map<String, Object>> askRagNew(
+            @RequestBody Map<String, Object> request,
+            org.springframework.security.core.Authentication authentication) {
 
         System.out.println("🔥 /ai/rag ENDPOINT HIT");
         
@@ -204,7 +208,8 @@ public class AiController {
             Map<String, Object> requestBody = Map.of(
                     "question", question.trim(),
                     "file_path", filePath.trim(),
-                    "session_id", sessionId != null ? sessionId.toString() : "default"
+                    "session_id", sessionId != null ? sessionId.toString() : "default",
+                    "user_email", authentication.getName()
             );
 
             HttpHeaders headers = new HttpHeaders();
@@ -230,23 +235,30 @@ public class AiController {
             
             if (answer.startsWith("ERROR:") || answer.startsWith("❌")) {
                 System.out.println("❌ AI Engine returned error: " + answer);
+                // Daily token quota errors arrive in-band as
+                // "ERROR: [quota:scope] message" — surface them as 429 with
+                // the engine's human-readable message.
+                if (answer.contains("[quota:")) {
+                    String message = answer.replaceFirst("^ERROR:\\s*\\[quota:[a-z]+\\]\\s*", "");
+                    return ResponseEntity.status(429).body(Map.of("error", message));
+                }
                 return ResponseEntity.status(500).body(Map.of("error", answer));
             }
-            
+
             return ResponseEntity.ok(Map.of("answer", answer));
-            
+
         } catch (HttpClientErrorException e) {
             String errorMsg = "RAG request failed with HTTP " + e.getStatusCode() + ": " + e.getMessage();
             String responseBody = e.getResponseBodyAsString();
-            String preview = responseBody.length() > 200 
-                ? responseBody.substring(0, 200) + "..." 
+            String preview = responseBody.length() > 200
+                ? responseBody.substring(0, 200) + "..."
                 : responseBody;
             errorMsg += " | Response: " + preview;
-            
+
             System.out.println("❌ " + errorMsg);
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", "AI failed: " + e.getMessage()));
-            
+
         } catch (Exception e) {
             String errorMsg = "RAG request failed: " + e.getMessage();
             System.out.println("❌ " + errorMsg);
@@ -262,7 +274,8 @@ public class AiController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> askRag(
             @PathVariable Long docId,
-            @RequestBody QuestionRequest request) {
+            @RequestBody QuestionRequest request,
+            org.springframework.security.core.Authentication authentication) {
 
         System.out.println("🔥 RAG ENDPOINT HIT - DocID: " + docId);
         
@@ -287,7 +300,8 @@ public class AiController {
         Map<String, Object> requestBody = Map.of(
                 "question", question,
                 "file_path", filePath,  // Raw path, no manual encoding
-                "session_id", docId // Using docId as session_id for document-specific context
+                "session_id", docId, // Using docId as session_id for document-specific context
+                "user_email", authentication.getName()
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -316,6 +330,10 @@ public class AiController {
             // Check if response is an error message
             if (answer.startsWith("ERROR:") || answer.startsWith("❌")) {
                 System.out.println("❌ AI Engine returned error: " + answer);
+                if (answer.contains("[quota:")) {
+                    String message = answer.replaceFirst("^ERROR:\\s*\\[quota:[a-z]+\\]\\s*", "");
+                    return ResponseEntity.status(429).body(Map.of("error", message));
+                }
                 return ResponseEntity.status(500).body(Map.of("error", answer));
             }
             
@@ -348,7 +366,8 @@ public class AiController {
     public Map<String, Object> askAI(
             @PathVariable String userId,
             @PathVariable Long sessionId,
-            @RequestBody QuestionRequest request) {
+            @RequestBody QuestionRequest request,
+            org.springframework.security.core.Authentication authentication) {
 
         String question = request.getQuestion();
         if (question == null || question.isEmpty()) {
@@ -357,9 +376,10 @@ public class AiController {
 
         String aiUrl = aiEngineUrl + "/global-ai";
         Map<String, Object> requestBody = Map.of(
-                "question", question, 
+                "question", question,
                 "has_file", false,
-                "session_id", sessionId
+                "session_id", sessionId,
+                "user_email", authentication.getName()
         );
 
         HttpHeaders headers = new HttpHeaders();

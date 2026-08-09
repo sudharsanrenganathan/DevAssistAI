@@ -24,3 +24,15 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local dev secrets — never commit
+local-secrets.ps1
+
+# Personal / generated artifacts — not part of the codebase
+*.pdf
+*.docx
+Resume-*
+desktop.ini
+screenshot_*.html
+findings/
+DevAssistAI-Workflow-Preview.png

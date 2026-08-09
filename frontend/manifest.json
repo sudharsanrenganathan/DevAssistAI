@@ -1,0 +1,14 @@
+{
+  "name": "DevAssist Offline Studio",
+  "short_name": "DevAssist Offline",
+  "description": "Run DevAssist AI (Chat + Docs) entirely on your own machine with a local Ollama model — no internet, no account.",
+  "start_url": "local-ai.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    { "src": "img/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

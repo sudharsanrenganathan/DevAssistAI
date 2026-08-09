@@ -151,7 +151,7 @@ Never use a real credential as a default value. The pattern must be:
 spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 
 # Wrong — real password as fallback
-spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:Sudharsan@2005}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:some-real-password}
 ```
 
 Required environment variables are documented in:
@@ -171,7 +171,9 @@ Required environment variables are documented in:
 
 ## Known Technical Debt (do not silently remove — discuss first)
 
-- `AiIntegrationService.java` — hardcodes `127.0.0.1:8000` and references `/secret-intelligence` (endpoint does not exist). Dead code, but leave it until a cleanup task is approved.
-- `question_answering.py` — contains FAISS-based vector search logic that is bypassed in production. The `/rag-ask` route sends raw text to the LLM instead.
-- `User.password` field — unused column left from before Supabase auth migration.
 - `normalize()` in `VoidMainController` — collapses newlines in expected output, which may cause false Wrong Answer verdicts on multi-line problems.
+- The AI engine loads doc-chat history via `GET {BACKEND_URL}/api/messages/{id}`, but no backend controller maps that path — the load fails silently on every doc chat. (Found during 2026-07-06 cleanup; fix needs a decision on the right history endpoint.)
+
+Resolved 2026-07-06 (user-approved cleanup): `AiIntegrationService.java`, `AIService.java`,
+`question_answering.py` and the unused `User.password` field were deleted — see
+`PROJECT_BUILDER_PROGRESS.md` §6e for the full deletion list.

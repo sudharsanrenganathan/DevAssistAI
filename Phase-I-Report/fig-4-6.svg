@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="168" viewBox="0 0 620 168" font-family="'Times New Roman',Times,serif">
+  <rect width="620" height="168" fill="#fff"/>
+  <g stroke="#000" stroke-width="1.2" fill="#f2f2f2">
+    <rect x="238" y="62" width="144" height="44" rx="3"/>
+  </g>
+  <g stroke="#000" stroke-width="1" fill="#fff">
+    <rect x="6"   y="4"   width="150" height="38" rx="3"/>
+    <rect x="6"   y="126" width="150" height="38" rx="3"/>
+    <rect x="464" y="4"   width="150" height="38" rx="3"/>
+    <rect x="464" y="126" width="150" height="38" rx="3"/>
+    <rect x="238" y="4"   width="144" height="34" rx="3"/>
+    <rect x="238" y="130" width="144" height="34" rx="3"/>
+  </g>
+  <g font-size="10" text-anchor="middle">
+    <text x="310" y="80" font-weight="bold">USERS</text>
+    <text x="310" y="96" font-size="9">supabase_id (PK) · email · name</text>
+    <text x="81"  y="20" font-weight="bold">DOCUMENTS</text>
+    <text x="81"  y="34" font-size="9">file_path · user_id</text>
+    <text x="81"  y="142" font-weight="bold">GLOBAL_CHAT_THREADS</text>
+    <text x="81"  y="156" font-size="9">title · pinned · user_id</text>
+    <text x="539" y="20" font-weight="bold">VM_SUBMISSIONS</text>
+    <text x="539" y="34" font-size="9">verdict · user_id</text>
+    <text x="539" y="142" font-weight="bold">IGNITE_PROJECTS</text>
+    <text x="539" y="156" font-size="9">files · user_id</text>
+    <text x="310" y="18" font-weight="bold">SECRET_MESSAGES</text>
+    <text x="310" y="31" font-size="9">role · content · chat_id</text>
+    <text x="310" y="144" font-weight="bold">GLOBAL_MESSAGES</text>
+    <text x="310" y="157" font-size="9">role · content · chat_id</text>
+  </g>
+  <g stroke="#000" stroke-width="1" fill="none">
+    <path d="M238,74 L156,42"/><path d="M238,96 L156,132"/>
+    <path d="M382,74 L464,42"/><path d="M382,96 L464,132"/>
+    <path d="M310,62 L310,38"/><path d="M310,106 L310,130"/>
+  </g>
+  <g font-size="8.5" fill="#000">
+    <text x="170" y="52">1..*</text><text x="170" y="124">1..*</text>
+    <text x="432" y="52">1..*</text><text x="432" y="124">1..*</text>
+    <text x="316" y="52">1..*</text><text x="316" y="124">1..*</text>
+  </g>
+</svg>

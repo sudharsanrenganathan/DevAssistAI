@@ -1,4 +1,3 @@
-import numpy as np
 from rag.text_splitter import split_document
 
 # Note: Heavy AI libraries are imported inside create_vector_store
@@ -6,6 +5,7 @@ from rag.text_splitter import split_document
 
 
 def create_vector_store(file_path):
+    import numpy as np
     from sentence_transformers import SentenceTransformer
     import faiss
 
@@ -37,13 +37,3 @@ def create_vector_store(file_path):
     index.add(embeddings)
 
     return index, chunks, model
-
-
-if __name__ == "__main__":
-
-    file = "sample.pdf"
-
-    index, chunks, model = create_vector_store(file)
-
-    print("Vector database created!")
-    print("Total vectors stored:", index.ntotal)

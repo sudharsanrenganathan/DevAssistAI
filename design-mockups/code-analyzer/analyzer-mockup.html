@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',system-ui,sans-serif; width:1440px; height:900px; overflow:hidden; color:#fff;
+  background:#0a0a0a; background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size:20px 20px; }
+.mono { font-family:'JetBrains Mono','Consolas',monospace; }
+.glass { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; }
+
+.top { height:54px; display:flex; align-items:center; gap:12px; padding:0 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+.brand { font-weight:800; font-size:16px; }
+.brand .g { background:linear-gradient(135deg,#06f5cd,#7c3aed); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.crumb { color:#64748b; font-size:13px; }
+.title { font-size:14.5px; font-weight:600; }
+.arr { font-size:10px; opacity:.6; }
+.pill { font-size:11.5px; padding:5px 12px; border-radius:16px; display:flex; align-items:center; gap:6px; }
+.pill.lang { background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.4); color:#60a5fa; }
+.pill.model { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; }
+.pill.loc { background:transparent; border:1px solid rgba(251,146,60,0.5); color:#fb923c; }
+.sp { flex:1; }
+.runbtn { padding:8px 22px; border-radius:8px; font-size:13px; font-weight:700;
+  background:linear-gradient(135deg,#3b82f6,#60a5fa); color:#04101f; display:flex; gap:7px; align-items:center; }
+.clearbtn { padding:8px 14px; border-radius:8px; font-size:12.5px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; }
+
+.main { display:flex; gap:12px; padding:12px; height:834px; }
+
+/* EDITOR */
+.edcol { width:565px; display:flex; flex-direction:column; overflow:hidden; }
+.edhead { display:flex; align-items:center; padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.08); font-size:12.5px; font-weight:600; color:#cbd5e1; gap:10px; }
+.edhead .file { color:#60a5fa; }
+.edhead .langsel { margin-left:auto; font-size:11.5px; color:#94a3b8; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); padding:4px 10px; border-radius:6px; }
+.code { flex:1; padding:12px 0; font-size:12.5px; line-height:1.8; overflow:hidden; }
+.cl { display:flex; }
+.cl.warnline { background:rgba(251,191,36,0.06); box-shadow:inset 3px 0 0 #fbbf24; }
+.cl.errline { background:rgba(248,113,113,0.07); box-shadow:inset 3px 0 0 #f87171; }
+.ln { width:44px; text-align:right; padding-right:14px; color:#334155; flex-shrink:0; }
+.ct { color:#cbd5e1; white-space:pre; }
+.kw { color:#c084fc; } .st { color:#4ade80; } .fn { color:#fbbf24; } .cm { color:#475569; } .num { color:#60a5fa; }
+.edfoot { display:flex; gap:16px; padding:8px 14px; border-top:1px solid rgba(255,255,255,0.08); font-size:11px; color:#64748b; }
+
+/* MIDDLE RESULTS */
+.midcol { flex:1; display:flex; flex-direction:column; gap:12px; overflow:hidden; }
+.rescard { padding:14px; display:flex; flex-direction:column; gap:9px; }
+.rhead { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; }
+.count { font-size:10px; padding:2px 8px; border-radius:10px; margin-left:2px; }
+.rhead .act { margin-left:auto; font-size:11px; color:#94a3b8; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); padding:4px 10px; border-radius:6px; }
+.issue { display:flex; gap:9px; font-size:12.5px; color:#cbd5e1; line-height:1.55; align-items:flex-start; }
+.sev { font-size:9.5px; font-weight:800; letter-spacing:.5px; padding:2px 7px; border-radius:9px; flex-shrink:0; margin-top:2px; }
+.sev.hi { background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.4); }
+.sev.med { background:rgba(251,191,36,0.13); color:#fbbf24; border:1px solid rgba(251,191,36,0.4); }
+.sev.low { background:rgba(96,165,250,0.13); color:#60a5fa; border:1px solid rgba(96,165,250,0.4); }
+.issue .loc { color:#60a5fa; }
+.optbox { background:#0d1117; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px; font-size:12px; line-height:1.7; white-space:pre; overflow:hidden; }
+.dadd { background:rgba(74,222,128,0.09); display:block; }
+.ddel { background:rgba(248,113,113,0.09); display:block; text-decoration:line-through; opacity:.75; }
+.optfoot { display:flex; gap:8px; }
+.miniact { font-size:11.5px; padding:6px 12px; border-radius:8px; }
+.miniact.apply { background:linear-gradient(135deg,#4ade80,#22c55e); color:#03170b; font-weight:700; }
+.miniact.ghost { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; }
+
+/* RIGHT PANEL */
+.rcol { width:315px; display:flex; flex-direction:column; gap:12px; overflow:hidden; }
+.scorecard { padding:16px; display:flex; align-items:center; gap:16px; }
+.ring { width:84px; height:84px; border-radius:50%; flex-shrink:0;
+  background:conic-gradient(#4ade80 0 78%, rgba(255,255,255,0.08) 78% 100%);
+  display:flex; align-items:center; justify-content:center; }
+.ring .inner { width:64px; height:64px; border-radius:50%; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring .val { font-size:20px; font-weight:800; color:#4ade80; }
+.ring .cap { font-size:8.5px; color:#64748b; letter-spacing:1px; }
+.scoreinfo { font-size:11.5px; color:#94a3b8; line-height:1.6; }
+.scoreinfo b { color:#e2e8f0; font-size:13px; display:block; margin-bottom:3px; }
+.compcard { padding:14px; display:flex; flex-direction:column; gap:10px; }
+.ch { font-size:12.5px; font-weight:700; color:#e2e8f0; display:flex; gap:7px; align-items:center; }
+.crow { display:flex; gap:8px; }
+.cbadge { flex:1; text-align:center; padding:10px 6px; border-radius:10px; }
+.cbadge .o { font-size:16px; font-weight:800; }
+.cbadge .l { font-size:9.5px; letter-spacing:.8px; color:#64748b; margin-top:3px; }
+.cbadge.cur { background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.35); }
+.cbadge.cur .o { color:#f87171; }
+.cbadge.opt { background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.35); }
+.cbadge.opt .o { color:#4ade80; }
+.chart { display:flex; align-items:flex-end; gap:7px; height:110px; padding:6px 4px 0; border-bottom:1px solid rgba(255,255,255,0.1); }
+.bar { flex:1; border-radius:4px 4px 0 0; background:linear-gradient(180deg,rgba(248,113,113,0.8),rgba(248,113,113,0.25)); }
+.bar.g { background:linear-gradient(180deg,rgba(74,222,128,0.8),rgba(74,222,128,0.25)); }
+.chlbl { display:flex; justify-content:space-between; font-size:9.5px; color:#475569; padding:4px 2px 0; }
+.legend { display:flex; gap:14px; font-size:10.5px; color:#94a3b8; }
+.dot { width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:5px; vertical-align:-1px; }
+.verdict { font-size:11.5px; color:#94a3b8; line-height:1.6; background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.25); border-radius:10px; padding:10px 12px; }
+.verdict b { color:#60a5fa; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">⚡ <span class="g">DevAssist AI</span></div>
+  <div class="crumb">/</div>
+  <div class="title">Code Analyzer</div><span class="arr">▼</span>
+  <span class="pill lang">Java ▾</span>
+  <span class="sp"></span>
+  <span class="pill loc">◆ Local AI</span>
+  <span class="pill model">◈ DeepSeek R1 · NVIDIA ▾</span>
+  <button class="clearbtn">Clear</button>
+  <button class="runbtn">▶ Analyze</button>
+</div>
+
+<div class="main">
+  <!-- EDITOR -->
+  <div class="edcol glass">
+    <div class="edhead">EDITOR <span class="file">Solution.java</span><span class="langsel">Java ▾</span></div>
+    <div class="code mono">
+      <div class="cl"><span class="ln">1</span><span class="ct"><span class="kw">public class</span> <span class="fn">Solution</span> {</span></div>
+      <div class="cl"><span class="ln">2</span><span class="ct">  <span class="kw">public static int</span> <span class="fn">findDuplicate</span>(<span class="kw">int</span>[] nums) {</span></div>
+      <div class="cl errline"><span class="ln">3</span><span class="ct">    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= nums.length; i++) {</span></div>
+      <div class="cl warnline"><span class="ln">4</span><span class="ct">      <span class="kw">for</span> (<span class="kw">int</span> j = i + <span class="num">1</span>; j &lt; nums.length; j++) {</span></div>
+      <div class="cl"><span class="ln">5</span><span class="ct">        <span class="kw">if</span> (nums[i] == nums[j]) {</span></div>
+      <div class="cl"><span class="ln">6</span><span class="ct">          <span class="kw">return</span> nums[i];</span></div>
+      <div class="cl"><span class="ln">7</span><span class="ct">        }</span></div>
+      <div class="cl"><span class="ln">8</span><span class="ct">      }</span></div>
+      <div class="cl"><span class="ln">9</span><span class="ct">    }</span></div>
+      <div class="cl"><span class="ln">10</span><span class="ct">    <span class="kw">return</span> -<span class="num">1</span>;</span></div>
+      <div class="cl"><span class="ln">11</span><span class="ct">  }</span></div>
+      <div class="cl"><span class="ln">12</span><span class="ct">}</span></div>
+    </div>
+    <div class="edfoot"><span>Java 21</span><span>UTF-8</span><span>12 lines</span><span style="margin-left:auto;color:#f87171">● 1 error</span><span style="color:#fbbf24">● 2 warnings</span></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="midcol">
+    <div class="rescard glass">
+      <div class="rhead" style="color:#f87171">✕ Errors <span class="count" style="background:rgba(248,113,113,0.15);color:#f87171">1</span></div>
+      <div class="issue"><span class="sev hi">HIGH</span><span><span class="loc">Line 3:</span> loop condition <span class="mono">i &lt;= nums.length</span> causes <b style="color:#f87171">ArrayIndexOutOfBoundsException</b> — use <span class="mono">i &lt; nums.length - 1</span>.</span></div>
+    </div>
+    <div class="rescard glass">
+      <div class="rhead" style="color:#fbbf24">⚠ Improvements <span class="count" style="background:rgba(251,191,36,0.13);color:#fbbf24">2</span></div>
+      <div class="issue"><span class="sev med">MED</span><span>Nested loops give <b style="color:#fbbf24">O(n²)</b> — a HashSet pass solves this in O(n) time.</span></div>
+      <div class="issue"><span class="sev low">LOW</span><span>Returning <span class="mono">-1</span> silently hides "no duplicate" — consider <span class="mono">OptionalInt</span>.</span></div>
+    </div>
+    <div class="rescard glass" style="flex:1">
+      <div class="rhead" style="color:#4ade80">✔ Optimized Code
+        <span class="act">❐ Copy</span><span class="act">⇆ Version control</span>
+      </div>
+      <div class="optbox mono"><span class="kw">public static int</span> <span class="fn">findDuplicate</span>(<span class="kw">int</span>[] nums) {
+<span class="ddel">  for (int i = 0; i &lt;= nums.length; i++) {</span><span class="dadd">  Set&lt;Integer&gt; seen = <span class="kw">new</span> HashSet&lt;&gt;();</span><span class="dadd">  <span class="kw">for</span> (<span class="kw">int</span> n : nums) {</span><span class="dadd">    <span class="kw">if</span> (!seen.add(n)) <span class="kw">return</span> n;</span>  }
+  <span class="kw">return</span> -1;
+}</div>
+      <div class="optfoot">
+        <span class="miniact apply">✔ Apply to editor</span>
+        <span class="miniact ghost">Explain changes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="rcol">
+    <div class="scorecard glass">
+      <div class="ring"><div class="inner"><span class="val">78</span><span class="cap">SCORE</span></div></div>
+      <div class="scoreinfo"><b>Good, needs fixes</b>1 critical error, 2 improvements. Fixing the loop bound raises this to ~92.</div>
+    </div>
+    <div class="compcard glass">
+      <div class="ch">◔ Complexity</div>
+      <div class="crow">
+        <div class="cbadge cur"><div class="o">O(n²)</div><div class="l">CURRENT</div></div>
+        <div class="cbadge opt"><div class="o">O(n)</div><div class="l">OPTIMAL</div></div>
+      </div>
+    </div>
+    <div class="compcard glass" style="flex:1">
+      <div class="ch">▦ Performance analysis</div>
+      <div class="chart">
+        <div class="bar" style="height:12%"></div><div class="bar g" style="height:10%"></div>
+        <div class="bar" style="height:30%"></div><div class="bar g" style="height:14%"></div>
+        <div class="bar" style="height:58%"></div><div class="bar g" style="height:19%"></div>
+        <div class="bar" style="height:100%"></div><div class="bar g" style="height:26%"></div>
+      </div>
+      <div class="chlbl"><span>n=10²</span><span>n=10³</span><span>n=10⁴</span><span>n=10⁵</span></div>
+      <div class="legend"><span><span class="dot" style="background:#f87171"></span>Current</span><span><span class="dot" style="background:#4ade80"></span>Optimized</span></div>
+      <div class="verdict"><b>Verdict:</b> at n = 10⁵ your code does ~5 × 10⁹ comparisons; the optimized version does 10⁵ — roughly <b>50,000× faster</b>.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

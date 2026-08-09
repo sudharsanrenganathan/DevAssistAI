@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter','Segoe UI',system-ui,sans-serif; width:1440px; height:900px; overflow:hidden; color:#fff; }
+.mono { font-family:'JetBrains Mono','Consolas',monospace; }
+.screen { display:none; width:1440px; height:900px; }
+body[data-screen="a"] #sa, body[data-screen="b"] #sb, body[data-screen="c"] #sc { display:flex; }
+
+/* ===================== SHARED LAYOUT ===================== */
+.layout { display:flex; width:100%; height:100%; }
+.sidebar { width:260px; padding:16px 14px; display:flex; flex-direction:column; gap:4px; }
+.brand { display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; padding:6px 10px; margin-bottom:10px; }
+.newchat { display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:10px; font-size:13.5px; font-weight:600; margin-bottom:12px; }
+.search { padding:9px 12px; border-radius:10px; font-size:12.5px; margin-bottom:14px; }
+.lbl { font-size:10.5px; letter-spacing:1.2px; font-weight:700; margin:6px 8px 8px; }
+.hitem { display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:8px; font-size:13px; }
+.hitem .dots { margin-left:auto; opacity:.5; }
+.chatcol { flex:1; display:flex; flex-direction:column; position:relative; }
+.top { height:52px; display:flex; align-items:center; gap:12px; padding:0 20px; }
+.switcher { display:flex; align-items:center; gap:6px; font-size:14.5px; font-weight:600; }
+.switcher .arr { font-size:10px; opacity:.6; }
+.pill { font-size:11.5px; padding:5px 12px; border-radius:16px; display:flex; align-items:center; gap:6px; }
+.sp { flex:1; }
+.msgs { flex:1; display:flex; flex-direction:column; gap:18px; padding:26px 0 10px; width:760px; margin:0 auto; overflow:hidden; }
+.um { align-self:flex-end; max-width:70%; padding:11px 16px; font-size:13.5px; line-height:1.6; border-radius:16px 16px 4px 16px; }
+.bm { align-self:flex-start; max-width:86%; font-size:13.5px; line-height:1.75; }
+.bm h4 { font-size:14px; margin:10px 0 4px; padding-bottom:4px; }
+.codebox { border-radius:12px; margin:12px 0; overflow:hidden; font-size:12.5px; }
+.codehead { display:flex; align-items:center; padding:7px 14px; font-size:10.5px; font-weight:700; letter-spacing:1px; }
+.codehead .cbtn { margin-left:auto; font-size:11px; font-weight:500; letter-spacing:0; padding:3px 10px; border-radius:6px; }
+.codebody { padding:14px 16px; line-height:1.7; white-space:pre; }
+.inputbox { width:720px; margin:0 auto 14px; border-radius:18px; padding:14px 14px 10px; }
+.irow { display:flex; align-items:flex-start; gap:10px; }
+.itext { flex:1; font-size:14px; padding:4px 4px 18px; }
+.sendb { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; }
+.ifoot { display:flex; align-items:center; gap:12px; padding:8px 4px 0; font-size:11.5px; }
+.footnote { text-align:center; font-size:11px; padding-bottom:10px; }
+.sidep { width:340px; padding:18px; display:flex; flex-direction:column; gap:12px; }
+.spt { font-size:13.5px; font-weight:700; display:flex; gap:8px; align-items:center; }
+.card { border-radius:13px; padding:13px 14px; font-size:12.5px; line-height:1.65; }
+.tag { position:absolute; bottom:14px; right:20px; font-size:11px; font-weight:700; letter-spacing:1.5px; padding:6px 14px; border-radius:20px; z-index:5; }
+.screen { position:relative; }
+
+/* ===================== VARIANT A : UNIFIED DEVASSIST THEME ===================== */
+#sa { background:#0a0a0a; background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size:20px 20px; }
+#sa .sidebar { background:rgba(255,255,255,0.02); border-right:1px solid rgba(255,255,255,0.08); }
+#sa .brand span.g { background:linear-gradient(135deg,#06f5cd,#7c3aed); -webkit-background-clip:text; background-clip:text; color:transparent; }
+#sa .newchat { background:linear-gradient(135deg,rgba(6,245,205,0.15),rgba(124,58,237,0.15)); border:1px solid rgba(6,245,205,0.3); color:#06f5cd; }
+#sa .search { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#64748b; }
+#sa .lbl { color:#475569; }
+#sa .hitem { color:#94a3b8; }
+#sa .hitem.on { background:rgba(6,245,205,0.1); color:#06f5cd; border-left:3px solid #06f5cd; }
+#sa .hitem.pin::before { content:"◆ "; color:#7c3aed; font-size:9px; }
+#sa .top { border-bottom:1px solid rgba(255,255,255,0.08); }
+#sa .switcher .nm { color:#fff; }
+#sa .pill.model { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; }
+#sa .pill.exp { background:transparent; border:1px solid rgba(251,146,60,0.5); color:#fb923c; }
+#sa .pill.exp2 { background:transparent; border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; }
+#sa .um { background:rgba(124,58,237,0.18); border:1px solid rgba(124,58,237,0.35); color:#e2e8f0; }
+#sa .bm { color:#cbd5e1; }
+#sa .bm h4 { color:#06f5cd; border-bottom:1px solid rgba(6,245,205,0.2); }
+#sa .bm b { color:#06f5cd; }
+#sa .codebox { background:#0d1117; border:1px solid rgba(255,255,255,0.1); }
+#sa .codehead { background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.06); color:#06f5cd; }
+#sa .codehead .cbtn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; }
+#sa .codebody { color:#cbd5e1; }
+#sa .kw { color:#c084fc; } #sa .st { color:#4ade80; } #sa .fn { color:#fbbf24; } #sa .cm { color:#475569; }
+#sa .inputbox { background:rgba(255,255,255,0.04); border:1px solid rgba(6,245,205,0.3); box-shadow:0 0 30px rgba(6,245,205,0.06); }
+#sa .itext { color:#475569; }
+#sa .sendb { background:linear-gradient(135deg,#06f5cd,#7c3aed); color:#0a0a0a; }
+#sa .ifoot { color:#64748b; }
+#sa .footnote { color:#475569; }
+#sa .sidep { border-left:1px solid rgba(255,255,255,0.08); }
+#sa .spt { color:#e2e8f0; }
+#sa .card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#94a3b8; }
+#sa .card b { color:#c084fc; }
+#sa .badge { display:inline-flex; align-items:center; gap:6px; background:rgba(6,245,205,0.1); border:1px solid rgba(6,245,205,0.3); border-radius:16px; padding:5px 12px; font-size:12px; color:#06f5cd; width:fit-content; }
+#sa .tag { background:rgba(6,245,205,0.12); border:1px solid #06f5cd66; color:#06f5cd; }
+
+/* ===================== VARIANT B : POLISHED CURRENT (GREEN/NAVY) ===================== */
+#sb { background:radial-gradient(circle at top left,#0b1020,#020617); position:relative; }
+#sb::before { content:""; position:absolute; width:500px; height:500px; background:radial-gradient(circle,rgba(34,197,94,0.25),transparent 70%); top:-150px; left:-150px; filter:blur(90px); }
+#sb::after { content:""; position:absolute; width:400px; height:400px; background:radial-gradient(circle,rgba(6,182,212,0.2),transparent 70%); bottom:-100px; right:-100px; filter:blur(90px); }
+#sb .layout { position:relative; z-index:1; }
+#sb .sidebar { background:rgba(15,23,42,0.7); border-right:1px solid rgba(255,255,255,0.05); }
+#sb .brand span.g { color:#4ade80; }
+#sb .newchat { background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); color:#4ade80; }
+#sb .search { background:rgba(29,34,54,0.8); border:1px solid #1e293b; color:#64748b; }
+#sb .lbl { color:rgba(255,255,255,0.35); }
+#sb .hitem { color:#cbd5f5; }
+#sb .hitem.on { background:rgba(34,197,94,0.12); border-left:3px solid #22c55e; color:#4ade80; }
+#sb .hitem.pin::before { content:"◆ "; color:#6366f1; font-size:9px; }
+#sb .top { border-bottom:1px solid rgba(255,255,255,0.05); }
+#sb .switcher .nm { color:#fff; }
+#sb .pill.model { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; }
+#sb .pill.exp { background:transparent; border:1px solid rgba(249,115,22,0.6); color:#f97316; }
+#sb .pill.exp2 { background:transparent; border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; }
+#sb .um { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:#e2e8f0; }
+#sb .bm { color:#cbd5e1; }
+#sb .bm h4 { color:#22c55e; border-bottom:1px solid rgba(34,197,94,0.2); }
+#sb .bm b { color:#4ade80; }
+#sb .codebox { background:#0d1117; border:1px solid rgba(255,255,255,0.08); }
+#sb .codehead { background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.06); color:#22c55e; }
+#sb .codehead .cbtn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; }
+#sb .codebody { color:#cbd5e1; }
+#sb .kw { color:#818cf8; } #sb .st { color:#4ade80; } #sb .fn { color:#fbbf24; } #sb .cm { color:#475569; }
+#sb .inputbox { background:rgba(2,6,23,0.85); border:1px solid rgba(255,255,255,0.06); box-shadow:0 0 25px rgba(34,197,94,0.15); }
+#sb .itext { color:#475569; }
+#sb .sendb { background:linear-gradient(135deg,#22c55e,#4ade80); color:#fff; }
+#sb .ifoot { color:#64748b; }
+#sb .footnote { color:rgba(255,255,255,0.4); }
+#sb .sidep { border-left:1px solid rgba(255,255,255,0.08); }
+#sb .spt { color:#c7d2fe; }
+#sb .card { background:rgba(30,41,59,0.6); border:1px solid rgba(255,255,255,0.05); color:#94a3b8; }
+#sb .card b { color:#a5b4fc; }
+#sb .badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.25); border-radius:16px; padding:5px 12px; font-size:12px; color:#4ade80; width:fit-content; }
+#sb .tag { background:rgba(34,197,94,0.12); border:1px solid #22c55e66; color:#4ade80; }
+
+/* ===================== VARIANT C : UNIFIED THEME + WIDE LAYOUT (no side panel) ===================== */
+#sc { background:#0a0a0a; background-image:radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size:20px 20px; }
+#sc .sidebar { background:rgba(255,255,255,0.02); border-right:1px solid rgba(255,255,255,0.08); }
+#sc .brand span.g { background:linear-gradient(135deg,#06f5cd,#7c3aed); -webkit-background-clip:text; background-clip:text; color:transparent; }
+#sc .newchat { background:linear-gradient(135deg,#06f5cd,#7c3aed); color:#0a0a0a; font-weight:700; }
+#sc .search { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#64748b; }
+#sc .lbl { color:#475569; }
+#sc .hitem { color:#94a3b8; }
+#sc .hitem.on { background:rgba(6,245,205,0.1); color:#06f5cd; border-left:3px solid #06f5cd; }
+#sc .hitem.pin::before { content:"◆ "; color:#7c3aed; font-size:9px; }
+#sc .top { border-bottom:1px solid rgba(255,255,255,0.08); }
+#sc .switcher .nm { color:#fff; }
+#sc .pill.model { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; }
+#sc .pill.ctx { background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.4); color:#c084fc; }
+#sc .pill.exp2 { background:transparent; border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; }
+#sc .msgs { width:860px; }
+#sc .um { background:rgba(124,58,237,0.18); border:1px solid rgba(124,58,237,0.35); color:#e2e8f0; }
+#sc .bm { color:#cbd5e1; }
+#sc .bm h4 { color:#06f5cd; border-bottom:1px solid rgba(6,245,205,0.2); }
+#sc .bm b { color:#06f5cd; }
+#sc .codebox { background:#0d1117; border:1px solid rgba(255,255,255,0.1); }
+#sc .codehead { background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.06); color:#06f5cd; }
+#sc .codehead .cbtn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; }
+#sc .codebody { color:#cbd5e1; }
+#sc .kw { color:#c084fc; } #sc .st { color:#4ade80; } #sc .fn { color:#fbbf24; } #sc .cm { color:#475569; }
+#sc .inputbox { width:820px; background:rgba(255,255,255,0.04); border:1px solid rgba(6,245,205,0.3); box-shadow:0 0 30px rgba(6,245,205,0.06); }
+#sc .itext { color:#475569; }
+#sc .sendb { background:linear-gradient(135deg,#06f5cd,#7c3aed); color:#0a0a0a; }
+#sc .ifoot { color:#64748b; }
+#sc .footnote { color:#475569; }
+#sc .tag { background:rgba(124,58,237,0.15); border:1px solid #7c3aed88; color:#c084fc; }
+#sc .actionrow { display:flex; gap:8px; margin-top:8px; }
+#sc .act { font-size:11.5px; color:#06f5cd; background:rgba(6,245,205,0.08); border:1px solid rgba(6,245,205,0.3); padding:5px 11px; border-radius:16px; }
+</style>
+</head>
+<body data-screen="a">
+
+<!-- ============================================================= -->
+<div class="screen" id="sa"><div class="layout">
+  <div class="tag">OPTION A · UNIFIED THEME</div>
+  <div class="sidebar">
+    <div class="brand">⚡ <span class="g">DevAssist AI</span></div>
+    <div class="newchat">＋ New chat</div>
+    <div class="search">Search chats…</div>
+    <div class="lbl">RECENT</div>
+    <div class="hitem pin">Spring Boot JWT filter help</div>
+    <div class="hitem on">Binary search in Java <span class="dots">⋯</span></div>
+    <div class="hitem">CSS grid vs flexbox</div>
+    <div class="hitem">SQL join explained</div>
+    <div class="hitem">Docker basics</div>
+    <div class="hitem">REST API naming</div>
+  </div>
+  <div class="chatcol">
+    <div class="top">
+      <div class="switcher"><span class="nm">Global AI</span> <span class="arr">▼</span></div>
+      <span class="sp"></span>
+      <span class="pill exp">◆ Local AI</span>
+      <span class="pill exp2">↓ Export PDF</span>
+    </div>
+    <div class="msgs">
+      <div class="um">write a binary search in java and explain it simply</div>
+      <div class="bm"><h4>Binary Search in Java</h4>Binary search finds an item in a <b>sorted array</b> by repeatedly halving the search range — much faster than checking every element.
+        <div class="codebox mono">
+          <div class="codehead">JAVA <span class="cbtn">❐ Copy</span></div>
+          <div class="codebody"><span class="kw">public static int</span> <span class="fn">binarySearch</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> target) {
+    <span class="kw">int</span> lo = 0, hi = arr.length - 1;
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">int</span> mid = lo + (hi - lo) / 2;  <span class="cm">// avoid overflow</span>
+        <span class="kw">if</span> (arr[mid] == target) <span class="kw">return</span> mid;
+        <span class="kw">if</span> (arr[mid] &lt; target) lo = mid + 1;
+        <span class="kw">else</span> hi = mid - 1;
+    }
+    <span class="kw">return</span> -1;  <span class="cm">// not found</span>
+}</div>
+        </div>
+        Each loop cuts the range in half, so the time complexity is <b>O(log n)</b>.</div>
+    </div>
+    <div class="inputbox">
+      <div class="irow"><div class="itext">Ask anything…</div><div class="sendb">➤</div></div>
+      <div class="ifoot"><span>◈ DeepSeek R1 · NVIDIA</span><span>▾</span></div>
+    </div>
+    <div class="footnote">Global AI can make mistakes. Verify important info.</div>
+  </div>
+  <div class="sidep">
+    <div class="spt">◈ About Global AI</div>
+    <div class="badge">● Online · Fast responses</div>
+    <div class="card"><b>General assistant</b> for any programming or study question — explanations, code, debugging, concepts.</div>
+    <div class="card"><b>Multi-model:</b> switch between DeepSeek, Llama and Groq models from the input bar.</div>
+    <div class="card"><b>Tip:</b> use Secret AI for your private, document-based chats.</div>
+  </div>
+</div></div>
+
+<!-- ============================================================= -->
+<div class="screen" id="sb"><div class="layout">
+  <div class="tag">OPTION B · CURRENT THEME POLISHED</div>
+  <div class="sidebar">
+    <div class="brand">⚡ <span class="g">DevAssist AI</span></div>
+    <div class="newchat">＋ New chat</div>
+    <div class="search">Search chats…</div>
+    <div class="lbl">RECENT</div>
+    <div class="hitem pin">Spring Boot JWT filter help</div>
+    <div class="hitem on">Binary search in Java <span class="dots">⋯</span></div>
+    <div class="hitem">CSS grid vs flexbox</div>
+    <div class="hitem">SQL join explained</div>
+    <div class="hitem">Docker basics</div>
+    <div class="hitem">REST API naming</div>
+  </div>
+  <div class="chatcol">
+    <div class="top">
+      <div class="switcher"><span class="nm">Global AI</span> <span class="arr">▼</span></div>
+      <span class="sp"></span>
+      <span class="pill exp">◆ Local AI</span>
+      <span class="pill exp2">↓ Export PDF</span>
+    </div>
+    <div class="msgs">
+      <div class="um">write a binary search in java and explain it simply</div>
+      <div class="bm"><h4>Binary Search in Java</h4>Binary search finds an item in a <b>sorted array</b> by repeatedly halving the search range — much faster than checking every element.
+        <div class="codebox mono">
+          <div class="codehead">JAVA <span class="cbtn">❐ Copy</span></div>
+          <div class="codebody"><span class="kw">public static int</span> <span class="fn">binarySearch</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> target) {
+    <span class="kw">int</span> lo = 0, hi = arr.length - 1;
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">int</span> mid = lo + (hi - lo) / 2;  <span class="cm">// avoid overflow</span>
+        <span class="kw">if</span> (arr[mid] == target) <span class="kw">return</span> mid;
+        <span class="kw">if</span> (arr[mid] &lt; target) lo = mid + 1;
+        <span class="kw">else</span> hi = mid - 1;
+    }
+    <span class="kw">return</span> -1;  <span class="cm">// not found</span>
+}</div>
+        </div>
+        Each loop cuts the range in half, so the time complexity is <b>O(log n)</b>.</div>
+    </div>
+    <div class="inputbox">
+      <div class="irow"><div class="itext">Ask anything…</div><div class="sendb">➤</div></div>
+      <div class="ifoot"><span>◈ DeepSeek R1 · NVIDIA</span><span>▾</span></div>
+    </div>
+    <div class="footnote">Global AI can make mistakes. Verify important info.</div>
+  </div>
+  <div class="sidep">
+    <div class="spt">◈ About Global AI</div>
+    <div class="badge">● Online · Fast responses</div>
+    <div class="card"><b>General assistant</b> for any programming or study question — explanations, code, debugging, concepts.</div>
+    <div class="card"><b>Multi-model:</b> switch between DeepSeek, Llama and Groq models from the input bar.</div>
+    <div class="card"><b>Tip:</b> use Secret AI for your private, document-based chats.</div>
+  </div>
+</div></div>
+
+<!-- ============================================================= -->
+<div class="screen" id="sc"><div class="layout">
+  <div class="tag">OPTION C · UNIFIED + WIDE CHAT</div>
+  <div class="sidebar">
+    <div class="brand">⚡ <span class="g">DevAssist AI</span></div>
+    <div class="newchat">＋ New chat</div>
+    <div class="search">Search chats…</div>
+    <div class="lbl">RECENT</div>
+    <div class="hitem pin">Spring Boot JWT filter help</div>
+    <div class="hitem on">Binary search in Java <span class="dots">⋯</span></div>
+    <div class="hitem">CSS grid vs flexbox</div>
+    <div class="hitem">SQL join explained</div>
+    <div class="hitem">Docker basics</div>
+    <div class="hitem">REST API naming</div>
+  </div>
+  <div class="chatcol">
+    <div class="top">
+      <div class="switcher"><span class="nm">Global AI</span> <span class="arr">▼</span></div>
+      <span class="pill ctx">● Online · DeepSeek R1</span>
+      <span class="sp"></span>
+      <span class="pill exp2">◆ Local AI</span>
+      <span class="pill exp2">↓ Export PDF</span>
+    </div>
+    <div class="msgs">
+      <div class="um">write a binary search in java and explain it simply</div>
+      <div class="bm"><h4>Binary Search in Java</h4>Binary search finds an item in a <b>sorted array</b> by repeatedly halving the search range — much faster than checking every element.
+        <div class="codebox mono">
+          <div class="codehead">JAVA <span class="cbtn">❐ Copy</span></div>
+          <div class="codebody"><span class="kw">public static int</span> <span class="fn">binarySearch</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> target) {
+    <span class="kw">int</span> lo = 0, hi = arr.length - 1;
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">int</span> mid = lo + (hi - lo) / 2;  <span class="cm">// avoid overflow</span>
+        <span class="kw">if</span> (arr[mid] == target) <span class="kw">return</span> mid;
+        <span class="kw">if</span> (arr[mid] &lt; target) lo = mid + 1;
+        <span class="kw">else</span> hi = mid - 1;
+    }
+    <span class="kw">return</span> -1;  <span class="cm">// not found</span>
+}</div>
+        </div>
+        Each loop cuts the range in half, so the time complexity is <b>O(log n)</b>.
+        <div class="actionrow"><span class="act">↺ Regenerate</span><span class="act">✚ Follow-up: recursive version</span><span class="act">❐ Copy answer</span></div>
+      </div>
+    </div>
+    <div class="inputbox">
+      <div class="irow"><div class="itext">Ask anything…</div><div class="sendb">➤</div></div>
+      <div class="ifoot"><span>◈ DeepSeek R1 · NVIDIA</span><span>▾</span><span class="sp"></span><span>Enter to send · Shift+Enter new line</span></div>
+    </div>
+    <div class="footnote">Global AI can make mistakes. Verify important info.</div>
+  </div>
+</div></div>
+
+<script>
+const p = new URLSearchParams(location.search);
+document.body.dataset.screen = p.get('screen') 
