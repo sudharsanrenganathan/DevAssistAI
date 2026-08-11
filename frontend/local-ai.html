@@ -44,7 +44,10 @@ body{
 .hbtn{ padding:7px 13px; font-size:12.5px; display:flex; align-items:center; gap:6px; }
 
 /* ---------- SETUP GATE ---------- */
-#gate{ flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
+/* justify-content: safe center — centers when it fits, but aligns to the
+   top (scrollable) when the card is taller than the viewport, so the header
+   and step 1 are never clipped off-screen. */
+#gate{ flex:1; display:none; flex-direction:column; align-items:center; justify-content:safe center; padding:24px; overflow-y:auto; }
 .gate-card{ width:min(640px,94vw); padding:30px 34px; }
 .gate-h{ font-size:26px; font-weight:800; margin-bottom:8px; }
 .gate-sub{ color:var(--mut); font-size:14px; margin-bottom:24px; line-height:1.5; }
