@@ -59,7 +59,27 @@ body{
 .code-box span{ flex:1; overflow-x:auto; white-space:nowrap; }
 .copy-btn{ font-size:11px; padding:4px 10px; flex-shrink:0; }
 .gate-foot{ display:flex; align-items:center; gap:10px; margin-top:22px; flex-wrap:wrap; }
-.gate-err{ font-size:12px; color:#f87171; margin-top:10px; min-height:16px; }
+.gate-err{ font-size:12px; color:#f87171; margin-top:10px; min-height:16px; line-height:1.5; }
+
+/* one-time vs every-time section headers */
+.section-label{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:.5px;
+  text-transform:uppercase; color:var(--teal); margin:24px 0 16px; padding-top:20px; border-top:1px solid var(--line); }
+.section-label.first{ border-top:none; padding-top:2px; margin-top:6px; }
+.section-label.evy{ color:#4ade80; }
+/* per-OS command tabs */
+.os-tabs{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.os-tab{ padding:5px 12px; font-size:11.5px; font-weight:600; color:var(--mut);
+  background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:20px; cursor:pointer; }
+.os-tab:hover{ color:var(--txt); }
+.os-tab.active{ color:#0a0a0a; background:linear-gradient(135deg,var(--teal),var(--purple)); border-color:transparent; font-weight:700; }
+/* helper hints + callouts */
+.hint{ font-size:11.5px; color:var(--dim); margin-top:7px; line-height:1.55; }
+.callout{ display:flex; gap:10px; background:rgba(6,245,205,0.06); border:1px solid rgba(6,245,205,0.25);
+  border-radius:10px; padding:11px 13px; font-size:12px; color:var(--mut); line-height:1.55; margin-top:12px; }
+.callout .ico{ flex-shrink:0; font-size:14px; }
+.callout b, .hint b{ color:var(--txt); }
+.setup-desc code, .hint code, .callout code{ font-family:'JetBrains Mono',monospace; color:var(--teal);
+  background:rgba(6,245,205,0.08); padding:1px 5px; border-radius:4px; font-size:.92em; }
 
 /* ---------- STUDIO ---------- */
 #studio{ flex:1; display:none; overflow:hidden; }
@@ -128,34 +148,83 @@ body{
 <div id="gate">
   <div class="gate-card glass">
     <div class="gate-h">Run DevAssist <span class="grad-text">on your own machine</span></div>
-    <div class="gate-sub">Offline Studio talks straight to a local AI model on your computer — no internet, no account, nothing leaves your device. Three one-time steps:</div>
+    <div class="gate-sub">Offline Studio runs a real AI model on <b>your own computer</b> — the AI never touches the internet and nothing leaves your device. Do the <b>one-time setup</b> once; after that it's just <b>open &amp; Connect</b>.</div>
+
+    <!-- ============ ONE-TIME SETUP ============ -->
+    <div class="section-label first">⚙ One-time setup — do this once</div>
 
     <div class="setup-step">
       <div class="setup-num">1</div>
       <div class="setup-body">
-        <div class="setup-title">Install Ollama (the local engine)</div>
-        <div class="setup-desc">A tiny app that runs open AI models on your machine.</div>
-        <a href="https://ollama.com/download" target="_blank" class="grad-btn hbtn" style="display:inline-flex; text-decoration:none;">Go to Ollama.com ↗</a>
+        <div class="setup-title">Install Ollama (the local AI engine)</div>
+        <div class="setup-desc">A small, free app that runs open AI models on your machine. Download it, run the installer, and it starts on its own — you'll see an <b>Ollama icon</b> in your taskbar (Windows) or menu bar (Mac).</div>
+        <a href="https://ollama.com/download" target="_blank" class="grad-btn hbtn" style="display:inline-flex; text-decoration:none;">Download Ollama ↗</a>
       </div>
     </div>
 
     <div class="setup-step">
       <div class="setup-num">2</div>
       <div class="setup-body">
-        <div class="setup-title">Pull the models</div>
-        <div class="setup-desc">In your terminal. The chat model powers Chat &amp; Docs; the embed model makes Docs understand large files.</div>
-        <div class="code-box" style="margin-bottom:8px;"><span>ollama pull llama3</span><button class="ghost-btn copy-btn" onclick="copyText('ollama pull llama3', this)">Copy</button></div>
-        <div class="code-box"><span>ollama pull nomic-embed-text</span><button class="ghost-btn copy-btn" onclick="copyText('ollama pull nomic-embed-text', this)">Copy</button></div>
+        <div class="setup-title">Download the two AI models</div>
+        <div class="setup-desc">Open a terminal — on <b>Windows</b> that's <b>Command Prompt</b> (press <code>Win</code>, type <code>cmd</code>, Enter) — and run these <b>one at a time</b>. The chat model powers <b>Chat</b>; the embed model lets <b>Docs</b> read large files. (~5 GB total, downloaded once.)</div>
+        <div class="code-box" style="margin-bottom:8px;"><span>ollama pull llama3</span><button class="ghost-btn copy-btn" onclick="copyText(this.previousElementSibling.textContent, this)">Copy</button></div>
+        <div class="code-box"><span>ollama pull nomic-embed-text</span><button class="ghost-btn copy-btn" onclick="copyText(this.previousElementSibling.textContent, this)">Copy</button></div>
+        <div class="hint">✅ Verify: run <code>ollama list</code> — you should see both <code>llama3</code> and <code>nomic-embed-text</code>.</div>
       </div>
     </div>
 
     <div class="setup-step">
       <div class="setup-num">3</div>
       <div class="setup-body">
-        <div class="setup-title">Allow this page to reach Ollama</div>
-        <div class="setup-desc">Start Ollama so it accepts requests from the browser, then keep this window open:</div>
-        <div class="code-box"><span id="serveCmd">OLLAMA_ORIGINS=* ollama serve</span><button class="ghost-btn copy-btn" onclick="copyText(document.getElementById('serveCmd').textContent, this)">Copy</button></div>
-        <div class="setup-desc" style="margin-top:6px;">On Windows PowerShell: <span class="mono" style="color:var(--teal)">$env:OLLAMA_ORIGINS="*"; ollama serve</span></div>
+        <div class="setup-title">Let the browser reach Ollama (saved permanently)</div>
+        <div class="setup-desc">By default Ollama blocks web pages. This one command saves a permanent setting so you <b>never touch a terminal for it again</b>. Pick your system:</div>
+
+        <div class="os-tabs">
+          <button class="os-tab active" data-os="win" onclick="setOs('win')">🪟 Windows</button>
+          <button class="os-tab" data-os="mac" onclick="setOs('mac')">🍎 macOS</button>
+          <button class="os-tab" data-os="linux" onclick="setOs('linux')">🐧 Linux</button>
+        </div>
+
+        <div class="os-pane" data-os="win">
+          <div class="setup-desc" style="margin-bottom:6px;">In <b>Command Prompt or PowerShell</b> (both work — <code>setx</code> saves it forever):</div>
+          <div class="code-box"><span>setx OLLAMA_ORIGINS "*"</span><button class="ghost-btn copy-btn" onclick="copyText(this.previousElementSibling.textContent, this)">Copy</button></div>
+          <div class="hint">You'll see <b>“SUCCESS: Specified value was saved.”</b> Then <b>restart Ollama</b> so it picks up the setting: right-click the <b>Ollama icon</b> in the system tray → <b>Quit</b>, then reopen <b>Ollama</b> from the Start menu.</div>
+        </div>
+
+        <div class="os-pane" data-os="mac" style="display:none">
+          <div class="setup-desc" style="margin-bottom:6px;">In <b>Terminal</b> — then restart Ollama (menu-bar icon → Quit, reopen):</div>
+          <div class="code-box"><span>launchctl setenv OLLAMA_ORIGINS "*"</span><button class="ghost-btn copy-btn" onclick="copyText(this.previousElementSibling.textContent, this)">Copy</button></div>
+        </div>
+
+        <div class="os-pane" data-os="linux" style="display:none">
+          <div class="setup-desc" style="margin-bottom:6px;">Simplest — run Ollama in a terminal with the setting and keep the window open:</div>
+          <div class="code-box"><span>OLLAMA_ORIGINS=* ollama serve</span><button class="ghost-btn copy-btn" onclick="copyText(this.previousElementSibling.textContent, this)">Copy</button></div>
+          <div class="hint">To make it permanent, add <code>Environment="OLLAMA_ORIGINS=*"</code> to the ollama systemd unit and <code>sudo systemctl restart ollama</code>.</div>
+        </div>
+
+        <div class="callout"><span class="ico">🔒</span><div><b>On Chrome/Edge, if Connect fails</b> with a <span class="mono">“loopback address space”</span> error: recent Chrome blocks websites from reaching your computer. Click the <b>tune/site-info icon</b> at the left of the address bar → <b>Site settings</b> → set <b>Local network access</b> to <b>Allow</b> → reload this page. (Firefox doesn't need this step.)</div></div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-num">4</div>
+      <div class="setup-body">
+        <div class="setup-title">Optional — install as an offline app</div>
+        <div class="setup-desc">This page loads from the web the first time. Install it once and it opens later <b>with no internet at all</b> (the AI already runs on your machine). Use the <b>⬇ Install as offline app</b> button below — then launch <b>DevAssist Offline</b> from your desktop any time.</div>
+      </div>
+    </div>
+
+    <!-- ============ EVERY TIME AFTER SETUP ============ -->
+    <div class="section-label evy">▶ Every time after setup</div>
+    <div class="setup-step">
+      <div class="setup-num" style="background:linear-gradient(135deg,#4ade80,var(--teal));">✓</div>
+      <div class="setup-body">
+        <div class="setup-desc" style="margin-bottom:0; color:var(--txt);">
+          <b>1.</b> Make sure <b>Ollama is running</b> — it auto-starts when you log in (look for the tray / menu-bar icon). Not there? Open <b>Ollama</b> from the Start menu. <b>No commands needed</b> — your settings are already saved.<br><br>
+          <b>2.</b> Open this page — or your installed <b>DevAssist Offline</b> app if you did step 4.<br><br>
+          <b>3.</b> Click <b>✓ I'm ready — Connect</b> below. Done.
+        </div>
+        <div class="hint">Not connecting? Open <code>http://localhost:11434</code> in a new tab — it should say <b>“Ollama is running.”</b> If it doesn't, Ollama isn't running yet (open it from the Start menu).</div>
       </div>
     </div>
 
@@ -259,8 +328,9 @@ async function checkConnection(fromButton){
     setConn('on', 'Ollama · ' + models.chat.length + ' model' + (models.chat.length === 1 ? '' : 's'));
   } catch (e) {
     setConn('off', 'Ollama not reachable');
-    showGate(fromButton ? 'Still can\'t reach Ollama at ' + OLLAMA +
-      '. Make sure it\'s running with OLLAMA_ORIGINS=* (step 3).' : '');
+    showGate(fromButton ? 'Still can\'t reach Ollama. Check: (1) open ' + OLLAMA +
+      ' in a new tab — it should say “Ollama is running” (if not, open Ollama). (2) Did step 3 + restart Ollama? ' +
+      '(3) On Chrome, if the console (F12) shows a “loopback address space” error, allow Local network access — see step 3\'s note — or use Firefox.' : '');
   }
 }
 function setConn(state, text){
@@ -528,7 +598,7 @@ function setDocStatus(t){ $('docStatus').textContent = t; }
 function friendlyErr(e){
   var m = (e && e.message) || '';
   if (/Failed to fetch|NetworkError|HTTP 403/i.test(m))
-    return 'Lost the connection to Ollama. Is it running with OLLAMA_ORIGINS=*? Click ↻ Reconnect.';
+    return 'Lost the connection to Ollama. Make sure it\'s still running (tray icon), then click ↻ Reconnect.';
   return m || 'Something went wrong.';
 }
 
@@ -563,7 +633,22 @@ if ('serviceWorker' in navigator){
   });
 }
 
+/* ---------------- per-OS setup tabs ---------------- */
+function setOs(os){
+  var tabs = document.querySelectorAll('.os-tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-os') === os);
+  var panes = document.querySelectorAll('.os-pane');
+  for (var j = 0; j < panes.length; j++) panes[j].style.display = panes[j].getAttribute('data-os') === os ? 'block' : 'none';
+}
+function detectOs(){
+  var s = (navigator.userAgent + ' ' + (navigator.platform || '')).toLowerCase();
+  if (s.indexOf('win') !== -1) return 'win';
+  if (s.indexOf('mac') !== -1 || s.indexOf('iphone') !== -1 || s.indexOf('ipad') !== -1) return 'mac';
+  return 'linux';
+}
+
 /* ---------------- boot ---------------- */
+setOs(detectOs());
 loadChat();
 checkConnection(false);
 </script>
