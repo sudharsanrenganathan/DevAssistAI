@@ -360,22 +360,21 @@ async function analyzeCode() {
     const code = editor.getValue();
     const language = document.getElementById("languageSelect").value;
     try {
-        const res = await authFetch(`/ai/analyze`, {
+        const res = await aiFetch(`/ai/analyze`, {
             method: "POST",
             body: JSON.stringify({ code: code, language: language, session_id: currentChatId || 1, model: selectedModel })
-        });
+        }, { onWaking: (a, t) => { btn.innerHTML = `⏳ Waking engine… (${a}/${t})`; } });
 
         if (res.status === 429) {
-            // Daily token quota — show the engine's message and stop.
-            let quotaMsg = "Daily AI token limit reached. It resets at midnight UTC.";
-            try {
-                const qd = await res.json();
-                quotaMsg = qd.message || qd.error || quotaMsg;
-            } catch {}
+            // A real token-quota 429 carries a specific message; a bare 429 from
+            // Cloudflare/Render during a cold start does not. Only the former is
+            // a real limit — the latter is transient, so label it accordingly.
+            const throttle = await classifyThrottle(res);
             refreshUsage();
+            const title = throttle.isQuota ? "🔋 Token limit" : "⏳ Server waking up";
             document.querySelector(".middle").innerHTML = `<div style='color:#fbbf24; padding:20px; border:1px solid rgba(251,191,36,0.2); border-radius:12px; background:rgba(251,191,36,0.05)'>
-                <h3>🔋 Token limit</h3>
-                <p style="font-size:13px; margin-top:8px;">${quotaMsg}</p>
+                <h3>${title}</h3>
+                <p style="font-size:13px; margin-top:8px;">${throttle.message}</p>
             </div>`;
             btn.innerHTML = "▶ Analyze"; btn.disabled = false;
             return;

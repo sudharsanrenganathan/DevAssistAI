@@ -502,7 +502,7 @@ async function send() {
             `/api/global-chat/local-ask` : 
             `/api/global-chat/ask`;
             
-        const response = await authFetch(endpoint, {
+        const response = await aiFetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -510,17 +510,18 @@ async function send() {
                 session_id: activeChatId,
                 model: selectedModel
             })
-        });
-        
+        }, { onWaking: (a, t) => {
+            const c = loadingDiv.querySelector(".content");
+            if (c) c.textContent = `Waking the AI engine… (${a}/${t})`;
+        } });
+
         if (response.status === 429) {
-            // Daily token quota (or provider busy) — show the engine's message.
-            let quotaMsg = "Daily AI token limit reached. It resets at midnight UTC.";
-            try {
-                const qd = await response.json();
-                quotaMsg = qd.message || qd.error || quotaMsg;
-            } catch {}
+            // A real token-quota 429 carries a specific message; a bare 429 from
+            // Cloudflare/Render during a cold start does not. classifyThrottle
+            // tells them apart so we never cry "token limit" by mistake.
+            const throttle = await classifyThrottle(response);
             loadingDiv.remove();
-            add("🔋 " + quotaMsg, "bot");
+            add((throttle.isQuota ? "🔋 " : "⏳ ") + throttle.message, "bot");
             refreshUsage();
             return;
         }

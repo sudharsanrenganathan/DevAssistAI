@@ -107,4 +107,22 @@ class CodeAnalyzerControllerTest {
                 .andExpect(jsonPath("$.status").value("quota"))
                 .andExpect(jsonPath("$.message").value("budget spent"));
     }
+
+    @Test
+    void analyzeConvertsBareEdge429ToBusyNotQuota() throws Exception {
+        // A cold-start/burst 429 injected by Cloudflare/Render has an empty (or
+        // HTML) body — it must NOT be surfaced to the user as a token limit.
+        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+                .thenThrow(HttpClientErrorException.create(HttpStatus.TOO_MANY_REQUESTS,
+                        "Too Many Requests", HttpHeaders.EMPTY,
+                        new byte[0], StandardCharsets.UTF_8));
+
+        mockMvc.perform(post("/ai/analyze")
+                        .header("Authorization", "Bearer valid-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ANALYZE_BODY))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.status").value("busy"))
+                .andExpect(jsonPath("$.message").exists());
+    }
 }

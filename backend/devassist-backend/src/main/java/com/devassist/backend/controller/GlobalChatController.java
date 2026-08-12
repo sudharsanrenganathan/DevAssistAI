@@ -203,14 +203,29 @@ public class GlobalChatController {
 
             return ResponseEntity.ok(response);
         } catch (org.springframework.web.client.HttpClientErrorException.TooManyRequests e) {
-            // Engine 429 (daily token quota or provider busy) — pass the JSON
-            // body through so the frontend can show the engine's message.
-            return ResponseEntity.status(429)
-                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                    .body(e.getResponseBodyAsString());
+            return throttleResponse(e.getResponseBodyAsString());
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("answer", "AI request failed: " + e.getMessage()));
         }
+    }
+
+    /**
+     * Shape a 429 for the client. A genuine daily-token-quota 429 from the AI
+     * engine is JSON carrying {@code status:"quota"} — pass it through untouched
+     * so the user sees the real allowance message. Anything else is a BARE 429
+     * injected by Cloudflare/Render during a cold start or request burst; return
+     * clean {@code status:"busy"} JSON so the client shows a transient
+     * "waking up" notice instead of a false "token limit reached".
+     */
+    private ResponseEntity<?> throttleResponse(String engineBody) {
+        if (engineBody != null && engineBody.contains("\"quota\"")) {
+            return ResponseEntity.status(429)
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(engineBody);
+        }
+        return ResponseEntity.status(429).body(Map.of(
+                "status", "busy",
+                "message", "The AI engine is waking up. Please try again in a moment."));
     }
 
     @PostMapping("/local-ask")

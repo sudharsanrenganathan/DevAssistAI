@@ -198,6 +198,74 @@ async function authFetch(url, options = {}) {
     return fetch(url, { ...options, headers });
 }
 
+// ==================== AI REQUEST HELPERS (cold-start aware) ====================
+
+/**
+ * Classify a 429 from an AI endpoint. The services run on Render's free tier
+ * (they sleep when idle) behind Cloudflare, so a burst or a cold start can
+ * return a BARE 429 with an empty/HTML body — that is NOT a token limit. A real
+ * quota 429 always carries JSON with status:"quota" (Global AI / Code Analyzer)
+ * or an {error|message} that names the token allowance (Secret AI). This reads
+ * the body, so pass a clone (res.clone()) if you still need to read it after.
+ * @param {Response} res a fetch Response whose status is 429
+ * @returns {Promise<{isQuota: boolean, message: string}>}
+ */
+async function classifyThrottle(res) {
+    let data = null;
+    try { data = JSON.parse(await res.text()); } catch (e) { /* empty or HTML edge body */ }
+    const msg = data && (data.message || data.error);
+    const isQuota = !!data && (
+        data.status === 'quota' ||
+        !!data.scope ||
+        (typeof msg === 'string' && /token|quota|allowance|capacity/i.test(msg))
+    );
+    if (isQuota) {
+        return { isQuota: true,
+                 message: msg || 'Daily AI token limit reached. It resets at midnight UTC.' };
+    }
+    return { isQuota: false,
+             message: 'The AI engine is waking up (free-tier services sleep when idle). Please try again in a moment.' };
+}
+
+/**
+ * authFetch tuned for the slow, sleep-prone AI endpoints. Retries the two
+ * cold-start symptoms — a network error, or a NON-quota 429 — a few times with
+ * a growing backoff, but NEVER retries a real token-quota 429. onWaking(attempt,
+ * total) fires before each retry so the UI can show progress. Returns the final
+ * Response; callers handle ok / 429 exactly as they did with authFetch.
+ * @param {string} url
+ * @param {RequestInit} [options]
+ * @param {{retries?: number, backoffMs?: number, onWaking?: (a:number,t:number)=>void}} [cfg]
+ * @returns {Promise<Response>}
+ */
+async function aiFetch(url, options, cfg) {
+    options = options || {};
+    cfg = cfg || {};
+    const retries = (cfg.retries === undefined) ? 2 : cfg.retries;
+    const backoffMs = (cfg.backoffMs === undefined) ? 2500 : cfg.backoffMs;
+    const total = retries + 1;
+    let lastErr;
+    for (let attempt = 1; attempt <= total; attempt++) {
+        try {
+            const res = await authFetch(url, options);
+            if (res.status === 429 && attempt < total) {
+                const probe = await classifyThrottle(res.clone());
+                if (probe.isQuota) return res;          // real quota — do not retry
+                if (cfg.onWaking) cfg.onWaking(attempt, total);
+                await new Promise(r => setTimeout(r, backoffMs * attempt));
+                continue;                               // transient edge 429 — retry
+            }
+            return res;
+        } catch (e) {
+            lastErr = e;
+            if (attempt >= total) throw e;
+            if (cfg.onWaking) cfg.onWaking(attempt, total);
+            await new Promise(r => setTimeout(r, backoffMs * attempt));
+        }
+    }
+    throw lastErr;
+}
+
 // ==================== TOAST NOTIFICATIONS ====================
 
 /**
