@@ -142,7 +142,7 @@ button { cursor:pointer; }
   </div>
 
   <div class="nav-buttons">
-    <div id="tokenMeter" style="display:none;align-items:center;margin-right:12px;padding:4px 12px;border-radius:999px;background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.15);font-size:12px;color:#94a3b8;white-space:nowrap" title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
+    <div id="tokenMeter" style="display:none;align-items:center;margin-right:12px;padding:4px 12px;border-radius:999px;background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.15);font-size:12px;color:#94a3b8;white-space:nowrap" title="Shared AI token pool used by everyone today (total pool across all users) — resets at midnight UTC">🔋 …</div>
     <select id="languageSelect" onchange="changeLanguage()" style="background:#1e293b;color:white;border:none;padding:8px;border-radius:6px;">
       <option value="java">Java</option>
       <option value="python">Python</option>
@@ -424,11 +424,11 @@ async function refreshUsage() {
         const res = await authFetch('/api/usage');
         if (!res.ok) return;
         const u = await res.json();
-        if (typeof u.user_tokens !== 'number' || typeof u.user_limit !== 'number') return;
+        if (typeof u.global_tokens !== 'number' || typeof u.global_limit !== 'number') return;
         const meter = document.getElementById('tokenMeter');
-        meter.textContent = `🔋 ${u.user_tokens.toLocaleString()} / ${u.user_limit.toLocaleString()} tokens today`;
-        meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
-            : (u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '#94a3b8');
+        meter.textContent = `🔋 ${u.global_tokens.toLocaleString()} / ${u.global_limit.toLocaleString()} tokens today`;
+        meter.style.color = u.global_tokens >= u.global_limit ? '#f87171'
+            : (u.global_tokens >= u.global_limit * 0.8 ? '#fbbf24' : '#94a3b8');
         meter.style.display = 'flex';
     } catch { /* meter is cosmetic — never let it break the analyzer */ }
 }

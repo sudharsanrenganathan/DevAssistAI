@@ -303,7 +303,7 @@ body{
   <div class="logo grad-text" id="featureName" style="font-size:15px;">Circuit</div>
   <div class="beta">BETA</div>
   <div class="meter" id="tokenMeter" style="display:none"
-       title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
+       title="Shared AI token pool used by everyone today (total pool across all users) — resets at midnight UTC">🔋 …</div>
   <div class="model-badge" style="margin-left:auto"><span class="dot-green"></span> GPT-OSS-120B · Groq</div>
   <div class="avatar" id="avatar">·</div>
 </div>
@@ -503,9 +503,9 @@ async function refreshUsage(){
     if (!res.ok) return;
     var u = await res.json();
     var meter = $('tokenMeter');
-    meter.textContent = '🔋 ' + u.user_tokens.toLocaleString() + ' / ' + u.user_limit.toLocaleString() + ' tokens today';
-    meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
-                      : u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '';
+    meter.textContent = '🔋 ' + u.global_tokens.toLocaleString() + ' / ' + u.global_limit.toLocaleString() + ' tokens today';
+    meter.style.color = u.global_tokens >= u.global_limit ? '#f87171'
+                      : u.global_tokens >= u.global_limit * 0.8 ? '#fbbf24' : '';
     meter.style.display = 'flex';
   } catch (e) { /* the meter is cosmetic — never let it break the page */ }
 }

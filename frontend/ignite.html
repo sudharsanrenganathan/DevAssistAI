@@ -186,7 +186,7 @@ body[data-state="workspace"] #workspaceScreen { display: flex; }
   <div class="crumb">/ &nbsp;<span data-feature-name></span></div>
   <span class="beta">BETA</span>
   <div class="model-badge"><span class="dot-green"></span> <span id="modelBadge"></span></div>
-  <div class="model-badge" id="tokenMeter" style="display:none;margin-left:0" title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
+  <div class="model-badge" id="tokenMeter" style="display:none;margin-left:0" title="Shared AI token pool used by everyone today (total pool across all users) — resets at midnight UTC">🔋 …</div>
   <div class="avatar" id="userAvatar">·</div>
 </div>
 
@@ -380,11 +380,11 @@ async function refreshUsage() {
     const res = await authFetch('/api/usage');
     if (!res.ok) return;
     const u = await res.json();
-    if (typeof u.user_tokens !== 'number' || typeof u.user_limit !== 'number') return;
+    if (typeof u.global_tokens !== 'number' || typeof u.global_limit !== 'number') return;
     const meter = $('tokenMeter');
-    meter.textContent = `🔋 ${u.user_tokens.toLocaleString()} / ${u.user_limit.toLocaleString()} tokens today`;
-    meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
-      : (u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '');
+    meter.textContent = `🔋 ${u.global_tokens.toLocaleString()} / ${u.global_limit.toLocaleString()} tokens today`;
+    meter.style.color = u.global_tokens >= u.global_limit ? '#f87171'
+      : (u.global_tokens >= u.global_limit * 0.8 ? '#fbbf24' : '');
     meter.style.display = 'flex';
   } catch { /* the meter is cosmetic — never let it break the builder */ }
 }

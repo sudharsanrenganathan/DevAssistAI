@@ -549,7 +549,7 @@
                     </div>
                 </div>
                 <div class="acct-usage" id="acctUsage" style="display:none;">
-                    <div class="acct-usage-top"><span>🔋 Daily AI tokens</span><span><b id="acctTokUsed">0</b> / <span id="acctTokLimit">0</span></span></div>
+                    <div class="acct-usage-top"><span>🔋 Daily AI tokens (shared pool)</span><span><b id="acctTokUsed">0</b> / <span id="acctTokLimit">0</span></span></div>
                     <div class="acct-bar"><div id="acctTokBar"></div></div>
                 </div>
                 <div class="acct-links">
@@ -1061,9 +1061,9 @@
                 if (!res.ok) return;
                 const u = await res.json();
                 document.getElementById("acctUsage").style.display = "block";
-                document.getElementById("acctTokUsed").textContent = (u.user_tokens || 0).toLocaleString();
-                document.getElementById("acctTokLimit").textContent = (u.user_limit || 0).toLocaleString();
-                const pct = u.user_limit ? Math.min(100, (u.user_tokens / u.user_limit) * 100) : 0;
+                document.getElementById("acctTokUsed").textContent = (u.global_tokens || 0).toLocaleString();
+                document.getElementById("acctTokLimit").textContent = (u.global_limit || 0).toLocaleString();
+                const pct = u.global_limit ? Math.min(100, (u.global_tokens / u.global_limit) * 100) : 0;
                 const bar = document.getElementById("acctTokBar");
                 bar.style.width = pct + "%";
                 bar.style.background = pct >= 100 ? "#f87171"

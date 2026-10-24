@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Export PDF
       </button>
-      <div id="tokenMeter" style="display:none;align-items:center;margin-left:auto;padding:4px 12px;border-radius:999px;background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.15);font-size:12px;color:#94a3b8;white-space:nowrap" title="Your daily AI token usage across all DevAssist features — resets at midnight UTC">🔋 …</div>
+      <div id="tokenMeter" style="display:none;align-items:center;margin-left:auto;padding:4px 12px;border-radius:999px;background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.15);font-size:12px;color:#94a3b8;white-space:nowrap" title="Shared AI token pool used by everyone today (total pool across all users) — resets at midnight UTC">🔋 …</div>
     </div>
     <div class="chat-box">
       <div id="emptyState" class="empty-state">
@@ -656,11 +656,11 @@ async function refreshUsage() {
         const res = await authFetch('/api/usage');
         if (!res.ok) return;
         const u = await res.json();
-        if (typeof u.user_tokens !== 'number' || typeof u.user_limit !== 'number') return;
+        if (typeof u.global_tokens !== 'number' || typeof u.global_limit !== 'number') return;
         const meter = document.getElementById('tokenMeter');
-        meter.textContent = `🔋 ${u.user_tokens.toLocaleString()} / ${u.user_limit.toLocaleString()} tokens today`;
-        meter.style.color = u.user_tokens >= u.user_limit ? '#f87171'
-            : (u.user_tokens >= u.user_limit * 0.8 ? '#fbbf24' : '#94a3b8');
+        meter.textContent = `🔋 ${u.global_tokens.toLocaleString()} / ${u.global_limit.toLocaleString()} tokens today`;
+        meter.style.color = u.global_tokens >= u.global_limit ? '#f87171'
+            : (u.global_tokens >= u.global_limit * 0.8 ? '#fbbf24' : '#94a3b8');
         meter.style.display = 'flex';
     } catch { /* meter is cosmetic — never let it break the chat */ }
 }
