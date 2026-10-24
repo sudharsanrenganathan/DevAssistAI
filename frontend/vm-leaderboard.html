@@ -190,12 +190,13 @@ body::after { content: ""; position: fixed; width: 500px; height: 500px; backgro
 
 <script>
 const API = `${BACKEND_URL}/vm`;
-const username = localStorage.getItem("username") || "guest";
-document.getElementById("userBadge").textContent = username;
+// Identity is enforced server-side from the JWT; the leaderboard flags the
+// caller's own row with a `you` boolean, so no client-side identity is needed.
+getUser().then(u => { document.getElementById("userBadge").textContent = getUserDisplayName(u); });
 
 async function loadLeaderboard() {
     try {
-        const res = await fetch(`${API}/leaderboard`);
+        const res = await authFetch(`${API}/leaderboard`);
         const data = await res.json();
 
         if (data.length === 0) {
@@ -232,13 +233,13 @@ function renderPodium(data) {
     let html = "";
     for (let i = 0; i < Math.min(3, data.length); i++) {
         const d = data[i];
-        const isYou = d.username === username;
+        const isYou = d.you;
         html += `
         <div class="podium-card ${classes[i]}">
             ${isYou ? '<div class="podium-you">YOU</div>' : ''}
             <div class="podium-rank">${medals[i]}</div>
-            <div class="podium-avatar">${d.username.charAt(0).toUpperCase()}</div>
-            <div class="podium-name">${d.username}</div>
+            <div class="podium-avatar">${d.displayName.charAt(0).toUpperCase()}</div>
+            <div class="podium-name">${d.displayName}</div>
             <div class="podium-score">${d.score}</div>
             <div class="podium-solved">${d.solved} solved · ${d.attempted} attempted</div>
         </div>`;
@@ -252,13 +253,13 @@ function renderTable(data) {
     body.innerHTML = data.map((d, i) => {
         const rank = i + 1;
         const rc = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "default";
-        const isYou = d.username === username;
+        const isYou = d.you;
 
         return `<div class="lb-row ${isYou ? 'is-you' : ''}">
             <div class="lb-rank ${rc}">${rank}</div>
             <div class="lb-user">
-                <div class="lb-avatar">${d.username.charAt(0).toUpperCase()}</div>
-                <span class="lb-name">${d.username}${isYou ? '<span class="lb-you-tag">YOU</span>' : ''}</span>
+                <div class="lb-avatar">${d.displayName.charAt(0).toUpperCase()}</div>
+                <span class="lb-name">${d.displayName}${isYou ? '<span class="lb-you-tag">YOU</span>' : ''}</span>
             </div>
             <div class="lb-solved">${d.solved}</div>
             <div class="lb-attempted">${d.attempted}</div>
@@ -268,7 +269,7 @@ function renderTable(data) {
 }
 
 function renderYourRank(data) {
-    const idx = data.findIndex(d => d.username === username);
+    const idx = data.findIndex(d => d.you);
     if (idx === -1) return;
 
     const banner = document.getElementById("yourRankBanner");

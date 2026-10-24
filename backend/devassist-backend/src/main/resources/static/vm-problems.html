@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <title>VoidMain — Problems</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-guard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    await requireAuth();
+});
+</script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: radial-gradient(circle at top left, #0b1020, #020617); color: #e5e7eb; min-height: 100vh; }
@@ -113,16 +120,16 @@ body::before { content: ""; position: fixed; width: 600px; height: 600px; backgr
 </div>
 
 <script>
-const API = "http://localhost:8080/vm";
-const username = localStorage.getItem("username") || "guest";
-document.getElementById("userBadge").textContent = username;
+const API = `${BACKEND_URL}/vm`;
+// Identity is enforced server-side from the JWT; we only show the user's name.
+getUser().then(u => { document.getElementById("userBadge").textContent = getUserDisplayName(u); });
 
 let allProblems = [];
 let currentDifficulty = "ALL";
 
 async function loadProblems() {
     try {
-        const res = await fetch(`${API}/problems?username=${username}`);
+        const res = await authFetch(`${API}/problems`);
         allProblems = await res.json();
         renderProblems();
     } catch(e) {

@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <title>VoidMain — Submission History</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-guard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    await requireAuth();
+});
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -169,16 +176,16 @@ body::after { content: ""; position: fixed; width: 500px; height: 500px; backgro
 </div>
 
 <script>
-const API = "http://localhost:8080/vm";
-const username = localStorage.getItem("username") || "guest";
-document.getElementById("userBadge").textContent = username;
+const API = `${BACKEND_URL}/vm`;
+// Identity is enforced server-side from the JWT; we only show the user's name.
+getUser().then(u => { document.getElementById("userBadge").textContent = getUserDisplayName(u); });
 
 let allSubs = [];
 let currentFilter = "ALL";
 
 async function loadHistory() {
     try {
-        const res = await fetch(`${API}/submissions/${username}`);
+        const res = await authFetch(`${API}/submissions`);
         allSubs = await res.json();
         updateStats();
         renderSubs();

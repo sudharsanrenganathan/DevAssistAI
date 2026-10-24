@@ -121,15 +121,15 @@ body::before { content: ""; position: fixed; width: 600px; height: 600px; backgr
 
 <script>
 const API = `${BACKEND_URL}/vm`;
-const username = localStorage.getItem("username") || "guest";
-document.getElementById("userBadge").textContent = username;
+// Identity is enforced server-side from the JWT; we only show the user's name.
+getUser().then(u => { document.getElementById("userBadge").textContent = getUserDisplayName(u); });
 
 let allProblems = [];
 let currentDifficulty = "ALL";
 
 async function loadProblems() {
     try {
-        const res = await fetch(`${API}/problems?username=${username}`);
+        const res = await authFetch(`${API}/problems`);
         allProblems = await res.json();
         renderProblems();
     } catch(e) {

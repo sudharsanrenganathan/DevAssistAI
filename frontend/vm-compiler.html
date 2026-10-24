@@ -310,9 +310,13 @@ body::before { content: ""; position: fixed; width: 600px; height: 600px; backgr
 const API = `${BACKEND_URL}/vm`;
 const params = new URLSearchParams(location.search);
 const questionId = params.get("questionId") || "E001";
-const username = localStorage.getItem("username") || "guest";
-
-document.getElementById("userBadge").textContent = username;
+// Identity is enforced server-side from the JWT. We keep the user's display
+// name only to label the badge and to send it for the public leaderboard.
+let myDisplayName = "";
+getUser().then(u => {
+    myDisplayName = getUserDisplayName(u);
+    document.getElementById("userBadge").textContent = myDisplayName;
+});
 
 const defaultCodes = {
     java: `import java.util.*;
@@ -381,7 +385,7 @@ let currentLang = 'java';
 // ================================================================
 async function loadProblem() {
     try {
-        const res = await fetch(`${API}/problems/${questionId}`);
+        const res = await authFetch(`${API}/problems/${questionId}`);
         if (!res.ok) throw new Error("Problem not found");
         const problem = await res.json();
 
@@ -628,7 +632,7 @@ async function runCode() {
         </div>`;
 
     try {
-        const res = await fetch(`${API}/run`, {
+        const res = await authFetch(`${API}/run`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ code: myEditor.getValue(), questionId, language: currentLang })
@@ -815,10 +819,10 @@ async function submitCode() {
         </div>`;
 
     try {
-        const res = await fetch(`${API}/submit`, {
+        const res = await authFetch(`${API}/submit`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: myEditor.getValue(), questionId, username, language: currentLang })
+            body: JSON.stringify({ code: myEditor.getValue(), questionId, display_name: myDisplayName, language: currentLang })
         });
         const data = await res.json();
         renderSubmitResult(data);
@@ -909,7 +913,7 @@ function switchPanelTab(tab, el) {
 // ================================================================
 async function loadSubmissions() {
     try {
-        const res = await fetch(`${API}/submissions/${username}`);
+        const res = await authFetch(`${API}/submissions`);
         const all = await res.json();
         const filtered = all.filter(s => s.problemId === questionId);
 

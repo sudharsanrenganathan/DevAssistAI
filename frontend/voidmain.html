@@ -197,12 +197,12 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
 <script>
 const API = `${BACKEND_URL}/vm`;
-const username = localStorage.getItem("username") || "guest";
+// Identity is enforced server-side from the JWT; no client-side username needed.
 
 async function loadDashboard() {
     try {
         // Stats
-        const statsRes = await fetch(`${API}/stats/${username}`);
+        const statsRes = await authFetch(`${API}/stats`);
         const stats = await statsRes.json();
         document.getElementById("statSolved").textContent = stats.solved || 0;
         document.getElementById("statAttempted").textContent = stats.attempted || 0;
@@ -215,7 +215,7 @@ async function loadDashboard() {
 
     try {
         // Recent submissions
-        const subRes = await fetch(`${API}/submissions/${username}`);
+        const subRes = await authFetch(`${API}/submissions`);
         const subs = await subRes.json();
         const body = document.getElementById("recentBody");
         if (subs.length === 0) { body.innerHTML = '<tr><td colspan="3" class="empty-msg">No submissions yet</td></tr>'; }
@@ -232,14 +232,14 @@ async function loadDashboard() {
 
     try {
         // Leaderboard
-        const lbRes = await fetch(`${API}/leaderboard`);
+        const lbRes = await authFetch(`${API}/leaderboard`);
         const lb = await lbRes.json();
         const lbBody = document.getElementById("lbBody");
         if (lb.length === 0) { lbBody.innerHTML = '<tr><td colspan="4" class="empty-msg">No data yet</td></tr>'; }
         else {
             lbBody.innerHTML = lb.slice(0, 5).map((l, i) => {
                 const rc = i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : "";
-                return `<tr><td class="lb-rank ${rc}">${i+1}</td><td>${l.username}</td><td>${l.solved}</td><td class="lb-score">${l.score}</td></tr>`;
+                return `<tr><td class="lb-rank ${rc}">${i+1}</td><td>${l.displayName}</td><td>${l.solved}</td><td class="lb-score">${l.score}</td></tr>`;
             }).join("");
         }
     } catch(e) { console.error("Leaderboard error:", e); }

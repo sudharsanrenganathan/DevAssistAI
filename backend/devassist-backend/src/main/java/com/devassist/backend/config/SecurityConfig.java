@@ -65,9 +65,16 @@ public class SecurityConfig {
                     "/api/global-chat/**",
                     "/api/upload-doc",
                     "/api/activity/**",
-                    "/ai/**",
-                    "/vm/**"   // VoidMain endpoints are public
+                    "/ai/**"
                 ).permitAll()
+
+                // ===== VOIDMAIN (JWT required) =====
+                // Every /vm endpoint derives its user from the authenticated
+                // principal (email), so the whole subtree needs a valid JWT —
+                // including the leaderboard, which is still "public" in that it
+                // ranks all users, but is only viewable by logged-in users (the
+                // VoidMain pages all require auth) and never exposes emails.
+                .requestMatchers("/vm/**").authenticated()
                 
                 // ===== PUBLIC STATIC ROUTES =====
                 .requestMatchers(

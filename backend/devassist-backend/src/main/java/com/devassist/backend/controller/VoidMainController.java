@@ -2,6 +2,8 @@ package com.devassist.backend.controller;
 import java.util.List;
 import com.devassist.backend.entity.*;
 import com.devassist.backend.repository.*;
+import com.devassist.backend.dto.VmLeaderboardEntry;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
@@ -59,7 +61,10 @@ private RestTemplate createRestTemplate() {
     @GetMapping("/problems")
     public List<Map<String, Object>> getAllProblems(
             @RequestParam(required = false) String difficulty,
-            @RequestParam(required = false, defaultValue = "guest") String username) {
+            Authentication authentication) {
+
+        // Identity always comes from the verified JWT — never a client param.
+        String user = authentication.getName();
 
         List<VmProblem> problems;
         if (difficulty != null && !difficulty.isEmpty()) {
@@ -70,7 +75,7 @@ private RestTemplate createRestTemplate() {
         }
 
         // Get solved set for this user
-        List<String> solvedIds = submissionRepo.findSolvedProblemIds(username);
+        List<String> solvedIds = submissionRepo.findSolvedProblemIds(user);
         Set<String> solvedSet = new HashSet<>(solvedIds);
 
         List<Map<String, Object>> result = new ArrayList<>();
@@ -172,10 +177,14 @@ private RestTemplate createRestTemplate() {
     // POST /vm/submit — judge against hidden test cases + save
     // ================================================================
     @PostMapping("/submit")
-    public ResponseEntity<?> submitCode(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> submitCode(@RequestBody Map<String, String> body,
+                                        Authentication authentication) {
         String code = body.getOrDefault("code", "");
         String questionId = body.getOrDefault("questionId", "E001");
-        String username = body.getOrDefault("username", "guest");
+        // Owner is the authenticated user (email); the body's username is ignored
+        // so a submission can never be attributed to someone else.
+        String username = authentication.getName();
+        String displayName = resolveDisplayName(body.get("display_name"), username);
         String language = body.getOrDefault("language", "java");
 
         // Only do Java class renaming for Java
@@ -237,7 +246,7 @@ private RestTemplate createRestTemplate() {
         submissionRepo.save(sub);
 
         // Update leaderboard
-        updateLeaderboard(username);
+        updateLeaderboard(username, displayName);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("verdict", verdict);
@@ -249,26 +258,35 @@ private RestTemplate createRestTemplate() {
     }
 
     // ================================================================
-    // GET /vm/submissions/{username}
+    // GET /vm/submissions — the caller's own submission history
     // ================================================================
-    @GetMapping("/submissions/{username}")
-    public List<VmSubmission> getSubmissions(@PathVariable String username) {
-        return submissionRepo.findByUsernameOrderBySubmittedAtDesc(username);
+    @GetMapping("/submissions")
+    public List<VmSubmission> getSubmissions(Authentication authentication) {
+        return submissionRepo.findByUsernameOrderBySubmittedAtDesc(authentication.getName());
     }
 
     // ================================================================
-    // GET /vm/leaderboard
+    // GET /vm/leaderboard — public ranking (no emails exposed)
     // ================================================================
     @GetMapping("/leaderboard")
-    public List<VmLeaderboard> getLeaderboard() {
-        return leaderboardRepo.findTop50ByOrderByScoreDescSolvedDesc();
+    public List<VmLeaderboardEntry> getLeaderboard(Authentication authentication) {
+        String me = authentication.getName();
+        return leaderboardRepo.findTop50ByOrderByScoreDescSolvedDesc().stream()
+                .map(row -> new VmLeaderboardEntry(
+                        resolveDisplayName(row.getDisplayName(), row.getUsername()),
+                        row.getSolved() != null ? row.getSolved() : 0,
+                        row.getAttempted() != null ? row.getAttempted() : 0,
+                        row.getScore() != null ? row.getScore() : 0,
+                        me.equals(row.getUsername())))
+                .toList();
     }
 
     // ================================================================
-    // GET /vm/stats/{username}
+    // GET /vm/stats — the caller's own stats
     // ================================================================
-    @GetMapping("/stats/{username}")
-    public Map<String, Object> getStats(@PathVariable String username) {
+    @GetMapping("/stats")
+    public Map<String, Object> getStats(Authentication authentication) {
+        String username = authentication.getName();
         List<String> solved = submissionRepo.findSolvedProblemIds(username);
         List<String> attempted = submissionRepo.findAttemptedProblemIds(username);
 
@@ -525,7 +543,7 @@ private RestTemplate createRestTemplate() {
         return s.replace("\r\n", "\n").replace("\r", "\n").replaceAll("\\s+", " ").trim();
     }
 
-    private void updateLeaderboard(String username) {
+    private void updateLeaderboard(String username, String displayName) {
         List<String> solved = submissionRepo.findSolvedProblemIds(username);
         List<String> attempted = submissionRepo.findAttemptedProblemIds(username);
 
@@ -540,11 +558,27 @@ private RestTemplate createRestTemplate() {
         VmLeaderboard entry = leaderboardRepo.findByUsername(username)
                 .orElse(new VmLeaderboard());
         entry.setUsername(username);
+        entry.setDisplayName(displayName);
         entry.setSolved(solved.size());
         entry.setAttempted(attempted.size());
         entry.setScore(score);
         entry.setUpdatedAt(LocalDateTime.now());
         leaderboardRepo.save(entry);
+    }
+
+    /**
+     * Pick the public label for a user: the client-supplied display name when
+     * present, otherwise the email's local part (before "@") so we never leak a
+     * full address onto the public leaderboard. Falls back to "Anonymous".
+     */
+    private String resolveDisplayName(String displayName, String email) {
+        if (displayName != null && !displayName.isBlank()) {
+            return displayName.trim();
+        }
+        if (email != null && email.contains("@")) {
+            return email.substring(0, email.indexOf('@'));
+        }
+        return email != null && !email.isBlank() ? email : "Anonymous";
     }
 
     // ================================================================
